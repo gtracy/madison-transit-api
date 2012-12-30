@@ -1,0 +1,163 @@
+html {
+  margin: 0;
+  padding: 0;
+} 
+
+body {
+  background-color: white;
+  font-family: Arial, Times, serif;
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}
+
+hr {
+  color: black;
+}
+
+a {
+  text-decoration: none;
+}
+
+hr {
+	margin-top: 25px;
+}
+
+#page-container {
+  background-color: #ffffff;
+  width: 900px;
+  margin: 0 auto;
+}
+
+#banner {
+	width: 100%;
+	text-align: right;
+	padding-top: 10px;
+}
+#banner a:hover {
+	padding: 4px;
+	background-color: #cccccc;
+}
+
+#header {
+  padding-top: 25px;
+  font-size: 48px;
+}
+
+#description {
+  margin: auto;
+  padding-top: 20px;
+  font-size: 20px;
+}
+
+#menu {
+	background: #cccccc;
+	font-size: 24px;
+}
+#menu ul {
+	padding: 12px;
+}
+#menu li {
+	padding: 4px;
+	display: inline;
+}
+#menu a {
+	font-size: 24px;
+	padding: 6px;
+	color: black;
+}
+#menu li:hover {
+	background: #eeeeee;
+}
+
+#sub-menu {
+  font-size: 20px;
+  text-align: center;
+  margin: auto;
+}
+#sub-menu a {
+  color: black;
+}
+#sub-menu a:hover {
+  color: red;
+}
+
+.selected {
+	background: white;
+}
+#menu .blog-title {
+    color: #b00000;
+}
+#donate {
+  float: right;
+  width: 25%;
+}
+#donate form { padding-left: 10px; padding-top: 75px;}
+
+#spec {
+	width: 90%;
+	padding-left: 40px;
+}
+#spec table {
+	width: 105%;
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+#spec th {
+	font-size: 20px;
+	background-color: #555555;
+	color: white;
+	border: 1px solid black;
+}
+#spec td {
+	height: 30px;
+	border: 1px solid black;
+	padding: 8px;
+}
+
+.striped {
+	background-color: #dddddd;
+}
+.center {
+	text-align: center;
+}
+
+#spacer {
+  clear: both;
+  width: 100%;
+}
+#feedback-details {
+  font-size: 16px;
+}
+
+#estimates {
+	text-align: center;
+	font-size: 16px;
+}
+
+#powered-by {
+  font-size: 12px;
+  float: left;
+  padding: 4px;
+}
+
+#contact-container {
+  float: left;
+  padding: 4px;
+  font-size: 12px;
+}
+
+#me {
+  float: right;
+  text-align: right;
+  padding: 4px;
+  font-size: 12px;
+}
+
+#footer {
+  border-top-color: black;
+  height: 80px;
+  color: #888888;
+  background: #ffffff;
+}

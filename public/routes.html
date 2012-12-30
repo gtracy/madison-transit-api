@@ -1,0 +1,122 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body onload="prettyPrint()">  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li><a href="/">API Home</a></li>
+  <li><a href="/schedule.html">Schedules</a></li>
+  <li class="selected"><a href="/routes.html">Routes</a></li>
+  <li><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li><a href="/parking.html">Parking</a></li>
+  <li><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+ <h1><a name="getroutes">getroutes</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getroutes method will return all routes in the Metro system. This data will rarely change.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getroutes
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ 
+ <span style="font-weight:bold;margin-left:24px;">http://www.smsmybus.com/v1/getroutes?key=xxx</span><p> </p>
+ <h3>Response</h3>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "timestamp" : "12:38pm",
+    "routes" : [
+      {
+        "routeID" : "02",
+        "directions" : [
+            "NTP", 
+            "WTP"
+        ]
+      },
+      {
+        "routeID" : "03",
+        "directions" : [
+            "ETP",
+            "WTP"
+        ]
+      },
+      ...
+      ...
+    ],
+}
+</code>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+  
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

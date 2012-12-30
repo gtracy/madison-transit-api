@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0px; padding: 0px }
+  #map_canvas { height: 100% }
+</style>
+<script src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+ <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+
+<script type="text/javascript">
+function getMyLocations() {
+    return [
+            {% for l in locations %}
+	          [{{l.location}},{{l.count}},{{l.weight}},{{l.stopID}}],
+	        {% endfor %}
+	       ];
+		
+}
+var infoBox = null;
+var map = null;
+var stopMarkers = [];
+
+function initialize() {
+    var latlng = new google.maps.LatLng(43.075611,-89.42598);
+    var myOptions = {
+      zoom: 13,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.TERRAIN
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"),
+        myOptions);
+
+    var usage_locations = getMyLocations();
+    for( var i = 0; i < usage_locations.length; i++ ) {
+    	var location = usage_locations[i];
+    	var usageLatLng = new google.maps.LatLng(location[0], location[1]);
+    	var infoText = usageLatLng+'<hr/>' +
+                       '<p>Total Requests: '+location[2]+
+                       '</p>';
+        stopMarkers[i] = createMarker(usageLatLng,infoText,location[3]);
+        
+    }    
+}
+
+function createMarker(usageLatLng,infoText,size) {
+	var mark = new google.maps.Circle({center:usageLatLng,
+        map:map,
+        radius: size,
+        fillColor: '#AA2222',
+        fillOpacity: .2,
+        strokeColor: '#555555',
+        strokeOpacity: .8,
+       });
+    google.maps.event.addListener(mark, 'click', function () {
+    	if( infoBox ) infoBox.close();
+	    infoBox = new google.maps.InfoWindow({content:infoText,maxWidth:'50'});
+		infoBox.open(map,mark);
+    });
+    return mark;
+}
+
+</script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas" style="width:100%; heightx:100%"></div>
+</body>
+</html>

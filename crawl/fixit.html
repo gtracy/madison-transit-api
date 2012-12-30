@@ -1,0 +1,78 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets check Madison bus schedules in real time.">
+    <meta name="keywords" content"Twilio, bus schedule, SMS, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <title>SMSMyBuss - Check the bus schedule in real time</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style type="text/css">
+     #error-container {
+       float: left;
+       width: 50%;
+     }
+     #stops-container {
+       float: right;
+       width: 50%;
+     }
+    </style>
+    
+  </head>
+
+<body>  
+
+<div id="page-container">
+ <div id="header">
+   <p><center><img src="img/header.png" alt="smsmybus logo"></center>
+ </div>
+ <div id="description">
+  <center>SMSMyBus is a mobile telephone application that lets you find real time bus arrivals for 
+  the <a class="description-anchor" href=http://www.cityofmadison.com/metro/>Madison Metro</a>.
+  Just text your request to 608.467.1603 to receive <i>real time</i> arrival estimates.</center>
+  <hr>
+ </div>
+
+ <div id="error-container">
+  <p>Error Listing:</p>
+  {{error.routeID}}
+  <br/>{{error.intersection}}
+  <br/>{{error.location}}
+  <br/>{{error.direction}}
+  <br/>{{error.metaStringOne}}
+ </div>
+ 
+ <div id="stops-container">
+  <p>Stops: possible matches...</p>
+  {% for s in stops %}
+  <p>
+   {{s.stopID}}
+   <br/>{{s.routeID}}
+   <br/>{{s.match}} {{s.intersection}}
+   <br/>{{s.location}}
+   <br/>{{s.direction}}
+  </p>
+  {% endfor %} 
+ </div>
+ 
+ <hr>
+ <div id="footer">
+  <div id="powered-by">
+     powered by:<br><br>
+     <a href=http://code.google.com/appengine/><img src="img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+     <a href=http://twilio.com><img src="img/twilio-logo.jpg" alt="twilio" height="30" width="30"></a>
+  </div>
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+  </div>
+  <div id="contact-container">
+   terms - privacy - <a href="mailto:greg@gregtracy.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+  </body>
+</html>
+

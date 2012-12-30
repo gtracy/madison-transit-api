@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0px; padding: 0px }
+  #map_canvas { height: 100% }
+</style>
+
+</head>
+<body>
+<h3>Missing Stop Locations</h3>
+<table>
+{% for s in stops %}
+  <tr>
+   <th>{{s.stopID}}</th>
+   <th>{{s.count}}</th>
+   <th><a href=/labs/fixstopform?stopID={{s.stopID}}>Fix it</a></th>
+  </tr>
+{% endfor %}
+</body>
+</html>

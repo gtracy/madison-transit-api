@@ -1,0 +1,106 @@
+application: msn-transit-api
+version: standalone-beta
+runtime: python27
+api_version: 1
+threadsafe: true
+
+derived_file_type:
+- python_precompiled
+
+inbound_services:
+
+builtins:
+- appstats: off
+- remote_api: on
+
+handlers:
+
+- url: /
+  static_files: public/index.html
+  upload: public/index.html
+
+- url: /(.*\.html)
+  static_files: public/\1
+  upload: public/(.*\.html)
+
+- url: /js
+  static_dir: public/js
+
+- url: /css
+  static_dir: public/css
+
+- url: /img/(.*)
+  static_files: public/img/\1
+  upload: public/img/(.*)
+
+- url: /favicon.ico
+  static_files: public/img/favicon.ico
+  upload: public/img/favicon.ico
+
+- url: /apple-touch-icon.png
+  static_files: public/img/apple-touch-icon.png
+  upload: public/img/apple-touch-icon.png
+
+- url: /robots.txt
+  static_files: public/robots.txt
+  upload: public/robots.txt
+
+#
+# ADMIN access
+#
+- url: /admin.*
+  script: admin.application
+  login: admin
+
+#
+# data CRAWLER access
+#
+- url: /crawl/routelist/.*
+  script: crawl.crawler.application
+  login: admin
+
+- url: /gtfs/port/.*
+  script: crawl.load_gtfs.application
+  login: admin
+
+#
+# API access
+- url: /v1/getparking
+  script: api.v1.getparking.application
+
+- url: /v1/getarrivals
+  script: api.v1.getarrivals.application
+
+- url: /v1/getroutes
+  script: api.v1.getroutes.application
+
+- url: /v1/get(stops|nearbystops|stoplocation|debug)
+  script: api.v1.getstops.application
+
+- url: /v1/getvehicles
+  script: api.v1.getvehicles.application
+
+- url: /v1/createdevkey/.*
+  script: api.v1.getarrivals.application
+  login: admin
+
+# drop table
+- url: /droptable/.*
+  script: crawl.crawler.application
+  login: admin
+
+# debug : create entities
+- url: /debug/create/.*
+  script: crawl.crawler.application
+  login: admin
+
+# debug : start table drop in background
+- url: /debug/drop/DeveloperRequest
+  script: crawl.crawler.application
+  login: admin
+
+
+#admin_console:
+# pages:
+# - name: Appstats
+#   url: /stats

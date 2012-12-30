@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0px; padding: 0px }
+  #map_canvas { height: 100% }
+</style>
+
+</head>
+<body>
+<h3>Add New Stop Location for {{stopID}}</h3>
+
+      <form method="post" action="/labs/fixstop">
+         <input type="hidden" name="stopID" value={{stopID}}></input>
+         <label for="lat">lat: </label>
+         <input id="lat" type="text" name="lat"></input>
+         <p/><label for="lon">lon: </label>
+         <input id="lon" type="text" name="lon"></input>
+         
+         <p/><label for="intersection">intersection: </label>
+         <input id="intersection" type="text" name="intersection"></input>
+         <p/><input type=submit value="submit"></input>
+      </form>
+
+</body>
+</html>

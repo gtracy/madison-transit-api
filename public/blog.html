@@ -1,0 +1,144 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body>  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li><a href="/">API Home</a></li>
+  <li><a href="/schedule.html">Schedules</a></li>
+  <li><a href="/routes.html">Routes</a></li>
+  <li><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li><a href="/parking.html">Parking</a></li>
+  <li class="selected"><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+
+ <h1 style="float:left;">Kiosk Kit</h1><span style="float:right;">December 11, 2011</span>
+ <div id="spec" style="clear:both;line-height:150%;font-size:16px">
+ I recently got a request to create another kiosk display like the one shown at <a href="http://www.smsmybus.com/motherfools/">Mother Fool's coffee house</a> 
+ and <a href="http://sector67.org">Sector67</a>.
+ Rather then build another one by hand, I went ahead and created a template that enables anyone to display a custom kiosk.
+ <p>
+ Very similar to the Google Gadget, there is a single URL that anyone can point their browser at to view real-time arrival estimates for any
+ two stops in the Metro system. 
+ <p>
+ <a href=http://smsmybus.com/kiosk?s=0100,0161&d=WORK,HOME>http://smsmybus.com/kiosk?s=0100,0161&d=WORK,HOME</a>
+ <p>
+ The two, four digit numbers after the 's=' string in that URL indicate the stop IDs to display. The two direction labels are optional, but if you
+ include them, order matters. They should correspond to the stops listed.
+ <p>
+ Enjoy!
+</div>
+
+ <h1 style="float:left;">API snags a giant new user</h1><span style="float:right;">September 10, 2011</span>
+ <div id="spec" style="clear:both;line-height:150%;font-size:16px">
+ Over a year ago, I smiled when I found SMSMyBus getting repurposed in the form of a kiosk at the <a href=http://www.motherfools.com/>Mother Fool's Coffeehouse</a>. 
+ I <a href=http://www.gregtracy.com/when-pet-projects-grow-up-and-become-somethin>wrote then</a> about the personal satisfaction of seeing a pet project growing into something bigger.
+ <p>
+ Well, last week, that satisfaction blossomed into gratification when I learned that the <a href=http://www.wisc.edu/>University of Wisconsin</a> had included the SMSMyBus API in 
+ the <a href=http://www.news.wisc.edu/19738>latest version of their app</a> released for the 2011 academic year. Now students using the app can get real time bus arrival estimates 
+ throughout the city rather than relying on the fixed schedule right from their iPhone and Android devices.
+ <p>
+ Mostly because this is exactly the kind of application that can get the attention of the <a href=http://mymetrobus.com>Metro</a> and the <a href=http://cityofmadison.com/>City of Madison</a> as an example of what can be 
+ accomplished if more public data becomes accessible in an easy to consume (programmable APIs) interface.
+ <p>
+ Super proud.
+</div>
+
+
+
+
+
+ <h1 style="float:left;">Metro Bus Kiosk</h1><span style="float:right;">April 23, 2011</span>
+ <div id="spec" style="clear:both;line-height:150%;font-size:16px">
+ The very first iteration of the API - never released - was a total hack and was not only hard coded for a handful
+ of Metro stops. But it utilized inside knowledge of how the SMS app was built to make the data accessible. While it
+ may have been a wart, it made the data available and produced the very first Metro bus kiosk at 
+ <a href="http://www.motherfools.com/">Mother Fool's Coffehouse</a>.
+ <p>
+ When the real API was produced, the goal was to replace those legacy implementations with native API implementations.
+ That's now been done and rolled out to all of the various businesses deploying a kiosk. You can see the Mother Fool's
+ kiosk <a href="http://www.smsmybus.com/motherfools/">here</a> and the <a href="http://sector67.org">Sector67</a> kiosk <a href="http://www.smsmybus.com/sector67/">here</a>.
+ <p>
+ If you'd like to deploy your own, feel free to use these as a starting point. They are good examples for consuming
+ the API in JavaScript. You can find the example code on the github repo - <a href="https://github.com/gtracy/smsmybus-dev">https://github.com/gtracy/smsmybus-dev</a>. Enjoy!
+</div>
+
+ <h1 style="float:left;">Google Gadgets!</h1><span style="float:right;">April 17, 2011</span>
+ <div id="spec" style="clear:both;line-height:150%;font-size:16px">
+ <span style="margin-left:25px;float:right;"><img src="/img/gadget-example.png" alt="Gadget example"/></span>
+ One of the very first uses of the API was to create a Google Gadget that displays the arrival times right inside
+ your Gmail window. But it never really worked quite right so it wasn't published. But now it's been cleaned up!
+ <p>
+ So with the help of a little XML, JavaScript and of course the API, you can now get bus arrival estimates for 
+ your favorite Metro stops alongside your chat sessions and gmail folders! This post provides some instructions
+ for adding the gadget.
+ <p>
+ <strong>1.</strong> Open up your gmail settings.
+ <p>
+ <strong>2.</strong> Select the 'Gadgets' tab.
+ <p>
+ <strong>3.</strong> Add the XML path of the gadget to the text field using the desired stop ID number in the URL path. For example, 
+ for the eastbound stop outside of Trader Joe's, I would add, http://www.smsmybus.com/gadgets/metro/2749.xml
+ <p>
+ <br/>
+ <img src="/img/gadget-instructions.png" alt="Gadget instructions image"/>
+ <p>
+ <br/>
+ <p>
+ To specify a different stop, just replace '2749' with your own four digit stop ID. And don't worry, you can always
+ check other stops from inside the gadget once it loads.
+ <p>
+ That's it! Interested in changing this? I've posted the xml on github if you'd like to use it as a starting point - 
+ <a href="https://github.com/gtracy/smsmybus-dev">https://github.com/gtracy/smsmybus-dev</a>.
+ </div>
+ 
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

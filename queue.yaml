@@ -1,0 +1,20 @@
+queue:
+- name: crawler
+  rate: 50/s
+  bucket_size: 1
+
+- name: eventlogger
+  rate: 5/s
+  bucket_size: 1
+
+- name: smssender
+  rate: 1/s
+  bucket_size: 1
+
+- name: crawlerrors
+  rate: 50/s
+  bucket_size: 1
+
+- name: stopstorage
+  rate: 50/s
+  bucket_size: 1

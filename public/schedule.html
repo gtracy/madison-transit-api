@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body onload="prettyPrint()">  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li><a href="/">API Home</a></li>
+  <li class="selected"><a href="/schedule.html">Schedules</a></li>
+  <li><a href="/routes.html">Routes</a></li>
+  <li><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li><a href="/parking.html">Parking</a></li>
+  <li><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+ <p>This portion of the web service describes scheduling information. Under <strong>all</strong> circumstances, this is 
+ predictive data. It is based on the real-time information described by the Metro system for each route - not fixed
+ schedule information.</p>
+ <p>It's important to understand that the API is dependent on the Metro's scheduling service. If the Metro's service is
+ down, so are we. I'm going to do my best to differentiate the difference between "no buses running" and "service unavailable" 
+ but there are no guarantees.</p>
+ <hr>
+ <h1><a name="getarrivals">getarrivals</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getarrivals method will return real-time arrival estimates for the next <i>N</i> buses at a specified stop.
+ Several filters can be applied to narrow the results.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getarrivals
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">stopID</td>
+  <td class="center">String</td>
+  <td>A four-digit value describing a valid stop in the Metro system.</td>
+ </tr>
+ <tr>
+  <td class="center">routeID</td>
+  <td class="center">String</td>
+  <td>A two-digit value describing a valid route in the Metro system. 
+  If routeID is specified, either stopID or vehicleID <strong><i>must also</i></strong> be specified in the request.</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">vehicleID</td>
+  <td class="center">String</td>
+  <td>A three-digit value describing a valid bus vehicle in the Metro system. If vehicleID is specified, 
+  routeID <strong><i>must also</i></strong> be specified in the request.</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ Retrieve the arrival estimates for all buses traveling through stop 1101:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101</span><p> </p>
+ Retrieve the arrival estimates for route 19 buses traveling through stop 1101:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101&routeID=19</span><p> </p>
+ Retrieve the arrival estimates for future stops of the route 19 bus identifies as #915:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&routeID=19&vehicleID=915</span>
+ <h3>Response</h3>
+ The response length is dependent on the particular request parameters. If the status field is 0, the response
+ will be grouped by stop and each stop will be grouped by routes traveling through the respective stop.
+ <p>The following results example is for a single stopID. </p>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "timestamp" : "12:38pm",
+    "stop" : {
+      "stopID" : "1101",
+      "route" : [{
+        "routeID" : "4",
+        "vehicleID" : "993",
+        "human" : "Route 4 toward STP arrives in 10 minutes",
+        "minutes" : "10",
+        "arrivalTime" : "12:44pm",
+        "destination" : "STP",
+      },
+      {
+        "routeID" : "3",
+        "vehicleID" : "433",
+        "human" : "Route 3 toward ETP arrives in 12 minutes",
+        "minutes" : "12",
+        "arrivalTime" : "12:46pm",
+        "destination" : "ETP",
+      },
+      ...
+      ...
+    ]},
+    ...
+    ...
+}
+</code>
+  <p>If a vehicleID is specified, multiple stops will be returned.</p>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

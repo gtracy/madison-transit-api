@@ -1,0 +1,378 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body onload="prettyPrint()">  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li><a href="/">API Home</a></li>
+  <li><a href="/schedule.html">Schedules</a></li>
+  <li><a href="/routes.html">Routes</a></li>
+  <li class="selected"><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li><a href="/parking.html">Parking</a></li>
+  <li><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+ <div id="sub-menu">
+   <a href="#getstops">getstops</a> | <a href="#getnearbystops">getnearbystops</a> | 
+   <a href="#getstoplocation">getstoplocation</a> | <a href="#getvehicles">getvehicles</a> 
+ </div>
+ <h1><a name="getstops">getstops</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getstops method will return the geo locations for all stops of a specified route.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getstops
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">routeID</td>
+  <td class="center">String</td>
+  <td>A two-digit value describing a valid route in the Metro system.</td>
+ </tr>
+ <tr>
+  <td class="center">destination</td>
+  <td class="center">String</td>
+  <td>A value describing a valid route endpoint in the Metro system. When a destination is included in the query, the results will be limited to the stops that are headed in that direction.</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ Retrieve all stops for route 3:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstops?key=xxx&routeID=03</span><p> </p>
+ Retrieve all stops for route 3 headed toward ETP:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstops?key=xxx&routeID=03&destination=ETP</span><p> </p>
+ <h3>Response</h3>
+ The response length is dependent on the particular request parameters. If the status field is 0, the response
+ will be grouped by route, listing the details of each stop on that route.
+ <p> </p>
+ <p>No assumptions should be made about the order of the stops in the response.</p>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "timestamp" : "12:38pm",
+    "routeID" : "03",
+    "stops" : [
+        {
+          "stopID" : "1391",
+          "intersection" : "Atwood & Ohio",
+          "latitude" : "43.0937715",
+          "longitude" : "-89.3467281",
+          "destination" : "ETP",
+        },
+        {
+          "stopID" : "1961",
+          "intersection" : "Atwood & Rusk",
+          "latitude" : "43.0924936",
+          "longitude" : "-89.3528187",
+          "destination" : "ETP",
+        },
+        ...
+        ...
+      ],
+}
+</code>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+
+ <hr>
+
+ <h1><a name="getnearbystops">getnearbystops</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getnearbystops method will return the geo locations for all stops near a specified location.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getnearbystops
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">lat</td>
+  <td class="center">String (required)</td>
+  <td>A geo-spaticial figure describing the latitude coordinate for a Metro stop.</td>
+ </tr>
+ <tr>
+  <td class="center">lon</td>
+  <td class="center">String (required)</td>
+  <td>A geo-spaticial figure describing the longitude coordinate for a Metro stop.</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">radius</td>
+  <td class="center">Integer</td>
+  <td>The radius around the lat and lon parameters where you would like to search. The radius is in feet and must be less than 500. It defaults to 500.</td>
+ </tr>
+ <tr>
+  <td class="center">routeID (not currently supported)</td>
+  <td class="center">String</td>
+  <td>A two-digit value describing a valid route in the Metro system. If a routeID is provided, the results will be limited to stops that service that route.</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">destination</td>
+  <td class="center">String</td>
+  <td>A value describing a valid route endpoint in the Metro system. When a destination is included in the query, the results will be limited to the stops that are headed in that direction.</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ Retrieve all stops for route 3 around a point on Atwood (43.0733673,-89.4014633):<p> </p>
+ <span style="font-size:14px;font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getnearbystops?key=xxx&lat=43.0733673&lon=-89.4014633&routeID=03</span><p> </p>
+ <h3>Response</h3>
+ The response length is dependent on the particular request parameters. If the status field is 0, the response
+ will be grouped by route, listing the details of each stop on that route within the specified radius.
+ <p> </p>
+ <p>No assumptions should be made about the order of the stops in the response.</p>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "timestamp" : "12:38pm",
+    "stop" : [
+        {
+          "stopID" : "1391",
+          "intersection" : "Atwood & Ohio",
+          "latitude" : "43.0937715",
+          "longitude" : "-89.3467281",
+          "destination" : "ETP",
+        },
+        {
+          "stopID" : "1961",
+          "intersection" : "Atwood & Rusk",
+          "latitude" : "43.0924936",
+          "longitude" : "-89.3528187",
+          "destination" : "ETP",
+        },
+        ...
+        ...
+      ],
+}
+</code>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+
+ <hr>
+
+ <h1><a name="getstoplocation">getstoplocation</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getstoplocation method will return the geo location for a specific stop.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getstoplocation
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">stopID</td>
+  <td class="center">String (required)</td>
+  <td>A four-digit value describing a valid stop ID in the Metro system.</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ Retrieve the location of stop ID 1391:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstoplocation?key=xxx&stopID=1391</span><p> </p>
+ <h3>Response</h3>
+ The response length is going to fixed since this method only supports retreiving a ingle resource. If the status field is 0, the response
+ will list the details of the requested stop.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "timestamp" : "12:38pm",
+    "stopID" : "1391",
+    "intersection" : "Atwood & Ohio",
+    "latitude" : "43.0937715",
+    "longitude" : "-89.3467281",
+}
+</code>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+
+ <hr>
+
+ <h1><a name="getvehicles">getvehicles</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getvehicles method will return the geo locatios for all buses currently driving a specified route.
+ <br/>
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getvehicles
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">key</td>
+  <td class="center">String (required)</td>
+  <td>16-digit API access key</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">routeID</td>
+  <td class="center">String (required)</td>
+  <td>A two-digit value describing a valid route in the Metro system. If a routeID is provided, the results will be limited to stops that service that route.</td>
+ </tr>
+ <tr>
+  <td class="center">direction</td>
+  <td class="center">String<br>(not yet supported)</br></td>
+  <td>A value describing a valid route endpoint in the Metro system. When a destination is included in the query, the results will be limited to the stops that are headed in that direction.</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">vehicleID</td>
+  <td class="center">String<br>(not yet supported)</br></td>
+  <td>A three-digit value describing a valid vehicle (bus) in the Metro system and currently driving a route. The vehicleID filter will only be applied to the specified routeID parameter.</td>
+ </tr>
+ </table>
+ <h3>Examples</h3>
+ Retrieve all vehicles for route 3:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03</span><p> </p>
+ Retrieve all details for vehicle 991 of route 3:<p> </p>
+ <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03&vehicleID=991</span><p> </p>
+ <h3>Response</h3>
+ The response length is dependent on the particular request parameters. If the status field is 0, the response
+ will be grouped by route, listing the details of each stop on that route within the specified radius.
+ <p> </p>
+ <p>No assumptions should be made about the order of the stops in the response.</p>
+<code class="prettyprint lang-javascript">
+{
+    "status" : "0",
+    "count" : "3",
+    "routeID" : "07",
+    "timestamp" : "1/15/2012 10:13:44 AM",
+    "vehicles" : [
+      {
+        "lat": "43.0863712", 
+        "lon": "-89.3601702", 
+        "direction": "WTP", 
+        "nextStop": "Jenifer & Ingersoll", 
+        "vehicleID": "943"
+      }, 
+      {
+        "lat": "43.0535659", 
+        "lon": "-89.4430852", 
+        "direction": "WTP", 
+        "nextStop": "West Transfer Point", 
+        "vehicleID": "937"
+      }, 
+      {
+        "lat": "43.0742107", 
+        "lon": "-89.3826771", 
+        "direction": "ETP", 
+        "nextStop": "Jenifer & Ingersoll", 
+        "vehicleID": "015"
+      }
+    ]
+}
+</code>
+ <h3>Error</h3>
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ present describing the error in plain English.
+ <p> </p>
+<code class="prettyprint lang-javascript">
+{
+  "status" : "-1",
+  "description" : "Invalid request parameters",	
+}
+</code>
+ </div>
+ 
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

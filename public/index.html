@@ -1,0 +1,112 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body>  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li class="selected"><a href="/">API Home</a></li>
+  <li><a href="/schedule.html">Schedules</a></li>
+  <li><a href="/routes.html">Routes</a></li>
+  <li><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li><a href="/parking.html">Parking</a></li>
+  <li><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+ <p>
+ This developer API is aimed at providing access to well-formed transit data for the Madison Metro service.
+ There are <strong>no guarantees</strong> that this data is accurate or even available. But I'll do the best I can to make it so.
+ </p>
+ <p>API Resources : In addition to this documention, you may find the following resources helpful:
+	<ul>
+	  <li>Google Group - <a href="http://groups.google.com/group/smsmybus-dev">http://groups.google.com/group/smsmybus-dev</a></li>
+	  <li>Github Examples - <a href="https://github.com/gtracy/smsmybus-dev">https://github.com/gtracy/smsmybus-dev</a></li>
+	</ul>
+ </p>
+ <h3>Why have this API?</h3>
+ Currently, the Metro doesn't make their transit data available in an easy to use form for developers. But I 
+ started to mirror the real-time schedule to build the original <a href=http://www.smsmybus.com>SMS interface</a>. 
+ Making this data available to other developers is the logical next step.<p>
+ <center><object width="400" height="225"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" />
+  <embed src="http://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="400" height="225"></embed>
+  </object>
+  <p><a href="http://vimeo.com/13764646">A Case for Open Data in Transit</a> from <a href="http://vimeo.com/user2352061">Streetfilms</a> on <a href="http://vimeo.com">Vimeo</a>.
+  </p>
+ </center>
+ <hr/>
+ <h3>Web Service Basics:</h3>
+ The Bus Tracker API is a web service that uses HTTP/1.1 as its application protocol. Each type of call/request 
+ to the API is an HTTP GET call to a unique URL. Parameters are encoded in the HTTP GET request by following the 
+ URL with a “?” and “argument=value” pairs separated by “&”.
+ <p>The response is a JSON document with a Content-Type of “text/javascript”. 
+ <p>For example, to request the current system time through the developer API, a program or script will make a 
+ HTTP/1.1 GET request to the following URL with parameters:
+ <p>http://api.smsmybus.com/api/v1/getarrivals?key=89dj2he89d8j3j3ksjhdue93j&stopID=1101
+ <p>The api.smsmybus.com is the host on which the Developer API is servicing HTTP requests. The service is running 
+ on port 80.
+ <p>The version of the API that is being accessed is built into the URL. In the above example, “v1” represents 
+ version 1.0 of the API.
+ <p>The “key” parameter represents the API key assigned to the developer making the request. All requests to the 
+ API must be accompanied by a valid API key.
+ <h3>What kind of information is available via the API?</h3>
+ In general terms, the API provides access to schedule data, location information (for buses and stops), and
+ system notifications. Note that these feeds will be rolling out in stages with the early focus being on schedule
+ and location information. You can browse all of the interfaces using the menu at the top of the page. 
+ <h3>What should I do with all of this great data?</h3>
+ The sky is the limit! Build a great Android app or build a new browser interface that plots the buses on a map, 
+ or find a way to give Madison visitors stop-by-stop Metro directions, or...?
+ <h3>How do I get started?</h3>
+ The first step is to register for a developer key. You'll need to use this key when you make calls to the API.
+ Just send me an email describing your application at <a href=mailto:api@smsmybus.com>api@smsmybus.com</a>. Also,
+ follow us on Twitter at <a href=http://twitter.com/smsmybus>smsmybus</a> to stay on top of news and updates on the
+ service.
+ 
+ 
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href="http://www.gregtracy.com">Greg Tracy</a> - <a href="http://twitter.com/gregtracy">@gregtracy</a>
+   <br><a href="http://code.google.com/appengine/"><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

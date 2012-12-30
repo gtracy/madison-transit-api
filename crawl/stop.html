@@ -1,0 +1,100 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets check Madison bus schedules in real time.">
+    <meta name="keywords" content"Twilio, bus schedule, SMS, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <title>SMSMyBuss - Check the bus schedule in real time</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script> 
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $("#request-form").submit(function() {
+          $("#form-container").slideUp("slow");
+          var args = "phone="+$('#phone').val()+"&text="+$('#text').val()
+          $.ajax({
+            type: "POST",
+            url: "/admin/sendsms",
+            data: args,
+            success: function(response) {
+              if( response.indexOf("Oops") >= 0 ) {
+                $("#form-container").slideDown("fast");
+                $("#form-answer").replaceWith('<div id="form-answer"><p style="color: red;font-weight: bold">'+response+'</p></div>');
+              } else {
+                $("#form-answer").replaceWith('<div id="form-answer"><h2>'+response+'</h2></div><hr>');
+              }
+            } // success function
+          }); // .ajax
+        }); // submit form
+      });
+    </script>
+
+  </head>
+
+<body>  
+
+<div id="page-container">
+ <div id="header">
+ {{ greeting }}<br>
+ <p><center><img src="img/header.png" alt="smsmybus logo"></center>
+ </div>
+ <div id="description">
+  <center>SMSMyBus is a mobile telephone application that lets you find real time bus arrivals for 
+  the <a class="description-anchor" href=http://www.cityofmadison.com/metro/>Madison Metro</a>.
+  Just text your request to 608.467.1603 to receive <i>real time</i> arrival estimates.</center>
+  <hr>
+ </div>
+
+ Current state of route {{ routeID }}
+ <table style="width:1000px;" id="callerlog">
+  <thead><tr>
+   <th>Stop ID</th>
+   <th>Geo</th>
+   <th>Intersection</th>
+   <th>Direction</th>
+   <th>Route ID</th>
+  </tr></thead>
+ {% for s in stops %}
+  <tr>
+   <td>{{ s.stopID }}</td>
+   <td>{{ s.location }}</td>
+   <td>{{ s.intersection }}</td>
+   <td>{{ s.direction }}</td>
+   <td>{{ s.routeID }}</td>
+  </tr>
+ {% endfor %}
+ </table>
+ 
+ <hr>
+ <div id="footer">
+  <div id="powered-by">
+     powered by:<br><br>
+     <a href=http://code.google.com/appengine/><img src="img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+     <a href=http://twilio.com><img src="img/twilio-logo.jpg" alt="twilio" height="30" width="30"></a>
+  </div>
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+  </div>
+  <div id="contact-container">
+   terms - privacy - <a href="mailto:greg@gregtracy.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

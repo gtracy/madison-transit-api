@@ -1,0 +1,189 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+  <head>
+    <meta name="description" content="A telephone application that lets you check Madison bus schedules in real time.">
+    <meta name="keywords" content"SMSMyBus, Twilio, bus schedule, SMS, madison, metro, API, developer, mymetro, mymetrobus, google app engine, cloud computing, telephone, telephony, smsmybus">
+    <meta name="google-site-verification" content="H9cmKbLovDFqlBKn-lLv7ojvKOQ599AKKsJ7QgrM1fA" />
+    <title>SMSMyBus API - Build your own Madison Metro applications</title>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script src="/js/prettify.js" type="text/javascript"></script>
+  </head>
+
+<body onload="prettyPrint()">  
+
+<div id="page-container">
+ <div id="header">
+ SMSMyBus API
+ </div>
+ <div id="description">
+  SMSMyBus exposes its data via a programming interface. This page describes that interface.
+ </div>
+ <div id="menu">
+ <ul>
+  <li><a href="/">API Home</a></li>
+  <li><a href="/schedule.html">Schedules</a></li>
+  <li><a href="/routes.html">Routes</a></li>
+  <li><a href="/locations.html">Locations</a></li>
+  <li><a href="/notifications.html">Notifications</a></li>
+  <li class="selected"><a href="/parking.html">Parking</a></li>
+  <li><a href="/blog.html" class="blog-title">Blog</a></li>
+ </ul>
+ </div>
+ <h1><a name="getparking">getparking</a></h1>
+ <div id="spec">
+ <h3>Overview</h3>
+ The getparking method will return realtime parking data from the Madison Parking Utility in a JSON document. If a parking location is currently in "special event, pay on entry" parking, or will be in the near future, event information is returned as well.
+ <h3>URL</h3>
+ http://api.smsmybus.com/v1/getparking
+ <h3>Fields</h3>
+ <table>
+ <tr>
+  <th style="width:120px;">Name</th>
+  <th style="width:150px;">Value</th>
+  <th>Description</th>
+ </tr>
+ <tr>
+  <td class="center">searchwindow</td>
+  <td class="center">Integer (optional)</td>
+  <td>Number of hours in advance of a special event parking start time to include event information in results. Defaults to 3, max of 24. At present, only one event a ramp per query is returned, with no order guarantee</td>
+ </tr>
+ <tr class="striped">
+  <td class="center">testingts</td>
+  <td class="center">UNIX timestamp (optional)</td>
+  <td>For testing purposes, consider this time to be "now"</td>
+ </tr>
+ </table>
+ <h3>Example 1: No parameters</h3>
+  
+
+ <span style="font-weighti:bold;margin-left:24px;">http://api.smsmybus.com/v1/getparking</span><p> </p> 
+ <h3>Response</h3>
+<code class="prettyprint lang-javascript">
+[{
+    "total_spots": "613",
+    "open_spots": "189",
+    "name": "Capitol Square North Garage",
+    "address": "218 East Mifflin St."
+}, {
+    "total_spots": "620",
+    "open_spots": "270",
+    "name": "Overture Center Garage",
+    "address": "318 W. Mifflin St."
+}, {
+    "total_spots": "855",
+    "open_spots": "456",
+    "name": "State Street Capitol Garage",
+    "address": "214 N. Carroll St."
+}, {
+    "total_spots": "243",
+    "open_spots": "96",
+    "name": "Brayton Lot",
+    "address": "1 South Butler St."
+}, {
+    "total_spots": "516",
+    "open_spots": "244",
+    "name": "Government East Garage",
+    "address": "215 S. Pinckney St."
+}, {
+    "total_spots": "1066",
+    "open_spots": "638",
+    "name": "State Street Campus Garage",
+    "address": ["430 N. Frances St.", "415 N. Lake St."]
+}]
+
+</code>
+<h3>Example 2: Searching for events occuring up to 9 hours after 11am on February 18th, 2012</h3>
+  
+
+ <span style="font-weighti:bold;margin-left:24px;">http://api.smsmybus.com/v1/getparking?searchwindow=9&testingts=1329584438</span><p> </p>
+ <h3>Response</h3>
+<code class="prettyprint lang-javascript">
+[{
+    "total_spots": "613",
+    "open_spots": "108",
+    "name": "Capitol Square North Garage",
+    "address": "218 East Mifflin St."
+}, {
+    "SpecialEventNotice": {
+        "EventTime": "2012-02-18T20:00:00",
+        "EventVenue": "Overture Center - Overture Hall",
+        "ParkingEndTime": "2012-02-18T20:05:00",
+        "Event": "Reinventing Radio: An Evening w\/Ira Glass",
+        "ParkingStartTime": "2012-02-18T18:00:00"
+    },
+    "total_spots": "620",
+    "open_spots": "239",
+    "name": "Overture Center Garage",
+    "address": "318 W. Mifflin St."
+}, {
+    "SpecialEventNotice": {
+        "EventTime": "2012-02-18T20:00:00",
+        "EventVenue": "Overture Center - Overture Hall",
+        "ParkingEndTime": "2012-02-18T20:05:00",
+        "Event": "Reinventing Radio: An Evening w\/Ira Glass",
+        "ParkingStartTime": "2012-02-18T18:00:00"
+    },
+    "total_spots": "855",
+    "open_spots": "386",
+    "name": "State Street Capitol Garage",
+    "address": "214 N. Carroll St."
+}, {
+    "total_spots": "243",
+    "open_spots": "67",
+    "name": "Brayton Lot",
+    "address": "1 South Butler St."
+}, {
+    "total_spots": "516",
+    "open_spots": "169",
+    "name": "Government East Garage",
+    "address": "215 S. Pinckney St."
+}, {
+    "SpecialEventNotice": {
+        "EventTime": "2012-02-18T19:00:00",
+        "EventVenue": "Kohl Center",
+        "ParkingEndTime": "2012-02-18T19:05:00",
+        "Event": "UW Men's Hockey",
+        "ParkingStartTime": "2012-02-18T17:00:00"
+    },
+    "total_spots": "1066",
+    "open_spots": "551",
+    "name": "State Street Campus Garage",
+    "address": ["430 N. Frances St.", "415 N. Lake St."]
+}]
+</code>
+<h3>Event Information</h3>
+For special event parking, ParkingStartTime and ParkingEndTime designate when pay-on-entry begin and end, respectively. Typically, pay on entry begins two hours before EventTime, and ends 5 minutes after EventTime.
+ </div>
+  
+ <div id="spacer"></div>
+ <hr>
+ <div id="footer">
+  <div id="me">
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+  </div>
+  <div id="contact-container">
+   <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
+  </div>
+ </div>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-2237321-13");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
+

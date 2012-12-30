@@ -1,0 +1,14 @@
+cron:
+- description: reset quotas for the abusers
+  url: /resetquotas
+  schedule: every day 14:00
+
+- description: persist the API counters
+  url: /admin/persistcounters
+  schedule: every 2 hours from 6:00 to 00:00
+  timezone: America/Chicago
+
+- description: email the daily report
+  url: /admin/dailyreport
+  schedule: every day 23:57
+  timezone: America/Chicago

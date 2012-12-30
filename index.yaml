@@ -1,0 +1,19 @@
+indexes:
+
+- kind: RouteListing
+  properties:
+  - name: direction
+  - name: route
+    direction: desc
+
+- kind: RouteListing
+  properties:
+  - name: stopID
+  - name: route
+
+- kind: DirectionListing
+  properties:
+  - name: key
+  - name: id
+    direction: desc
+
