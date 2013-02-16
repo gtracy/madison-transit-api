@@ -20,6 +20,7 @@ aggregated_results = {}
 
 
 def clean(sid):
+    logging.debug('cleaning request sid: %s' % sid)
     del aggregated_results[sid]
 ## end
 
@@ -186,17 +187,22 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
 # on the time-to-arrival
 #
 def insert_result(sid,stop):
-    if len(aggregated_results[sid]) == 0:
-        aggregated_results[sid] = [stop]
-    else:
-        done = False
-        for i, s in enumerate(aggregated_results[sid]):
-            if stop.time <= s.time:
-                    aggregated_results[sid].insert(i,stop)
-                    done = True
-                    break
-        if not done:
-            aggregated_results[sid].append(stop)
+    try:
+        if len(aggregated_results[sid]) == 0:
+            aggregated_results[sid] = [stop]
+        else:
+            done = False
+            for i, s in enumerate(aggregated_results[sid]):
+                if stop.time <= s.time:
+                        aggregated_results[sid].insert(i,stop)
+                        done = True
+                        break
+            if not done:
+                aggregated_results[sid].append(stop)
+    except KeyError as e:
+        logging.error('aggregation error: %s' % e.message)
+
+
             
 ## end
 

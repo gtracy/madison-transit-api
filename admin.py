@@ -16,9 +16,9 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 from google.appengine.runtime import apiproxy_errors
 
-import utils.gdata.docs.service
-import utils.gdata.spreadsheet.service
-import utils.gdata.spreadsheet.text_db
+import gdata.docs.service
+import gdata.spreadsheet.service
+import gdata.spreadsheet.text_db
 
 import config
 
