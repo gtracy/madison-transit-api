@@ -133,15 +133,15 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
       lat = float(self.request.get('lat'))
       lon = float(self.request.get('lon'))
       radius = self.request.get('radius')
-      if radius == '':
-          radius = 500
+      if radius == '' or radius is None:
+          radius = 100
       else:
           radius = int(radius)
       routeID = self.request.get('routeID')
-      destination = self.request.get('destination')
+      direction = self.request.get('direction')
       
       # stop location requests...
-      json_response = nearbyStops(lat,lon,radius,routeID)
+      json_response = nearbyStops(lat,lon,radius,routeID,direction)
 
       # encapsulate response in json
       #logging.debug('API: json response %s' % response);
@@ -168,7 +168,7 @@ class DebugHandler(webapp.RequestHandler):
 
     def get(self):
       # stop location requests...
-      response = nearbyStops(43.0637457,-89.4188056,500,None)
+      response = nearbyStops(43.0637457,-89.4188056,500,None,'westbound')
 
       # encapsulate response in json
       logging.debug('API: json response %s' % response);
@@ -197,7 +197,28 @@ class NotSupportedHandler(webapp.RequestHandler):
 
 ## end NotSupportedHandler
 
-def nearbyStops(lat,lon,radius,routeID):
+def getDestinationCode(destination):
+    # we have to translate the direction input into a code used
+    # for the metro lookup
+    destination_code_key = '%s:codekey' % destination
+    destination_code = memcache.get(destination_code_key)
+    if( destination_code is None ):
+
+        logging.warn('cache miss on destination code %s' % destination)
+        destination_listing = db.GqlQuery('select * from DestinationListing where label = :1', destination).get()
+        if destination_listing is None:
+            logging.error('routeRequest :: unable to locate destination %s in the datastore!?' % destination)
+            response_dict = {'status':'0',
+                             'info':('Destination %s not found' % destination)
+                            }
+            return response_dict
+        else:
+            destination_code = destination_listing.id
+            memcache.set(destination_code_key,destination_code)
+
+    return destination_code
+
+def nearbyStops(lat,lon,radius,routeID,direction):
 
     # limit the radius value to 500
     if radius > 1000:
@@ -211,11 +232,18 @@ def nearbyStops(lat,lon,radius,routeID):
              max_results=100,
              max_distance=radius)
     else:
-        results = StopLocation.proximity_fetch(
-             StopLocation.all().filter('routeID =', routeID),  # Rich query!
-             geotypes.Point(lat,lon),  # Or db.GeoPt
-             max_results=100,
-             max_distance=radius)    
+        if direction is not None:
+            results = StopLocation.proximity_fetch(
+                 StopLocation.all().filter('routeID =', routeID).filter('direction =', direction),
+                 geotypes.Point(lat,lon),  # Or db.GeoPt
+                 max_results=100,
+                 max_distance=radius)    
+        else:
+            results = StopLocation.proximity_fetch(
+                 StopLocation.all().filter('routeID =', routeID),
+                 geotypes.Point(lat,lon),  # Or db.GeoPt
+                 max_results=100,
+                 max_distance=radius)    
 
     if results is None:
         response_dict = {'status':'0',
@@ -249,9 +277,16 @@ def routeRequest(routeID,destination):
     
     # @fixme memcache these results!
     if destination is not None:
-        q = db.GqlQuery('select * from RouteListing where route = :1 and direction = :2 order by route', routeID, destination)
+
+        destination_code = getDestinationCode(destination)
+        logging.debug('route listing query for route %s and direction %s' % (routeID,destination_code))
+        q = db.GqlQuery('select * from RouteListing where route = :1 and direction = :2 order by route', routeID, destination_code)
+
     else:
+
         q = db.GqlQuery('select * from RouteListing where route = :1 order by route', routeID)
+
+
     routes = q.fetch(500)
     if routes is None:
         response_dict = {'status':'0',
