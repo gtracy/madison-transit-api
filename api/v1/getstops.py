@@ -11,6 +11,7 @@ from api.v1 import api_utils
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.labs.taskqueue import Task
 
 class GetStopHandler(webapp.RequestHandler):
     
@@ -59,6 +60,9 @@ class GetStopHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
+      # push event out to anyone watching the live board
+      task = Task(url='/map/task', params={'stopID':stopID})
+      task.add('eventlogger')
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'
@@ -108,6 +112,9 @@ class GetStopLocationHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
+      # push event out to anyone watching the live board
+      task = Task(url='/map/task', params={'stopID':stopID})
+      task.add('eventlogger')
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'
@@ -156,6 +163,9 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
 
       self.response.out.write(response)
+      # push event out to anyone watching the live board
+      #task = Task(url='/map/task', params={'stopID':stopID})
+      #task.add('eventlogger')
     
     def post(self):
         self.response.headers['Content-Type'] = 'application/json'

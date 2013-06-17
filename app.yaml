@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: destination-fix
+version: livemap
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -8,16 +8,27 @@ derived_file_type:
 - python_precompiled
 
 inbound_services:
+- channel_presence
 
 builtins:
 - appstats: off
 - remote_api: on
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
 
 handlers:
 
 - url: /
   static_files: public/index.html
   upload: public/index.html
+
+# map apps
+- url: /map(.*)
+  script: maps.map.app
 
 - url: /(.*\.html)
   static_files: public/\1

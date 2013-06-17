@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map-canvas { height: 100% }
+    </style>
+    <script type="text/javascript" src="/js/maps.js"></script>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfQA6o9xFlZ5ZxgWF9J-AwYg5sfm4V2Og&sensor=true">
+    </script>
+    <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+  </head>
+  <body>
+    <div id="map-canvas"/>
+    <script type="text/javascript">
+      google.maps.event.addDomListener(window, 'load', App.utils.initialize());
+      App.utils.initChannel('{{token}}')
+    </script>
+
+  <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+  <script type="text/javascript">
+    try {
+      var pageTracker = _gat._getTracker("UA-2237321-13");
+      pageTracker._trackPageview();
+    } catch(err) {}
+    </script>
+
+  </body>
+</html>

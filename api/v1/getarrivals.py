@@ -6,6 +6,7 @@ import webapp2 as webapp
 import json
 
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.labs.taskqueue import Task
 
 from api.v1 import api_utils
 from api import asynch
@@ -70,8 +71,11 @@ class MainHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/json'
           response = json.dumps(json_response)
       
-      api_utils.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
       self.response.out.write(response)
+      api_utils.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+      # push event out to anyone watching the live board
+      task = Task(url='/map/task', params={'stopID':stopID})
+      task.add('eventlogger')
 
 ## end RequestHandler
 

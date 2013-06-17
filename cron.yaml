@@ -8,3 +8,8 @@ cron:
   url: /admin/dailyreport
   schedule: every day 23:27
   timezone: America/Chicago
+
+- description: reset live map channels
+  url: /admin/resetchannels
+  schedule: every 2 hours
+  timezone: America/Chicago

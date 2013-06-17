@@ -4,7 +4,7 @@ queue:
   bucket_size: 1
 
 - name: eventlogger
-  rate: 5/s
+  rate: 50/s
   bucket_size: 1
 
 - name: smssender

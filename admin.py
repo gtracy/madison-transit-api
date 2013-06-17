@@ -2,11 +2,14 @@ import os
 import wsgiref.handlers
 import logging
 import webapp2 as webapp
+import json
 
 from operator import itemgetter
+from datetime import datetime
 from datetime import date
 from datetime import timedelta
 
+from google.appengine.api import channel
 from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.api import users
@@ -88,7 +91,24 @@ class GDocHandler(webapp.RequestHandler):
           logging.debug('updating gdoc for %s with %s' % (dk.developerKey,str(dk.requestCounter)))
           updateField(dk.developerKey,dk.requestCounter)
 ## end
-       
+
+class ResetChannelsHandler(webapp.RequestHandler):
+  def get(self):
+    now = datetime.now()
+    channels = json.loads(memcache.get('channels') or '{}')
+    for channel_id, created in channels.items():
+        
+        dt = datetime.strptime(created.split(".")[0], "%Y-%m-%d %H:%M:%S")
+
+        # NOTE: normally this would be 60 minutes; set it lower to expose the refresh behavior
+        if (now - dt) > timedelta(minutes=1):
+            del channels[channel_id]            
+            channel.send_message(channel_id, json.dumps({'function':'reload'}))
+                
+        memcache.set('channels', json.dumps(channels))
+
+## end
+
 def updateField(category,value):
     member = 'Sheet1'
     # get a connection to the db/spreadsheet
@@ -127,6 +147,7 @@ def updateField(category,value):
 application = webapp.WSGIApplication([('/admin/persistcounters', PersistCounterHandler),
                                       ('/admin/dailyreport', DailyReportHandler),
                                       ('/admin/gdoctest', GDocHandler),
+                                      ('/admin/resetchannels', ResetChannelsHandler)
                                       ],
                                      debug=True)
 
