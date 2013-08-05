@@ -36,6 +36,7 @@ def validateDevKey(devKey):
    
     storeKey = memcache.get(devKey)
     if storeKey is None:
+        logging.error('Dev key - %s - cache miss')
         q = db.GqlQuery("SELECT __key__ FROM DeveloperKeys WHERE developerKey = :1", devKey)
         storeKey = q.get()
         if storeKey is None:
@@ -49,6 +50,7 @@ def validateDevKey(devKey):
     
     # we've validated the dev key at this point... start counting requests
     total = memcache.incr(devKey + ':counter', initial_value=0)
+    logging.debug(storeKey)
     return storeKey
     
 ## end validateDevKey()
