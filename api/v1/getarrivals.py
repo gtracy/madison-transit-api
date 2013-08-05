@@ -5,6 +5,7 @@ import time
 import webapp2 as webapp
 import json
 
+from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.labs.taskqueue import Task
 
@@ -23,6 +24,7 @@ class MainHandler(webapp.RequestHandler):
     def get(self):
       start = time.time()
       api_utils.apiStatCount()
+      dev_key = self.request.get('key')
 
       if api_utils.afterHours() is True:
         # don't run these jobs during "off" hours
@@ -32,7 +34,7 @@ class MainHandler(webapp.RequestHandler):
       devStoreKey = validateRequest(self.request)
       if devStoreKey is None:
           # filter out the kiosk errors from the log
-          if( not (self.request.get('key') == 'kiosk' and self.request.get('stopID') == '') ):
+          if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
               logging.error("failed to validate the request parameters")
           self.response.headers['Content-Type'] = 'application/javascript'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
@@ -45,7 +47,7 @@ class MainHandler(webapp.RequestHandler):
       logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
       
       if stopID is not '' and routeID is '':
-          json_response = stopRequest(stopID, devStoreKey)
+          json_response = stopRequest(stopID, dev_key)
           api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
       elif stopID is not '' and routeID is not '':
           json_response = stopRouteRequest(stopID, routeID, devStoreKey)
@@ -122,48 +124,72 @@ def validateRequest(request):
 
 ## end validateRequest()
 
-def stopRequest(stopID, devStoreKey):
+def stopRequest(stopID, devKey):
 
     logging.debug("Stop Request started")
-    response_dict = {'status':'0',
-                     'timestamp':api_utils.getLocalTimestamp()
-                     }    
-                     
-    # unique key to track this request
-    t = str(time.time()).split('.')[0]
-    sid = stopID + str(devStoreKey) + t
-
-    # got fetch all of the data for this stop
-    routes = asynch.aggregateBusesAsynch(sid,stopID)
-    if routes is None or len(routes) == 0:
-        response_dict['status'] = '-1'
-        response_dict['description'] = 'No routes found for this stop'
-        response_dict['stopID'] = stopID
-        return response_dict
-
-    # get the stop details
-    stop_dict = {'stopID':stopID,}
+    response_dict = None
     
-    # take the first 10 results. we assume the results are sorted by time
-    #route_results = sorted(route_results, key=attrgetter('time'))
-    route_results = []
-    for r in routes:
-        minutes = api_utils.computeCountdownMinutes(r.arrivalTime)
-        if minutes > 0:
-            route_results.append(dict({'routeID':r.routeID,
-                          'vehicleID':'unknown',
-                          'minutes':str(minutes),
-                          'arrivalTime':r.arrivalTime,
-                          'destination':r.destination,
-                          }))            
-    
-    # add the populated stop details to the response
-    stop_dict.update({'route':route_results});
-    response_dict.update({'stop':stop_dict})
+    # if this is a kiosk request, grab the cached result
+    if( devKey.find('kiosk') >= 0 ):
+    #if( True ):
+        logging.debug('kiosk request. check for cache hit')
+        # look for memcahced results
+        results_cache_key = 'kiosk::%s' % stopID
+        response_dict = memcache.get(results_cache_key)
+        if( response_dict is None ):
+            logging.debug('gettarrivals : kiosk cache miss')
+
+    if( response_dict is None ):
+        response_dict = {'status':'0',
+                         'timestamp':api_utils.getLocalTimestamp()
+                         }    
+
+        # unique key to track this request
+        t = str(time.time()).split('.')[0]
+        sid = '%s::%s::%s' % (stopID,devKey,t)
+
+        # fetch all of the data for this stop
+        routes = asynch.aggregateBusesAsynch(sid,stopID)
+        if routes is None or len(routes) == 0:
+            response_dict['status'] = '-1'
+            response_dict['description'] = 'No routes found for this stop'
+            response_dict['stopID'] = stopID
+            return response_dict
+
+        # get the stop details
+        stop_dict = {'stopID':stopID,}
         
-    # cleanup the results
-    asynch.clean(sid)
-    
+        # take the first 10 results. we assume the results are sorted by time
+        #route_results = sorted(route_results, key=attrgetter('time'))
+        route_results = []
+        for r in routes:
+            minutes = api_utils.computeCountdownMinutes(r.arrivalTime)
+            if minutes > 0:
+                route_results.append(dict({'routeID':r.routeID,
+                              'vehicleID':'unknown',
+                              'minutes':str(minutes),
+                              'arrivalTime':r.arrivalTime,
+                              'destination':r.destination,
+                              }))            
+        
+        # add the populated stop details to the response
+        stop_dict.update({'route':route_results});
+        response_dict.update({'stop':stop_dict})
+            
+        # cleanup the results
+        asynch.clean(sid)
+
+        # cache results if it is from a kiosk
+        if( devKey.find('kiosk') >= 0 ):
+            # look for memcahced results
+            results_cache_key = 'kiosk::%s' % stopID
+            memcache.set(results_cache_key,response_dict,75)
+            logging.debug('gettarrivals : kiosk cache set')
+
+    else:
+        logging.debug('getarrivals : kiosk cash hit')
+        response_dict['cached'] = True
+
     return response_dict
 
 ## end stopRequest()
