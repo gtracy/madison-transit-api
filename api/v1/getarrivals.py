@@ -26,42 +26,45 @@ class MainHandler(webapp.RequestHandler):
       api_utils.apiStatCount()
       dev_key = self.request.get('key')
 
-      if api_utils.afterHours() is True:
-        # don't run these jobs during "off" hours
-	      json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
+      if api_utils.afterHours() is False:
 
-      # validate the request parameters
-      devStoreKey = validateRequest(self.request)
-      if devStoreKey is None:
-          # filter out the kiosk errors from the log
-          if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
-              logging.error("failed to validate the request parameters")
-          self.response.headers['Content-Type'] = 'application/javascript'
-          self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
-          return
+          # validate the request parameters
+          devStoreKey = validateRequest(self.request)
+          if devStoreKey is None:
+              # filter out the kiosk errors from the log
+              if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
+                  logging.error("failed to validate the request parameters")
+              self.response.headers['Content-Type'] = 'application/javascript'
+              self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
+              return
 
-      # snare the inputs
-      stopID = api_utils.conformStopID(self.request.get('stopID'))
-      routeID = self.request.get('routeID')
-      vehicleID = self.request.get('vehicleID')
-      logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
-      
-      if stopID is not '' and routeID is '':
-          json_response = stopRequest(stopID, dev_key)
-          api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
-      elif stopID is not '' and routeID is not '':
-          json_response = stopRouteRequest(stopID, routeID, devStoreKey)
-          api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
-      elif routeID is not '' and vehicleID is not '':
-          json_response = routeVehicleRequest(routeID, vehicleID, devStoreKey)
-          api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
+          # snare the inputs
+          stopID = api_utils.conformStopID(self.request.get('stopID'))
+          routeID = self.request.get('routeID')
+          vehicleID = self.request.get('vehicleID')
+          #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
+          
+          if stopID is not '' and routeID is '':
+              json_response = stopRequest(stopID, dev_key)
+              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+          elif stopID is not '' and routeID is not '':
+              json_response = stopRouteRequest(stopID, routeID, devStoreKey)
+              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+          elif routeID is not '' and vehicleID is not '':
+              json_response = routeVehicleRequest(routeID, vehicleID, devStoreKey)
+              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
+          else:
+              logging.debug("API: invalid request")
+              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
+              json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
+
       else:
-          logging.debug("API: invalid request")
-          api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
-          json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
+          # don't run these jobs during "off" hours
+          logme.debug('shunted... off hour request')
+          json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
 
       # encapsulate response in json or jsonp
-      logging.debug('API: json response %s' % json_response);
+      #logging.debug('API: json response %s' % json_response);
 
       callback = self.request.get('callback')
       if callback is not '':
@@ -76,8 +79,10 @@ class MainHandler(webapp.RequestHandler):
       self.response.out.write(response)
       api_utils.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
       # push event out to anyone watching the live board
-      task = Task(url='/map/task', params={'stopID':stopID})
-      task.add('eventlogger')
+      channels = memcache.get('channels')
+      if channels is not None:
+          task = Task(url='/map/task', params={'stopID':stopID})
+          task.add('eventlogger')
 
 ## end RequestHandler
 
@@ -93,7 +98,7 @@ def validateRequest(request):
     vehicleID = request.get('vehicleID')
     
     # give up if someone asked for stop 0, which seems to be popular for some reason
-    logging.debug('validating stopID %s' % stopID);
+    #logging.debug('validating stopID %s' % stopID);
     if stopID == '' or stopID is '0' or stopID is '0000':
         return None
         
@@ -126,13 +131,12 @@ def validateRequest(request):
 
 def stopRequest(stopID, devKey):
 
-    logging.debug("Stop Request started")
+    #logging.debug("Stop Request started")
     response_dict = None
     
     # if this is a kiosk request, grab the cached result
     if( devKey.find('kiosk') >= 0 ):
-    #if( True ):
-        logging.debug('kiosk request. check for cache hit')
+        #logging.debug('kiosk request. check for cache hit')
         # look for memcahced results
         results_cache_key = 'kiosk::%s' % stopID
         response_dict = memcache.get(results_cache_key)
@@ -184,7 +188,7 @@ def stopRequest(stopID, devKey):
             # look for memcahced results
             results_cache_key = 'kiosk::%s' % stopID
             memcache.set(results_cache_key,response_dict,75)
-            logging.debug('gettarrivals : kiosk cache set')
+            #logging.debug('gettarrivals : kiosk cache set')
 
     else:
         logging.debug('getarrivals : kiosk cash hit')
