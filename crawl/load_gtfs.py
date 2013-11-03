@@ -88,13 +88,14 @@ class PortStopTask(webapp.RequestHandler):
 ## end PortStopTask
 
 
+application = webapp.WSGIApplication([('/gtfs/port/stops', PortStopsHandler),
+                                        ('/gtfs/port/stop/task/', PortStopTask),
+                                     ],
+                                     debug=True)
+
 def main():
   logging.getLogger().setLevel(logging.DEBUG)
-  application = webapp.WSGIApplication([('/gtfs/port/stops', PortStopsHandler),
-                                        ('/gtfs/port/stop/task/', PortStopTask),
-                                        ],
-                                       debug=True)
-  wsgiref.handlers.CGIHandler().run(application)
+  run_wsgi_app(application)
 
 
 if __name__ == '__main__':

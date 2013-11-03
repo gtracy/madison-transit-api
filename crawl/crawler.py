@@ -52,7 +52,7 @@ class CrawlingTaskHandler(webapp.RequestHandler):
             loop = 0
             done = False
             result = None
-            start = quota.get_request_cpu_usage()
+            #start = quota.get_request_cpu_usage()
             while not done and loop < 3:
                 try:
                     # fetch the page
@@ -66,7 +66,7 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                         logging.debug("Error content: %s" % result.content)
                         time.sleep(4)
                         loop = loop+1
-            end = quota.get_request_cpu_usage()
+            #end = quota.get_request_cpu_usage()
             #logging.info("scraping took %s cycles" % (end-start))
 
             # start to interrogate the results
