@@ -60,7 +60,7 @@ class MainHandler(webapp.RequestHandler):
 
       else:
           # don't run these jobs during "off" hours
-          logme.debug('shunted... off hour request')
+          #logging.debug('shunted... off hour request')
           json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
 
       # encapsulate response in json or jsonp
