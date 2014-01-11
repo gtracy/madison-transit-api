@@ -8,6 +8,8 @@ import random
 
 from datetime import datetime
 
+from data_model import StopLocation
+
 from google.appengine.api import channel
 from google.appengine.api import users
 from google.appengine.api import memcache 
