@@ -14,21 +14,6 @@ import config
 from data_model import DeveloperRequest
 
 
-def noop():
-    logging.debug('noop called')
-## end
-
-def apiStatCount():
-    stathat = StatHat()
-    stathat.post_count(config.STATHAT_USER_KEY,config.STATHAT_API_COUNT_STAT_KEY,1,callback=noop)
-
-def apiErrorCount():
-    stathat = StatHat()
-    stathat.post_count(config.STATHAT_USER_KEY,config.STATHAT_API_ERROR_STAT_KEY,1,callback=noop)
-
-def apiStat(stat_key,value):
-    stathat = StatHat()
-    stathat.post_value(config.STATHAT_USER_KEY,stat_key,value,callback=noop)
 
 def validateDevKey(devKey):
 

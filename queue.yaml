@@ -18,3 +18,7 @@ queue:
 - name: stopstorage
   rate: 50/s
   bucket_size: 1
+
+- name: stats
+  rate: 50/s
+  bucket_size: 1

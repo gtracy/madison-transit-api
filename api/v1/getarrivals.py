@@ -8,9 +8,11 @@ import json
 from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.labs.taskqueue import Task
+from google.appengine.runtime import DeadlineExceededError
 
 from api.v1 import api_utils
 from api import asynch
+from stats import stathat
 import config
 
 
@@ -23,61 +25,67 @@ class MainHandler(webapp.RequestHandler):
     
     def get(self):
       start = time.time()
-      api_utils.apiStatCount()
       dev_key = self.request.get('key')
 
-      if api_utils.afterHours() is False:
+      try:
+          if api_utils.afterHours() is False:
 
-          # validate the request parameters
-          devStoreKey = validateRequest(self.request)
-          if devStoreKey is None:
-              # filter out the kiosk errors from the log
-              if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
-                  logging.error("failed to validate the request parameters")
-              self.response.headers['Content-Type'] = 'application/javascript'
-              self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
-              return
+              # validate the request parameters
+              devStoreKey = validateRequest(self.request)
+              if devStoreKey is None:
+                  # filter out the kiosk errors from the log
+                  if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
+                      logging.error("failed to validate the request parameters")
+                  self.response.headers['Content-Type'] = 'application/javascript'
+                  self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
+                  return
 
-          # snare the inputs
-          stopID = api_utils.conformStopID(self.request.get('stopID'))
-          routeID = self.request.get('routeID')
-          vehicleID = self.request.get('vehicleID')
-          #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
-          
-          if stopID is not '' and routeID is '':
-              json_response = stopRequest(stopID, dev_key)
-              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
-          elif stopID is not '' and routeID is not '':
-              json_response = stopRouteRequest(stopID, routeID, devStoreKey)
-              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
-          elif routeID is not '' and vehicleID is not '':
-              json_response = routeVehicleRequest(routeID, vehicleID, devStoreKey)
-              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
+              # snare the inputs
+              stopID = api_utils.conformStopID(self.request.get('stopID'))
+              routeID = self.request.get('routeID')
+              vehicleID = self.request.get('vehicleID')
+              #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
+              
+              if stopID is not '' and routeID is '':
+                  json_response = stopRequest(stopID, dev_key)
+                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+              elif stopID is not '' and routeID is not '':
+                  json_response = stopRouteRequest(stopID, routeID, devStoreKey)
+                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+              elif routeID is not '' and vehicleID is not '':
+                  json_response = routeVehicleRequest(routeID, vehicleID, devStoreKey)
+                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
+              else:
+                  logging.debug("API: invalid request")
+                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
+                  json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
+
           else:
-              logging.debug("API: invalid request")
-              api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
-              json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
+              # don't run these jobs during "off" hours
+              #logging.debug('shunted... off hour request')
+              json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
 
-      else:
-          # don't run these jobs during "off" hours
-          #logging.debug('shunted... off hour request')
-          json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
+          # encapsulate response in json or jsonp
+          #logging.debug('API: json response %s' % json_response);
 
-      # encapsulate response in json or jsonp
-      #logging.debug('API: json response %s' % json_response);
+          callback = self.request.get('callback')
+          if callback is not '':
+              self.response.headers['Content-Type'] = 'application/javascript'
+              self.response.headers['Access-Control-Allow-Origin'] = '*'
+              self.response.headers['Access-Control-Allow-Methods'] = 'GET'
+              response = callback + '(' + json.dumps(json_response) + ');'
+          else:
+              self.response.headers['Content-Type'] = 'application/json'
+              response = json.dumps(json_response)
+          
+          self.response.out.write(response)
+      except DeadlineExceededError:
+          self.response.clear()
+          self.response.set_status(500)
+          self.response.out.write("This operation could not be completed in time...")
 
-      callback = self.request.get('callback')
-      if callback is not '':
-          self.response.headers['Content-Type'] = 'application/javascript'
-          self.response.headers['Access-Control-Allow-Origin'] = '*'
-          self.response.headers['Access-Control-Allow-Methods'] = 'GET'
-          response = callback + '(' + json.dumps(json_response) + ');'
-      else:
-          self.response.headers['Content-Type'] = 'application/json'
-          response = json.dumps(json_response)
-      
-      self.response.out.write(response)
-      api_utils.apiStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+      stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+      stathat.apiStatCount()
       # push event out to anyone watching the live board
       channels = memcache.get('channels')
       if channels is not None:

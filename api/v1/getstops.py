@@ -7,6 +7,7 @@ import json
 from data_model import StopLocation
 from utils.geo import geotypes
 from api.v1 import api_utils
+from stats import stathat
 
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -16,7 +17,6 @@ from google.appengine.api.labs.taskqueue import Task
 class GetStopHandler(webapp.RequestHandler):
     
     def get(self):
-      api_utils.apiStatCount()
 
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETSTOPS)
@@ -60,6 +60,7 @@ class GetStopHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
+      stathat.apiStatCount()
       # push event out to anyone watching the live board
       task = Task(url='/map/task', params={'stopID':stopID})
       task.add('eventlogger')
@@ -74,7 +75,6 @@ class GetStopHandler(webapp.RequestHandler):
 class GetStopLocationHandler(webapp.RequestHandler):
     
     def get(self):
-      api_utils.apiStatCount()
       
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETSTOPLOCATION)
@@ -112,6 +112,7 @@ class GetStopLocationHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
+      stathat.apiStatCount()
       # push event out to anyone watching the live board
       task = Task(url='/map/task', params={'stopID':stopID})
       task.add('eventlogger')
@@ -126,7 +127,6 @@ class GetStopLocationHandler(webapp.RequestHandler):
 class GetNearbyStopsHandler(webapp.RequestHandler):
     
     def get(self):
-      api_utils.apiStatCount()
       
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETNEARBYSTOPS)
@@ -163,9 +163,7 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
 
       self.response.out.write(response)
-      # push event out to anyone watching the live board
-      #task = Task(url='/map/task', params={'stopID':stopID})
-      #task.add('eventlogger')
+      stathat.apiStatCount()
     
     def post(self):
         self.response.headers['Content-Type'] = 'application/json'

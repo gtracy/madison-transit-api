@@ -15,6 +15,7 @@ from api.BeautifulSoup import BeautifulSoup, Tag
 
 
 from api.v1 import api_utils
+from stats import stathat
 
 
 class MainHandler(webapp.RequestHandler):
@@ -25,7 +26,6 @@ class MainHandler(webapp.RequestHandler):
         return
     
     def get(self):
-        api_utils.apiStatCount()
         events = {}
         
         loop = 0
@@ -147,6 +147,7 @@ class MainHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = 'application/json'
             response = json.dumps(json_response)
       
+        stathat.apiStatCount()
         self.response.out.write(response)
 
 ## end RequestHandler

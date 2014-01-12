@@ -6,15 +6,14 @@ import webapp2 as webapp
 import json
 
 from google.appengine.api import urlfetch
-
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from api.v1 import api_utils
+from stats import stathat
 
 class MainHandler(webapp.RequestHandler):
     
     def get(self):
-      api_utils.apiStatCount()
       
       # validate the request parameters
       devStoreKey = validateRequest(self.request)
@@ -52,6 +51,7 @@ class MainHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
+      stathat.apiStatCount()
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'

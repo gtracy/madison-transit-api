@@ -27,6 +27,7 @@ def clean(sid):
 def cleanAll():
     logging.debug('cleaning the aggregated results list. total of %s sids' % str(len(aggregated_results)))
     for key,value in aggregated_results.items():
+        logging.debug('... BULK clean %s' % key);
         del aggregated_results[key]
     logging.debug('done with the clean... %s' % aggregated_results)
 ## end
@@ -57,7 +58,9 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
             email_missing_stop(stopID,routeID,sid)
         return None
     else:
-    	aggregated_results[sid] = []
+        aggregated_results[sid] = []
+        logging.debug('Stop aggregation start %s '%sid)
+        logging.debug(aggregated_results)
         # create a bunch of asynchronous url fetches to get all of the route data
         rpcs = []
         memcache.set(sid,0)
@@ -86,13 +89,17 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
 # once all of the results have been grabbed, piece them together
 #
 def aggregateAsynchResults(sid):
-      logging.info("API: Time to report back on results for %s..." % sid)
+    logging.info("API: Time to report back on results for %s..." % sid)
       
-      if len(aggregated_results[sid]) == 0:
-          logging.debug("We couldn't find results for transaction %s. Chances are there aren't any matches with the request." % sid)
-          textBody = "Doesn't look good... Your bus isn't running right now!"
+    try:
+        if len(aggregated_results[sid]) == 0:
+            logging.debug("We couldn't find results for transaction %s. Chances are there aren't any matches with the request." % sid)
+            textBody = "Doesn't look good... Your bus isn't running right now!"
+    except KeyError as e:
+        logging.error('aggregation error: %s' % e.message)
+        logging.debug(aggregated_results)
 
-      return aggregated_results[sid]
+    return aggregated_results[sid]
   
 ## end aggregatAsynchResults()
 

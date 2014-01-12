@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: timezone-fix
+version: performance
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -110,6 +110,9 @@ handlers:
   script: crawl.crawler.application
   login: admin
 
+# stats task
+- url: /stats/new/.*
+  script: stats.stathat.application
 
 #admin_console:
 # pages:

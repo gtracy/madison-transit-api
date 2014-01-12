@@ -5,14 +5,12 @@ import webapp2 as webapp
 import json
 
 from utils.geo.geomodel import geotypes
-
 from google.appengine.api import memcache
-
 from google.appengine.ext import db
-
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from api.v1 import api_utils
+from stats import stathat
 from data_model import RouteListing
 
 class StaticAPIs(db.Model):
@@ -24,7 +22,6 @@ class StaticAPIs(db.Model):
 class MainHandler(webapp.RequestHandler):
     
     def get(self):
-      api_utils.apiStatCount()
 
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETROUTES)
@@ -76,6 +73,7 @@ class MainHandler(webapp.RequestHandler):
           response = json_response
       
       self.response.out.write(response)
+      stathat.apiStatCount()
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'
