@@ -77,7 +77,7 @@ class MainHandler(webapp.RequestHandler):
           response = json.dumps(json_response)
       
       self.response.out.write(response)
-      api_utils.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+      api_utils.apiStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
       # push event out to anyone watching the live board
       channels = memcache.get('channels')
       if channels is not None:

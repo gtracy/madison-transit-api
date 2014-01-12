@@ -2,6 +2,8 @@ import os
 import logging
 import time
 import re
+import datetime
+from pytz.gae import pytz
 
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -10,6 +12,7 @@ from google.appengine.datastore import entity_pb
 from stats.stathat import StatHat
 import config
 from data_model import DeveloperRequest
+
 
 def noop():
     logging.debug('noop called')
@@ -23,7 +26,7 @@ def apiErrorCount():
     stathat = StatHat()
     stathat.post_count(config.STATHAT_USER_KEY,config.STATHAT_API_ERROR_STAT_KEY,1,callback=noop)
 
-def apiTimeStat(stat_key,value):
+def apiStat(stat_key,value):
     stathat = StatHat()
     stathat.post_value(config.STATHAT_USER_KEY,stat_key,value,callback=noop)
 
@@ -80,31 +83,31 @@ def inthepast(time):
     
 ## end inthepast
 
+def getLocalDatetime():
+
+    utc_dt = datetime.datetime.now()
+    central_tz = pytz.timezone('US/Central')
+    utc = pytz.utc
+    ltime = utc.localize(utc_dt).astimezone(central_tz)
+    return ltime
+
+## end getLocalDatetime
 
 def getLocalTimestamp():
-    
-    # get the local, server time
-    ltime = time.localtime()
-    ltime_hour = ltime.tm_hour - 5  # convert to madison time
-    ltime_hour += 24 if ltime_hour < 0 else 0
-    ltime_min = ltime_hour * 60 + ltime.tm_min
-    #logging.debug("local time... %s (%s:%s) day minutes %s" % (ltime,ltime_hour,ltime.tm_min,ltime_min))
-    
-    tstamp_min = str(ltime.tm_min) if ltime.tm_min >= 10 else ("0"+str(ltime.tm_min))
-    tstamp_hour = str(ltime_hour) if ltime_hour <=12 else str(ltime_hour-12)
-    tstamp_label = "pm" if ltime_hour > 11 else "am"
 
-    return(tstamp_hour+':'+tstamp_min+tstamp_label)
+    ltime = getLocalDatetime()
+    ltime_stamp = ltime.strftime('%I:%M%p')
+    logging.debug("local pytz time %s" % ltime_stamp)
+    return(ltime_stamp)
 
 ## end getLocalTimestamp()
 
 def computeCountdownMinutes(arrivalTime):
 
-    # compute current time in minutes
-    ltime = time.localtime()
-    ltime_hour = ltime.tm_hour - 5
-    ltime_hour += 24 if ltime_hour < 0 else 0
-    ltime_min = ltime_hour * 60 + ltime.tm_min
+    ltime = getLocalDatetime()
+    ltime_hour = ltime.hour
+    #ltime_hour += 24 if ltime_hour < 0 else 0
+    ltime_min = ltime_hour * 60 + ltime.minute
     #logging.debug("local time: %s hours, or %s minutes"  % (ltime_hour,ltime_min))
     
     # pull out the arrival time
