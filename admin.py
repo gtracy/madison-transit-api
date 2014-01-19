@@ -104,8 +104,13 @@ class ResetChannelsHandler(webapp.RequestHandler):
         if (now - dt) > timedelta(minutes=1):
             del channels[channel_id]            
             channel.send_message(channel_id, json.dumps({'function':'reload'}))
-                
+    
+    if channels:
         memcache.set('channels', json.dumps(channels))
+        logging.debug('channels not empty')
+    else:
+        memcache.delete('channels')
+        logging.error('empty. delete it.')
 
 ## end
 
