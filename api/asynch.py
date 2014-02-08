@@ -13,6 +13,7 @@ from data_model import RouteListing
 from data_model import BusStopAggregation
 
 from api.v1 import api_utils
+from stats import stathat
 import config
 
 # our local cache hashed by SID for each request
@@ -115,7 +116,7 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
         result = rpc.get_result()
         done = True;
     except urlfetch.DownloadError:
-         api_utils.apiErrorCount()
+         stathat.apiErrorCount()
          logging.error("API: Error loading page. route %s, stop %s" % (routeID,stopID))
          if result:
             logging.error("API: Error status: %s" % result.status_code)
