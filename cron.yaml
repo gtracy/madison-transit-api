@@ -13,3 +13,8 @@ cron:
   url: /admin/resetchannels
   schedule: every 2 hours
   timezone: America/Chicago
+
+- description: flush stathat counters
+  url: /stats/flush
+  schedule: every 1 minutes
+  timezone: America/Chicago

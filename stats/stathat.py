@@ -4,9 +4,12 @@ import urllib2
 import webapp2 as webapp
 from google.appengine.api import urlfetch
 from google.appengine.api.labs.taskqueue import Task
+from google.appengine.api import memcache
 
 import config
 
+STATHAT_MEMCACHE_ERROR_COUNT = 'stathat_error_count'
+STATHAT_MEMCACHE_REQ_COUNT = 'stathat_req_count'
 
 class StatHat:
 
@@ -50,12 +53,15 @@ class StatHat:
 
 
 def apiStatCount():
-    task = Task(url='/stats/new/count', params={'stat_key':config.STATHAT_API_COUNT_STAT_KEY})
-    task.add('stats')
+    memcache.incr(STATHAT_MEMCACHE_REQ_COUNT, 1, None, 0)
+    #task = Task(url='/stats/new/count', params={'stat_key':config.STATHAT_API_COUNT_STAT_KEY})
+    #task.add('stats')
+
 
 def apiErrorCount():
-    task = Task(url='/stats/new/count', params={'stat_key':config.STATHAT_API_ERROR_STAT_KEY})
-    task.add('stats')
+    memcache.incr(STATHAT_MEMCACHE_ERROR_COUNT, 1, None, 0)
+    #task = Task(url='/stats/new/count', params={'stat_key':config.STATHAT_API_ERROR_STAT_KEY})
+    #task.add('stats')
 
 def apiTimeStat(stat_key,value):
     task = Task(url='/stats/new/value', params={'stat_key':stat_key,'value':value})
@@ -65,15 +71,6 @@ def noop():
     logging.debug('noop called')
 ## end
 
-class StatCountTaskHandler(webapp.RequestHandler):
-
-  def post(self):
-    stat_key = self.request.get('stat_key')
-
-    stathat = StatHat()
-    stathat.post_count(config.STATHAT_USER_KEY,stat_key,1,callback=noop)
-
-## end StatCountTaskHandler
 
 class StatValueTaskHandler(webapp.RequestHandler):
 
@@ -86,9 +83,26 @@ class StatValueTaskHandler(webapp.RequestHandler):
 
 ## end StatValueTaskHandler
 
+class StatFlushHandler(webapp.RequestHandler):
 
-application = webapp.WSGIApplication([('/stats/new/count', StatCountTaskHandler),
-                                      ('/stats/new/value', StatValueTaskHandler)
+    def get(self):
+        stathat = StatHat()
+
+        errors = memcache.get(STATHAT_MEMCACHE_ERROR_COUNT)
+        if errors is not None:
+            stathat.post_count(config.STATHAT_USER_KEY,config.STATHAT_API_ERROR_STAT_KEY,errors,callback=noop)
+            memcache.decr(STATHAT_MEMCACHE_ERROR_COUNT, errors)
+
+        req_count = memcache.get(STATHAT_MEMCACHE_REQ_COUNT)
+        if req_count is not None:
+            stathat.post_count(config.STATHAT_USER_KEY,config.STATHAT_API_COUNT_STAT_KEY,req_count,callback=noop)
+            memcache.decr(STATHAT_MEMCACHE_REQ_COUNT, req_count)
+
+## end StatFlushHandler
+
+
+application = webapp.WSGIApplication([('/stats/new/value', StatValueTaskHandler),
+                                      ('/stats/flush', StatFlushHandler)
                                       ],
                                      debug=True)
 

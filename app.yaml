@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: performance
+version: stathat-tune
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -12,7 +12,7 @@ inbound_services:
 
 builtins:
 - appstats: off
-- remote_api: on
+- remote_api: off
 
 libraries:
 - name: webapp2
@@ -112,6 +112,10 @@ handlers:
 
 # stats task
 - url: /stats/new/.*
+  script: stats.stathat.application
+
+# stathat flusher
+- url: /stats/flush
   script: stats.stathat.application
 
 #admin_console:
