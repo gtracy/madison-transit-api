@@ -36,11 +36,11 @@ class CrawlerHandler(webapp.RequestHandler):
         crawlURL = URLBASE + 'r=' + routeID
         task = Task(url='/crawl/routelist/crawlingtask', params={'crawl':crawlURL,'routeID':'00'})
         task.add('crawler')
-        logging.info("Added new task for %s" % crawlURL)        
+        logging.info("Added new task for %s" % crawlURL)
         return
-    
+
 ## end CrawlerHandler()
-        
+
 class CrawlingTaskHandler(webapp.RequestHandler):
     def post(self):
         try:
@@ -48,7 +48,7 @@ class CrawlingTaskHandler(webapp.RequestHandler):
             direction = self.request.get('direction')
             routeID = self.request.get('routeID')
             logging.debug("task scraping for %s, direction %s, route %s" % (scrapeURL,direction,routeID))
-            
+
             loop = 0
             done = False
             result = None
@@ -81,20 +81,20 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                     # route crawler looks for titles with an ID# string
                     if title.find("#") > 0:
                         # we finally got down to the page we're looking for
-                        
+
                         # pull the stopID from the page content...
                         stopID = title.split("#")[1].split("]")[0]
-                        
+
                         # pull the intersection from the page content...
                         intersection = title.split("[")[0].strip()
-                        
+
                         logging.info("found stop %s, %s" % (stopID,intersection))
-                        
+
                         # check for conflicts...
                         stop = db.GqlQuery("SELECT * FROM StopLocation WHERE stopID = :1", stopID).get()
                         if stop is None:
                           logging.error("Missing stop %s which should be impossible" % stopID);
-                        
+
                         # pull the route and direction data from the URL
                         routeData = scrapeURL.split('?')[1]
                         logging.info("FOUND THE PAGE ---> arguments: %s stopID: %s" % (routeData,stopID))
@@ -102,7 +102,7 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                         routeID = routeArgs[0].split('=')[1]
                         directionID = routeArgs[1].split('=')[1]
                         timeEstimatesURL = CRAWL_URLBASE + href
-                    
+
                         # check for conflicts...
                         r = db.GqlQuery("SELECT * FROM RouteListing WHERE route = :1 AND direction = :2 AND stopID = :3",
                                         routeID, directionID, stopID).get()
@@ -136,22 +136,22 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                             routeData = href.split('?')[1]
                             routeArgs = routeData.split('&')
                             directionID = routeArgs[1].split('=')[1]
-                            
+
                             l = DestinationListing.get_or_insert(title, id=directionID, label=title)
-                                        
+
         except apiproxy_errors.DeadlineExceededError:
             logging.error("DeadlineExceededError exception!?")
             return
-            
+
         return;
-    
+
 ## end CrawlingTask()
 
 class DropTableHandler(webapp.RequestHandler):
     def post(self, model=""):
         logging.debug('HEADS UP -> we have a request to drop the entities in the %s model' % model)
         self.get(model)
-        
+
     def get(self, model=""):
         qstring = "select * from " + model
         logging.info("query string is... %s" % qstring)
@@ -173,25 +173,13 @@ class StartTableDrop(webapp.RequestHandler):
         task.add('crawler')
         self.response.out.write('got it. started the background task to delete all %s entities' % model)
 
-class CreateDeveloperKeysHandler(webapp.RequestHandler):
-    def get(self):
-      key = DeveloperKeys()
-      key.developerName = 'Prog Mamer'
-      key.developerKey = 'fixme'
-      key.developerEmail = 'fixme@gmail.com'
-      key.requestCounter = 0
-      key.errorCounter = 0
-      key.put()
-
-## end
-
 class RouteListHandler(webapp.RequestHandler):
     def get(self,routeID=""):
       logging.info("fetching all stop locations for route %s" % routeID)
       q = db.GqlQuery("SELECT * FROM StopLocation WHERE routeID = :1", routeID)
       if q is not None:
           results = []
-          
+
           # Perform the query to get 500 results.
           stops = q.fetch(500)
           logging.info("running through stop location list....")
@@ -204,31 +192,30 @@ class RouteListHandler(webapp.RequestHandler):
 #                      sLocation = None
 #                  else:
 #                      raise
-                  
+
               results.append({'stopID':s.stopID,
                               #'location':sLocation if sLocation is not None else 'unknown',
                               'intersection':s.intersection,# if sLocation is not None else 'unknown',
                               'direction':s.direction,# if sLocation is not None else 'unknown',
                               'routeID':routeID,
                               })
-              
-              
+
+
       # add the counter to the template values
       template_values = {'stops':results}
-        
+
       # create a page that provides a form for sending an SMS message
       path = os.path.join(os.path.dirname(__file__), 'stop.html')
       self.response.out.write(template.render(path,template_values))
 
-    
+
 ## end
 
 application = webapp.WSGIApplication([('/crawl/routelist/configure/(.*)', CrawlerHandler),
                                         ('/crawl/routelist/crawlingtask', CrawlingTaskHandler),
                                         ('/routelist/(.*)', RouteListHandler),
                                         ('/droptable/(.*)', DropTableHandler),
-                                        ('/debug/drop/(.*)', StartTableDrop),
-                                        ('/debug/create/newkey', CreateDeveloperKeysHandler),
+                                        ('/debug/drop/(.*)', StartTableDrop)
                                         ],
                                        debug=True)
 

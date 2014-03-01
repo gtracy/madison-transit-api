@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: stathat-tune
+version: developer-access
 runtime: python27
 api_version: 1
 threadsafe: true

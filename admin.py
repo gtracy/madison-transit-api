@@ -16,6 +16,7 @@ from google.appengine.api import users
 from google.appengine.api.labs.taskqueue import Task
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext.webapp import template
 
 from google.appengine.runtime import apiproxy_errors
 
@@ -45,12 +46,12 @@ class PersistCounterHandler(webapp.RequestHandler):
             dk.requestCounter += int(count)
             memcache.set(counter_key,0)
             devkeys_to_save.append(dk)
-    
+
     if len(devkeys_to_save) > 0:
         db.put(devkeys_to_save)
-        
+
     logging.debug('... done persisting %s counters' % str(len(devkeys_to_save)))
-        
+
 ## end
 
 #
@@ -61,7 +62,7 @@ class DailyReportHandler(webapp.RequestHandler):
     def get(self):
       devkeys_to_save = []
       msg_body = '\n'
-      
+
       # right now we're only reporting on the API counters
       devkeys = db.GqlQuery("SELECT * FROM DeveloperKeys").fetch(100)
       for dk in devkeys:
@@ -71,16 +72,16 @@ class DailyReportHandler(webapp.RequestHandler):
 
           # post counter to google doc
           updateField(dk.developerKey,dk.requestCounter)
-          
+
           # reset the daily counter
           if dk.requestCounter > 0:
             dk.requestCounter = 0
             devkeys_to_save.append(dk)
-      
+
       # save the modified developer keys
       if len(devkeys_to_save) > 0:
           db.put(devkeys_to_save)
-      
+
 ## end
 
 class GDocHandler(webapp.RequestHandler):
@@ -97,14 +98,14 @@ class ResetChannelsHandler(webapp.RequestHandler):
     now = datetime.now()
     channels = json.loads(memcache.get('channels') or '{}')
     for channel_id, created in channels.items():
-        
+
         dt = datetime.strptime(created.split(".")[0], "%Y-%m-%d %H:%M:%S")
 
         # NOTE: normally this would be 60 minutes; set it lower to expose the refresh behavior
         if (now - dt) > timedelta(minutes=1):
-            del channels[channel_id]            
+            del channels[channel_id]
             channel.send_message(channel_id, json.dumps({'function':'reload'}))
-    
+
     if channels:
         memcache.set('channels', json.dumps(channels))
         logging.debug('channels not empty')
@@ -148,11 +149,36 @@ def updateField(category,value):
 
 ## end
 
+class CreateDeveloperKeysHandler(webapp.RequestHandler):
+    def get(self):
+      key = DeveloperKeys()
+      key.developerName = 'Prog Mamer'
+      key.developerKey = 'fixme'
+      key.developerEmail = 'fixme@gmail.com'
+      key.requestCounter = 0
+      key.errorCounter = 0
+      key.put()
+
+## end
+
+class APIUserDumpHandler(webapp.RequestHandler):
+    def get(self):
+        devs = db.GqlQuery("SELECT * FROM DeveloperKeys").fetch(limit=None)
+        template_values = {
+            'devs' : devs
+        }
+        path = os.path.join(os.path.dirname(__file__), 'views/devlist.html')
+        self.response.out.write(template.render(path,template_values))
+
+
+
 
 application = webapp.WSGIApplication([('/admin/persistcounters', PersistCounterHandler),
                                       ('/admin/dailyreport', DailyReportHandler),
                                       ('/admin/gdoctest', GDocHandler),
-                                      ('/admin/resetchannels', ResetChannelsHandler)
+                                      ('/admin/resetchannels', ResetChannelsHandler),
+                                      ('/admin/apidump', APIUserDumpHandler),
+                                      ('/admin/api/create', CreateDeveloperKeysHandler)
                                       ],
                                      debug=True)
 
