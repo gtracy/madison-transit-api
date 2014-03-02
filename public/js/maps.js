@@ -116,6 +116,12 @@ App.utils = {
 		      { "visibility": "simplified" },
 		      { "color": "#808080" }
 		    ]
+		  },{
+		    "featureType": "road.arterial",
+		    "elementType": "labels",
+		    "stylers": [
+		      { "visibility": "off" }
+		    ]
 		  }
 		]
 		var mapOptions = {
