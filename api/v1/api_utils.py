@@ -21,7 +21,7 @@ def validateDevKey(devKey):
         return None
     else:
         devKey = devKey.lower()
-   
+
     storeKey = memcache.get(devKey)
     if storeKey is None:
         logging.error('Dev key - %s - cache miss')
@@ -35,12 +35,12 @@ def validateDevKey(devKey):
         else:
             logging.debug('API : devkey cache miss!')
             memcache.set(devKey, storeKey)
-    
+
     # we've validated the dev key at this point... start counting requests
     total = memcache.incr(devKey + ':counter', initial_value=0)
     logging.debug(storeKey)
     return storeKey
-    
+
 ## end validateDevKey()
 
 def conformStopID(stopID):
@@ -54,18 +54,18 @@ def conformStopID(stopID):
     	    stopID = "000" + stopID
     	else:
     	    stopID = "0" + stopID
-    
+
     return stopID
-    
+
 ## end conformStopID()
 
 def inthepast(time):
-    
+
     if computeCountdownMinutes(time) < 0:
         return True
     else:
         return False
-    
+
 ## end inthepast
 
 def getLocalDatetime():
@@ -94,7 +94,7 @@ def computeCountdownMinutes(arrivalTime):
     #ltime_hour += 24 if ltime_hour < 0 else 0
     ltime_min = ltime_hour * 60 + ltime.minute
     #logging.debug("local time: %s hours, or %s minutes"  % (ltime_hour,ltime_min))
-    
+
     # pull out the arrival time
     #logging.debug("API: parsing arrival time of %s" % arrivalTime)
     m = re.search('(\d+):(\d+)\s(.*?)',arrivalTime)
@@ -102,12 +102,33 @@ def computeCountdownMinutes(arrivalTime):
     btime_hour += 12 if arrivalTime.find('pm') > 0 and arrival_hour < 12 else 0
     btime_min = btime_hour * 60 + int(m.group(2))
     #logging.debug("computing countdown with %s. %s hours %s minutes" % (arrivalTime,btime_hour,btime_min))
-                  
+
     delta_in_min = btime_min - ltime_min
     #logging.debug('API: countdown is %s minutes'% delta_in_min)
     return(delta_in_min)
 
 ## end computeCountdownMinutes()
+
+# Checks to see if the current time is during the hours
+# in which the Metro doesn't operate
+#
+def afterHours():
+    ltime = getLocalDatetime()
+    hour = ltime.hour
+    weekday = ltime.weekday()
+
+    # late night service on Friday/Saturday
+    if( weekday >= 5 ):
+        if hour > 2 and hour < 6:
+          return True
+        else:
+          return False
+    else:
+        if hour > 1 and hour < 6:
+          return True
+        else:
+          return False
+## end afterHours()
 
 def buildErrorResponse(error,description):
       # encapsulate response in json
@@ -116,21 +137,8 @@ def buildErrorResponse(error,description):
                        'description':description,
                        }
       return response_dict
-            
-## end jsonError()    
 
-# Checks to see if the current time is during the hours
-# in which the Metro doesn't operate
-#
-def afterHours():
-      ltime = time.localtime()
-      ltime_hour = ltime.tm_hour - 5
-      ltime_hour += 24 if ltime_hour < 0 else 0
-      if ltime_hour > 1 and ltime_hour < 6:
-	      return True
-      else:
-          return False
-## end afterHours()
+## end jsonError()
 
 def getDirectionLabel(directionID):
     directionLabel = memcache.get(directionID)
@@ -144,7 +152,7 @@ def getDirectionLabel(directionID):
         else:
             logging.error("ERROR: We don't have a record of this direction ID!?! Impossible! %s" % directionID)
             directionLabel = "unknown"
-            
+
     return directionLabel
 
 ## end getDirectionLabel()
@@ -191,5 +199,4 @@ def deserialize_entities(data):
         return db.model_from_protobuf(entity_pb.EntityProto(data))
     else:
         return [db.model_from_protobuf(entity_pb.EntityProto(x)) for x in data]
-        
-        
+
