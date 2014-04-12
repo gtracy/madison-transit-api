@@ -174,18 +174,82 @@ def getParkingSpecialEvents():
     loop = 0
     done = False
     result = None
+    specialeventsurl = 'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
+    cachehours = 24
+    
+    #initialize the dict to hold result of scrape.
+    specialevents = dict()
+    specialevents['CacheUntil'] = datetime.datetime.strftime(api_utils.getLocalDatetime() + datetime.timedelta(hours=+cachehours), '%Y-%m-%dT%H:%M:%S')
+    logging.info(specialevents['CacheUntil'])
+    specialevents['ParkingSpecialEvents'] = []
+    specialevents['LastScraped'] = datetime.datetime.strftime(api_utils.getLocalDatetime(), '%Y-%m-%dT%H:%M:%S')
+    
+    # Looping in case fetch flaky.
     while not done and loop < 3:
-       try:
-          result = urlfetch.fetch('https://views.scraperwiki.com/run/madison_parking_special_events_api/?')
-          done = True;
-       except urlfetch.DownloadError:
-          logging.error("Error loading page (%s)... sleeping" % loop)
-       if result is None:
-          logging.debug("Error status: %s" % result.status_code)
-          logging.debug("Error header: %s" % result.headers)
-          logging.debug("Error content: %s" % result.content)
-       time.sleep(6)
-       loop = loop+1
+        try:
+
+            #grab the city parking html page - what an awesome API!!! :(
+            result = urlfetch.fetch(specialeventsurl)
+
+            #invoke soup to parse html
+            soup = BeautifulSoup(result.content)
+
+            # find the calendar table containing special event info.
+            # returns array of <tr>'s.
+            special_event_rows = soup.find("table", { "id" : "calendar" }).findAll('tr')
+
+            # loop table rows, starting with 3rd row (excludes 2 header rows)
+            for row_index in range(2, len(special_event_rows)):
+
+                # grab the array of cells in the current row
+                table_cells = special_event_rows[row_index].findAll('td')
+
+                parkinglocation = table_cells[1].string
+                eventvenue = table_cells[4].string
+                event = table_cells[3].string
+
+                # take the event time strings (already central time), create datetime obj, then convert back to correct string
+                eventtimeobj = datetime.datetime.strptime(table_cells[0].string + table_cells[5].string.replace(' ',''), '%m/%d/%Y%I:%M%p')
+                eventtime = datetime.datetime.strftime(eventtimeobj, '%Y-%m-%dT%H:%M:%S')
+
+                # split '00:00 pm - 00:00 pm' into start and end strings
+                timeparts = table_cells[2].string.split(' - ')
+
+                # clean up whitespace to avoid errors due to inconsistent format
+                timeparts[0] = timeparts[0].replace(' ', '')
+                timeparts[1] = timeparts[1].replace(' ', '')
+
+                parkingstarttimeobj = datetime.datetime.strptime(table_cells[0].string + timeparts[0], '%m/%d/%Y%I:%M%p')
+                parkingstarttime = datetime.datetime.strftime(parkingstarttimeobj, '%Y-%m-%dT%H:%M:%S')
+
+                parkingendtimeobj = datetime.datetime.strptime(table_cells[0].string + timeparts[1], '%m/%d/%Y%I:%M%p')
+                parkingendtime = datetime.datetime.strftime(parkingstarttimeobj, '%Y-%m-%dT%H:%M:%S')
+
+                # add this special event info to the ParkingSpecialEvents collection
+                specialevents['ParkingSpecialEvents'].append({"ParkingLocation":parkinglocation, "EventVenue":eventvenue, "EventTime":eventtime, "Event":event, "ParkingStartTime":parkingstarttime, "ParkingEndTime":parkingendtime})
+
+                # setting content var to keep contract with caller exactly in-tact (for now).
+            result.content = json.dumps(specialevents)
+
+            done = True;
+
+        # problem hiting url, try a few times
+        except urlfetch.DownloadError:
+            logging.error("Error loading page (%s)... sleeping" % loop)
+            if result:
+                logging.debug("Error status: %s" % result.status_code)
+                logging.debug("Error header: %s" % result.headers)
+                logging.debug("Error content: %s" % result.content)
+            time.sleep(6)
+            loop = loop+1
+
+        # This is bad. Some data may be in a differnt format due to 
+        # either unexpected data entry or *gulp* site redeisgn.
+        # Likely require code change to fix.
+        except ValueError:
+            logging.error("Error parsing scraped content from (%s)... exiting getParkingSpecialEvents()" % specialeventsurl)
+            done = True
+            result = None
     return result
 
 def parseSpecialEvents(se, searchwindow, providedtime=None):
