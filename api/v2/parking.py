@@ -8,10 +8,11 @@ import re
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
+from pytz.gae import pytz
 
 from api.BeautifulSoup import BeautifulSoup
 
-from api.v1 import api_utils
+from api.v2 import api_utils
 from stats import stathat
 
 
@@ -27,11 +28,24 @@ class ParkingHandler(webapp.RequestHandler):
         )
 
     def get(self):
-        city_lots = CityParkingLots(self.response).get_city_parking_data()
-        logging.debug('API: city_lots json response %s' % city_lots)
+        self.response.headers['Content-Type'] = 'application/javascript'
+        self.response.headers['Allow'] = 'GET'
+        try:
+            city_parking = CityParking()
+            city_lots = CityParkingLotsService(city_parking).get_city_parking_data()
+            logging.debug('API: city_lots json response %s' % city_lots)
+        except urlfetch.DownloadError:
+            logging.error('Failed to retrieve city data')
+            self.response.status = 500  # method not allowed
+            self.response.out.write(
+                json.dumps(
+                    api_utils.buildErrorResponse('-1', 'Failed to retrieve city data')
+                )
+            )
+            return
 
         uw_lots = {}
-        logging.debug('API: uw_lots json response %s' %  uw_lots)
+        logging.debug('API: uw_lots json response %s' % uw_lots)
 
         #  encapsulate response in json or jsonp
         callback = self.request.get('callback')
@@ -50,13 +64,12 @@ class ParkingHandler(webapp.RequestHandler):
 
 ## end MainHandler
 
-
-class CityParkingLots:
-    def __init__(self, response):
-        self.response = response
+# CityParking.lots pre-populates static props and later fills dynamic props
+class CityParking:
+    def __init__(self):
 
         # define lots with mostly initial data to minimize potential for breakage.
-        self.city_lots = [
+        self.lots = [
             {
                 'name': 'State Street Campus Garage',
                 'shortName': 'campus',  # minimum reliable unique string
@@ -107,34 +120,33 @@ class CityParkingLots:
             }
         ]
 
-    def get_city_parking_availability_html(self):
+
+class CityParkingLotsService():
+    def __init__(self, city_parking):
+        self.lots = city_parking.lots
+
+    def fetch_city_parking_availability_html(self):
         loop = 0
         done = False
         result = None
-        while not done and loop < 3:
+        retry = 3
+        url = 'http://www.cityofmadison.com/parkingUtility/garagesLots/availability/'
+        while not done and loop < retry:
             try:
-                result = urlfetch.fetch('http://www.cityofmadison.com/parkingUtility/garagesLots/availability/')
+                result = urlfetch.fetch(url)
                 done = True
             except urlfetch.DownloadError:
-                logging.error("Error loading page (%s)... sleeping" % loop)
-                if result:
-                    logging.debug("Error status: %s" % result.staus_code)
-                    logging.debug("Error header: %s" % result.headers)
-                    logging.debug("Error content: %s" % result.content)
-                time.sleep(6)
+                logging.error("Error fetching url on loop %s. Retry" % loop)
+                if (loop + 1) == retry:
+                    logging.error("Error fetching %s. Aborting" % url)
+                    raise urlfetch.DownloadError
+                time.sleep(3)
                 loop += 1
-
-        if result is None or result.status_code != 200:
-            err_desc = 'Error retrieving city parking data'
-            logging.error(err_desc)
-            self.response.headers['Content-Type'] = 'application/javascript'
-            self.response.status = 500
-            self.response.out.write(json.dumps(api_utils.buildErrorResponse('500', err_desc)))
 
         return result.content
 
     def merge_availability_with_special_events(self, parking_availabilities, special_events):
-        for lot in self.city_lots:
+        for lot in self.lots:
             for availability in parking_availabilities:
                 if availability['name'].lower().find(lot['shortName']) >= 0:
                     lot['openSpots'] = availability['openSpots']
@@ -144,19 +156,20 @@ class CityParkingLots:
                     if special_event['parkingLocation'].lower().find(lot['shortName']) >= 0:
                         lot['specialEvent'] = special_event
 
-        return {}
+        #return {}
+    ## end merge_availability_with_special_events
 
-    #  This will handle complete build up of city lot collection (availability and special events)
+    #  get_city_parking_data builds up lot collection (availability and special events)
     def get_city_parking_data(self):
-        parking_availability_html = self.get_city_parking_availability_html()
+        parking_availability_html = self.fetch_city_parking_availability_html()
         parking_availabilities = self.transform_city_parking_availability_html_to_dict(parking_availability_html)
 
-        special_events_html = self.get_parking_special_events_html()
+        special_events_html = self.fetch_parking_special_events_html()
         special_events = self.transform_city_parking_special_events_html_to_dict(special_events_html)
 
         self.merge_availability_with_special_events(parking_availabilities, special_events)
 
-        return self.city_lots
+        return self.lots
 
     def transform_city_parking_availability_html_to_dict(self, city_parking_avail_html):
         city_lot_soup = BeautifulSoup(city_parking_avail_html)
@@ -166,49 +179,59 @@ class CityParkingLots:
         # get all children of the availability div whose class name starts with dataRow
         lot_rows = city_lot_soup.find("div", {"id": "availability"}).findAll("div", {"class": re.compile('^dataRow')})
 
-        for row_index in range(1, len(lot_rows)):
-            for detail in lot_rows[row_index]:
+
+        #for row_index in range(0, len(lot_rows)):
+        #    for detail in lot_rows[row_index]:
+        #        if detail.string is not None and detail.string.isdigit():
+        #            lot_spots = detail.string
+
+        #    lot_details = {
+        #        'name': lot_rows[row_index].div.a.string,
+        #        'openSpots': lot_spots
+        #    }
+        #    results.append(lot_details)
+
+        for row in lot_rows:
+            for detail in row:
                 if detail.string is not None and detail.string.isdigit():
                     lot_spots = detail.string
 
             lot_details = {
-                'name': lot_rows[row_index].div.a.string,
+                'name': row.div.a.string,
                 'openSpots': lot_spots
             }
             results.append(lot_details)
 
+
         logging.debug(json.dumps(results))
         return results
 
-    ## end
+    ## end transform_city_parking_availability_html_to_dict
 
-    def transform_city_parking_special_events_html_to_dict(self, special_events_html):
-        cache_hours = 24
+    def transform_city_parking_special_events_html_to_dict(self, special_events_html, is_test=None):
         special_events = dict()
-        special_events['cacheUntil'] = datetime.datetime.strftime(api_utils.getLocalDatetime() + datetime.timedelta(hours=+cache_hours), '%Y-%m-%dT%H:%M:%S')
         special_events['parkingSpecialEvents'] = []
-        special_events['lastScraped'] = datetime.datetime.strftime(api_utils.getLocalDatetime(), '%Y-%m-%dT%H:%M:%S')
 
         #invoke soup to parse html
         soup = BeautifulSoup(special_events_html)
 
         try:
-            # find the calendar table containing special event info.
-            # returns array of <tr>'s.
+            # special_event_rows is array of <tr>'s.
             special_event_rows = soup.find("table", {"id": "calendar"}).findAll('tr')
             # loop table rows, starting with 3rd row (excludes 2 header rows)
             for row_index in range(2, len(special_event_rows)):
-                # grab the array of cells in the current row
+                # table_cells is array in the current row
                 table_cells = special_event_rows[row_index].findAll('td')
 
                 parking_location = table_cells[1].string
                 event_venue = table_cells[4].string
                 event = table_cells[3].string
 
-                # take the event CT time strings, create datetime obj, then convert back to correct string
-                event_time_obj = datetime.datetime.strptime(
-                    table_cells[0].string + table_cells[5].string.replace(' ', ''), '%m/%d/%Y%I:%M%p')
-                event_time = datetime.datetime.strftime(event_time_obj, '%Y-%m-%dT%H:%M:%S')
+                # transform provided event_time (Central Time)
+                event_time = datetime.datetime.strptime(
+                    table_cells[0].string + table_cells[5].string.replace(' ', ''),
+                    '%m/%d/%Y%I:%M%p'
+                ).strftime('%Y-%m-%dT%H:%M:%S')
 
                 # split '00:00 pm - 00:00 pm' into start and end strings
                 time_parts = table_cells[2].string.split(' - ')
@@ -217,24 +240,43 @@ class CityParkingLots:
                 time_parts[0] = time_parts[0].replace(' ', '')
                 time_parts[1] = time_parts[1].replace(' ', '')
 
-                parking_start_time_obj = datetime.datetime.strptime(table_cells[0].string + time_parts[0], '%m/%d/%Y%I:%M%p')
-                parking_start_time = datetime.datetime.strftime(parking_start_time_obj, '%Y-%m-%dT%H:%M:%S')
+                # todo - not happy with this whole business of conversion and date math.
+                # should be able to optimize
+                # transform provided parking_start_time (Central Time)
+                parking_start_time = datetime.datetime.strptime(
+                    table_cells[0].string + time_parts[0],
+                    '%m/%d/%Y%I:%M%p'
+                ).strftime('%Y-%m-%dT%H:%M:%S')
 
-                parking_end_time_obj = datetime.datetime.strptime(table_cells[0].string + time_parts[1], '%m/%d/%Y%I:%M%p')
-                parking_end_time = datetime.datetime.strftime(parking_start_time_obj, '%Y-%m-%dT%H:%M:%S')
+                # transform provided parking_end_time (Central Time)
+                parking_end_time = datetime.datetime.strptime(
+                    table_cells[0].string + time_parts[1],
+                    '%m/%d/%Y%I:%M%p'
+                ).strftime('%Y-%m-%dT%H:%M:%S')
 
-                ###############testing data ##############   Comment this out!!!!  ######################################################
-                parking_start_time = '2014-04-25T01:00:00'
-                parking_end_time = '2014-04-25T23:00:00'
+                central_tz = pytz.timezone('US/Central')
 
-                # add this special event info to the parkingSpecialEvents collection
-                special_events['parkingSpecialEvents'].append(
-                    {"parkingLocation": parking_location,
-                     "eventVenue": event_venue,
-                     "eventTime": event_time,
-                     "eventName": event,
-                     "parkingStartTime": parking_start_time,
-                     "parkingEndTime": parking_end_time})
+                # test-only - sets timestamp of events start:now-1min, end:now+60days
+                if is_test:
+                    parking_start_time = (datetime.datetime.now(central_tz) -
+                                        datetime.timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%S')
+                    parking_end_time = (datetime.datetime.now(central_tz) +
+                                        datetime.timedelta(days=60)).strftime('%Y-%m-%dT%H:%M:%S')
+
+                # we only care about special_events that are happening now
+                if api_utils.datetimeNowIsInRange(
+                        datetime.datetime.strptime(parking_start_time, '%Y-%m-%dT%H:%M:%S'),
+                        datetime.datetime.strptime(parking_end_time, '%Y-%m-%dT%H:%M:%S'),
+                        datetime.datetime.now(central_tz).replace(tzinfo=None)
+                ):
+                    # add this special event info to the parkingSpecialEvents collection
+                    special_events['parkingSpecialEvents'].append(
+                        {"parkingLocation": parking_location,
+                         "eventVenue": event_venue,
+                         "eventTime": event_time,
+                         "eventName": event,
+                         "parkingStartTime": parking_start_time,
+                         "parkingEndTime": parking_end_time})
 
         except ValueError:
             # bad error. cannot parse html perhaps due to html change.
@@ -243,7 +285,7 @@ class CityParkingLots:
 
         return special_events
 
-    def get_parking_special_events_html(self):
+    def fetch_parking_special_events_html(self):
         loop = 0
         done = False
         result = None
