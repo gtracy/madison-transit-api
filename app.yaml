@@ -80,7 +80,7 @@ handlers:
   script: api.v1.getparking.application
 
 - url: /v2/parking
-  script: api.v2.parking.application
+  script: api.v2.parking.parking.application
 
 - url: /v1/getarrivals
   script: api.v1.getarrivals.application
