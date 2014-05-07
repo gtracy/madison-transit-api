@@ -19,23 +19,23 @@ class CityParkingService():
             self.lots = CityParkingData().lots
 
     #  orchestrate the heavy lifting
-    def get_cityparking_data(self):
-        parking_availability_html = self.fetch_cityparking_availability_html()
-        parking_availabilities = self.parse_cityparking_availability_html(parking_availability_html)
+    def get_data(self):
+        parking_availability_html = self.fetch_availability_html()
+        parking_availabilities = self.parse_availability_html(parking_availability_html)
 
         # a little logic to deal if spec event call failed. we can still return availability
-        special_events_html = self.fetch_cityparking_special_events_html()
+        special_events_html = self.fetch_special_events_html()
         special_events = None
         if special_events_html:
-            special_events = self.parse_cityparking_special_events_html(special_events_html)
+            special_events = self.parse_special_events_html(special_events_html)
 
-        self.fill_cityparking_data(parking_availabilities, special_events)
+        self.fill_cityparking_data_obj(parking_availabilities, special_events)
 
         return self.lots
 
-    ## end get_cityparking_data
+    ## end get_data
 
-    def fetch_cityparking_availability_html(self):
+    def fetch_availability_html(self):
         url = 'http://www.cityofmadison.com/parkingUtility/garagesLots/availability/'
         try:
             result = urlfetch.fetch(url)
@@ -45,7 +45,7 @@ class CityParkingService():
 
         return result.content
 
-    def parse_cityparking_availability_html(self, cityparking_avail_html):
+    def parse_availability_html(self, cityparking_avail_html):
         results = []
         lot_spots = -1
 
@@ -77,7 +77,7 @@ class CityParkingService():
 
     ## end parse_cityparking_availability_html
 
-    def fetch_cityparking_special_events_html(self):
+    def fetch_special_events_html(self):
         special_events_url = 'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
 
         try:
@@ -93,7 +93,37 @@ class CityParkingService():
 
     ## end fetch_parking_special_events_html
 
-    def parse_cityparking_special_events_html(self, special_events_html, is_test=None):
+    def parse_special_event_datetimes(self, table_cells):
+        # transform provided event_time (Central Time)
+        event_time = datetime.datetime.strptime(
+            table_cells[0].string + table_cells[5].string.replace(' ', ''),
+            '%m/%d/%Y%I:%M%p'
+        ).strftime('%Y-%m-%dT%H:%M:%S')
+
+        # split '00:00 pm - 00:00 pm' into start and end strings
+        time_parts = table_cells[2].string.split(' - ')
+
+        # clean up whitespace to avoid errors due to inconsistent format
+        time_parts[0] = time_parts[0].replace(' ', '')
+        time_parts[1] = time_parts[1].replace(' ', '')
+
+        # transform provided parking_start_time (Central Time)
+        parking_start_time = datetime.datetime.strptime(
+            table_cells[0].string + time_parts[0],
+            '%m/%d/%Y%I:%M%p'
+        ).strftime('%Y-%m-%dT%H:%M:%S')
+
+        # transform provided parking_end_time (Central Time)
+        parking_end_time = datetime.datetime.strptime(
+            table_cells[0].string + time_parts[1],
+            '%m/%d/%Y%I:%M%p'
+        ).strftime('%Y-%m-%dT%H:%M:%S')
+
+        return event_time, parking_end_time, parking_start_time
+
+    ## end parse_special_event_datetimes
+
+    def parse_special_events_html(self, special_events_html, is_test=None):
         if not special_events_html:
             return
 
@@ -114,47 +144,9 @@ class CityParkingService():
                 event_venue = table_cells[4].string
                 event = table_cells[3].string
 
-                # transform provided event_time (Central Time)
-                event_time = datetime.datetime.strptime(
-                    table_cells[0].string + table_cells[5].string.replace(' ', ''),
-                    '%m/%d/%Y%I:%M%p'
-                ).strftime('%Y-%m-%dT%H:%M:%S')
+                event_time, parking_end_time, parking_start_time = self.parse_special_event_datetimes(table_cells)
 
-                # split '00:00 pm - 00:00 pm' into start and end strings
-                time_parts = table_cells[2].string.split(' - ')
-
-                # clean up whitespace to avoid errors due to inconsistent format
-                time_parts[0] = time_parts[0].replace(' ', '')
-                time_parts[1] = time_parts[1].replace(' ', '')
-
-                # transform provided parking_start_time (Central Time)
-                parking_start_time = datetime.datetime.strptime(
-                    table_cells[0].string + time_parts[0],
-                    '%m/%d/%Y%I:%M%p'
-                ).strftime('%Y-%m-%dT%H:%M:%S')
-
-                # transform provided parking_end_time (Central Time)
-                parking_end_time = datetime.datetime.strptime(
-                    table_cells[0].string + time_parts[1],
-                    '%m/%d/%Y%I:%M%p'
-                ).strftime('%Y-%m-%dT%H:%M:%S')
-
-                central_tz = pytz.timezone('US/Central')
-
-                # hack for testing - sets timestamp of events start:now-1min, end:now+60days
-                #if is_test:
-                #    parking_start_time = (datetime.datetime.now(central_tz) -
-                #                          datetime.timedelta(minutes=1)).strftime('%Y-%m-%dT%H:%M:%S')
-                #    parking_end_time = (datetime.datetime.now(central_tz) +
-                #                        datetime.timedelta(days=60)).strftime('%Y-%m-%dT%H:%M:%S')
-
-                # we only care about special_events that are happening now
-                #if api_utils.datetimeNowIsInRange(
-                #        datetime.datetime.strptime(parking_start_time, '%Y-%m-%dT%H:%M:%S'),
-                #        datetime.datetime.strptime(parking_end_time, '%Y-%m-%dT%H:%M:%S'),
-                #        datetime.datetime.now(central_tz).replace(tzinfo=None)
-                #):
-                    # add this special event info to the specialEvents collection
+                # add this special event info to the specialEvents collection
                 special_events['specialEvents'].append(
                     {
                         'parkingLocation': parking_location,
@@ -176,7 +168,7 @@ class CityParkingService():
 
     ## end parse_cityparking_special_events_html
 
-    def fill_cityparking_data(self, parking_availabilities, special_events):
+    def fill_cityparking_data_obj(self, parking_availabilities, special_events):
         for lot in self.lots:
             for availability in parking_availabilities:
                 if availability['name'].lower().find(lot['shortName']) >= 0:

@@ -29,7 +29,7 @@ class ParkingHandler(webapp.RequestHandler):
         self.response.headers['Allow'] = 'GET'
 
         try:
-            city_lots = CityParkingService().get_cityparking_data()
+            city_lots = CityParkingService().get_data()
             logging.debug('API: city_lots json response %s' % city_lots)
         except urlfetch.DownloadError:
             logging.error('Failed to retrieve city data')

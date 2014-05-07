@@ -31,15 +31,15 @@ class TestSequenceFunctions(unittest.TestCase):
     # todo exception tests.
 
     def test_cityparking_result_not_none(self):
-        parking_results = CityParkingService().get_cityparking_data()
+        parking_results = CityParkingService().get_data()
         self.assertIsNotNone(parking_results)
 
     def test_cityparking_result_len(self):
-        parking_results = CityParkingService().get_cityparking_data()
+        parking_results = CityParkingService().get_data()
         self.assertEquals(len(parking_results), 6)
 
     def test_cityparking_spot_availability_val(self):
-        parking_results = CityParkingService().get_cityparking_data()
+        parking_results = CityParkingService().get_data()
         failure = False
         for result in parking_results:
             result_num = int(result['openSpots'])
@@ -51,8 +51,8 @@ class TestSequenceFunctions(unittest.TestCase):
     # this one could fail without a software bug if there
     # are no events for 60 days
     def test_cityparking_special_event_exists(self):
-        spec_events_html = CityParkingService().fetch_cityparking_special_events_html()
-        special_events = CityParkingService().parse_cityparking_special_events_html(
+        spec_events_html = CityParkingService().fetch_special_events_html()
+        special_events = CityParkingService().parse_special_events_html(
             spec_events_html, True)
 
         self.assertGreater(len(special_events), 0)
