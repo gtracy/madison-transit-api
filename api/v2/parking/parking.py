@@ -6,8 +6,8 @@ from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from api.v2 import api_utils
-from api.v2.parking.CityParking import CityParkingService
-from api.v2.parking.CampusParking import CampusParkingService
+from api.v2.parking.cityparking import CityParkingService
+from api.v2.parking.campusparking import CampusParkingService
 from stats import stathat
 
 

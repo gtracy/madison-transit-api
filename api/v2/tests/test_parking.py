@@ -10,8 +10,8 @@ sys.path.append(os.path.dirname('/Users/chriss/code/me/madison-transit-api/api/v
 
 import unittest
 
-from api.v2.parking.CityParking import CityParkingService
-from api.v2.parking.CampusParking import CampusParkingService
+from api.v2.parking.cityparking import CityParkingService
+from api.v2.parking.campusparking import CampusParkingService
 
 
 from google.appengine.ext import testbed
@@ -58,11 +58,11 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertGreater(len(special_events), 0)
 
     def test_campusparking_html_not_none(self):
-        parking_html = CampusParkingService().fetch_campusparking_availability_html()
+        parking_html = CampusParkingService().fetch_availability_html()
         self.assertIsNotNone(parking_html)
 
     def test_campusparking_not_none(self):
-        parking_results = CampusParkingService().get_campusparking_data()
+        parking_results = CampusParkingService().get_data()
         self.assertIsNotNone(parking_results)
 
 

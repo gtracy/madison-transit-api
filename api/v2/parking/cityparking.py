@@ -4,19 +4,18 @@ import json
 import re
 
 from google.appengine.api import urlfetch
-from pytz.gae import pytz
 
+from api.v2.parking.parkingdata import ParkingData
 from api.BeautifulSoup import BeautifulSoup
-from api.v2 import api_utils
 
 
 # Handles fetch, parse and combine of cityparking data
 class CityParkingService():
     def __init__(self, cityparking=None):  # allow injection of parking data
         if cityparking:
-            self.lots = cityparking.lots
+            self.lots = cityparking.city_lots
         else:
-            self.lots = CityParkingData().lots
+            self.lots = ParkingData().city_lots
 
     #  orchestrate the heavy lifting
     def get_data(self):
@@ -180,125 +179,3 @@ class CityParkingService():
                         lot['specialEvents'].append(special_event)
 
     ## end merge_availability_with_special_events
-
-
-# CityParkingData.lots pre-populates static props and later fills dynamic props
-class CityParkingData:
-    def __init__(self):
-
-        # to be added to payload of each special event to allow
-        # consumers to link to page for
-        self.event_url = 'http://www.cityofmadison.com/parkingUtility/calendar/'
-
-        # define lots with mostly initial data to minimize potential for breakage.
-        self.lots = [
-            {
-                'name': 'State Street Campus Garage',
-                'shortName': 'campus',  # minimum reliable unique string
-                'address': {
-                    'street': '430 N. Frances St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    '400 N. Frances St.',
-                    '400 N. Lake St.'
-                ],
-                'totalSpots': 243,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            },
-            {
-                'name': 'Brayton Lot',
-                'shortName': 'brayton',  # minimum reliable unique string
-                'address': {
-                    'street': '1 South Butler St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    {'street': '10 S. Butler St.'}
-                ],
-                'totalSpots': 247,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            },
-            {
-                'name': 'Capitol Square North Garage',
-                'shortName': 'north',  # minimum reliable unique string
-                'address': {
-                    'street': '218 East Mifflin St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    '100 N. Butler St.', '200 E. Mifflin St.', '100 N. Webster St.'
-                ],
-                'totalSpots': 613,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            },
-            {
-                'name': 'Government East Garage',
-                'shortName': 'east',  # minimum reliable unique string
-                'address': {
-                    'street': '215 S. Pinckney St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    '200 S. Pinckney St.', '100 E. Wilson St.'
-                ],
-                'totalSpots': 516,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            },
-            {
-                'name': 'Overture Center Garage',
-                'shortName': 'overture',  # minimum reliable unique string
-                'address': {
-                    'street': '318 W. Mifflin St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    '300 W. Dayton St.', '300 W. Mifflin St.'
-                ],
-                'totalSpots': 620,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            },
-            {
-                'name': 'State Street Capitol Garage',
-                'shortName': 'state street capitol',  # minimum reliable unique string
-                'address': {
-                    'street': '214 N. Carroll St.',
-                    'city': 'Madison',
-                    'state': 'WI',
-                    'postalCode': '53703'
-                },
-                'entrances': [
-                    '200 N. Carroll St.', '100 W. Dayton St.', '100 W. Johnson St. '
-                ],
-                'totalSpots': 850,
-                'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
-                'specialEvents': []
-            }
-        ]
