@@ -46,7 +46,7 @@ class CityParkingService():
 
     def parse_availability_html(self, cityparking_avail_html):
         results = []
-        lot_spots = -1
+        lot_spots = None
 
         try:
             city_lot_soup = BeautifulSoup(cityparking_avail_html)
@@ -69,7 +69,7 @@ class CityParkingService():
 
         except ValueError:
             # bad error. cannot parse html perhaps due to html change.
-            logging.error('Error parsing scraped content from city special events page.')
+            logging.error('Error parsing scraped content from city parking page.')
             raise ValueError
 
         return results
@@ -122,7 +122,7 @@ class CityParkingService():
 
     ## end parse_special_event_datetimes
 
-    def parse_special_events_html(self, special_events_html, is_test=None):
+    def parse_special_events_html(self, special_events_html):
         if not special_events_html:
             return
 
@@ -150,10 +150,10 @@ class CityParkingService():
                     {
                         'parkingLocation': parking_location,
                         'eventVenue': event_venue,
-                        'eventTime': event_time,
+                        'eventDatetime': event_time,
                         'eventName': event,
-                        'parkingStartTime': parking_start_time,
-                        'parkingEndTime': parking_end_time
+                        'parkingStartDatetime': parking_start_time,
+                        'parkingEndDatetime': parking_end_time
                     }
                 )
 
@@ -172,6 +172,7 @@ class CityParkingService():
             for availability in parking_availabilities:
                 if availability['name'].lower().find(lot['shortName']) >= 0:
                     lot['openSpots'] = availability['openSpots']
+                    break
 
             if special_events and (special_events['specialEvents']) > 0:
                 for special_event in special_events['specialEvents']:

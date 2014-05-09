@@ -117,8 +117,7 @@ class ParkingData:
         # define lots with mostly initial data to minimize potential for breakage.
         self.campus_lots = [
             {
-               'id': 1,
-               'shortName': '020',
+               'shortName': '20',
                'name': 'University Avenue Ramp',
                'address': {
                  'street': '1390 University Avenue',
@@ -134,8 +133,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 2,
-               'shortName': '027',
+               'shortName': '27',
                'name': 'Nancy Nicholas Hall Garage',
                'address': {
                  'street': '1330 Linden Drive',
@@ -151,8 +149,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 3,
-               'shortName': '036',
+               'shortName': '36',
                'name': 'Observatory Drive Ramp',
                'address': {
                  'street': '1645 Observatory Drive',
@@ -168,8 +165,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 4,
-               'shortName': '06U',
+               'shortName': '6U',
                'name': 'Helen C. White Garage Upper Level',
                'address': {
                  'street': '600 N. Park Street',
@@ -185,8 +181,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 5,
-               'shortName': '06L',
+               'shortName': '6L',
                'name': 'Helen C. White Garage Lower Level',
                'address': {
                  'street': '600 N. Park Street',
@@ -202,8 +197,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 6,
-               'shortName': '007',
+               'shortName': '7',
                'name': 'Grainger Hall Garage',
                'address': {
                  'street': '325 N. Brooks Street',
@@ -219,8 +213,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 7,
-               'shortName': '029',
+               'shortName': '29',
                'name': 'North Park Street Ramp',
                'address': {
                  'street': '21 N. Park Street',
@@ -236,8 +229,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 8,
-               'shortName': '046',
+               'shortName': '46',
                'name': 'Lake & Johnson Ramp',
                'address': {
                  'street': '301 N. Lake Street',
@@ -253,8 +245,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 9,
-               'shortName': '083',
+               'shortName': '83',
                'name': 'Fluno Center Garage',
                'address': {
                  'street': '314 N. Frances Street',
@@ -270,8 +261,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 10,
-               'shortName': '017',
+               'shortName': '17',
                'name': 'Engineering Drive Ramp',
                'address': {
                  'street': '1525 Engineering Drive',
@@ -287,8 +277,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 11,
-               'shortName': '080',
+               'shortName': '80',
                'name': 'Union South Garage',
                'address': {
                  'street': '1308 West Dayton Street',
@@ -304,8 +293,7 @@ class ParkingData:
                'specialEvents': []
             },
             {
-               'id': 12,
-               'shortName': '076',
+               'shortName': '76',
                'name': 'University Bay Drive Ramp',
                'address': {
                  'street': '2501 University Bay Drive',

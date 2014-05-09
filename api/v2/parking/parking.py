@@ -23,14 +23,14 @@ class ParkingHandler(webapp.RequestHandler):
         )
 
     def get(self):
-        city_lots = dict()
+        lots = dict()
         # always include these headers
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.headers['Allow'] = 'GET'
 
         try:
-            city_lots = CityParkingService().get_data()
-            logging.debug('API: city_lots json response %s' % city_lots)
+            lots = CityParkingService().get_data()
+            logging.debug('API: city_lots json response %s' % lots)
         except urlfetch.DownloadError:
             logging.error('Failed to retrieve city data')
             self.response.status = 500
@@ -48,8 +48,25 @@ class ParkingHandler(webapp.RequestHandler):
                 )
             )
 
-        uw_lots = {}
-        logging.debug('API: uw_lots json response %s' % uw_lots)
+        try:
+            lots.append(CampusParkingService().get_data())
+            logging.debug('API: campus lots added, json response %s' % lots)
+        except urlfetch.DownloadError:
+            logging.error('Failed to retrieve uw campus data')
+            self.response.status = 500
+            self.response.out.write(
+                json.dumps(
+                    api_utils.buildErrorResponse('-1', 'Failed to retrieve uw campus data')
+                )
+            )
+        except ValueError:
+            logging.error('Failed to parse city html data')
+            self.response.status = 500
+            self.response.out.write(
+                json.dumps(
+                    api_utils.buildErrorResponse('-1', 'Failed to parse uw campus html data')
+                )
+            )
 
         #  encapsulate response in json or jsonp
         callback = self.request.get('callback')
@@ -57,10 +74,10 @@ class ParkingHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = 'application/javascript'
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Access-Control-Allow-Methods'] = 'GET'
-            response = callback + '(' + json.dumps(city_lots) + ');'
+            response = callback + '(' + json.dumps(lots) + ');'
         else:
             self.response.headers['Content-Type'] = 'application/json'
-            response = json.dumps(city_lots)
+            response = json.dumps(lots)
 
         #stathat.apiStatCount()
         self.response.out.write(response)

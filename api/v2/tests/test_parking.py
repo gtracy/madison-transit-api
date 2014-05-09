@@ -49,11 +49,11 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(failure, False)
 
     # this one could fail without a software bug if there
-    # are no events for 60 days
+    # are no events
     def test_cityparking_special_event_exists(self):
         spec_events_html = CityParkingService().fetch_special_events_html()
         special_events = CityParkingService().parse_special_events_html(
-            spec_events_html, True)
+            spec_events_html)
 
         self.assertGreater(len(special_events), 0)
 
@@ -65,7 +65,33 @@ class TestSequenceFunctions(unittest.TestCase):
         parking_results = CampusParkingService().get_data()
         self.assertIsNotNone(parking_results)
 
+    def test_campusparking_spot_availability_val(self):
+        parking_html = CampusParkingService().fetch_availability_html()
+        parking_results = CampusParkingService().parse_availability_html(parking_html)
+        failure = False
+        for result in parking_results:
+            result_num = int(result['openSpots'])
+            if result_num < 0:
+                failure = True
 
+        self.assertEqual(failure, False)
+
+    def test_campusparking_special_events_html_not_none(self):
+        parking_html = CampusParkingService().fetch_special_events_html()
+        self.assertIsNotNone(parking_html)
+
+    def test_campusparking_special_event_has_parkinglocation(self):
+        spec_events_html = CampusParkingService().fetch_special_events_html()
+        special_events = CampusParkingService().parse_special_events_html(
+            spec_events_html)
+
+        self.assertNotEqual(special_events['specialEvents'][0]['parkingLocations'], '')
+
+    def test_campusparking_special_events_complete_data(self):
+        data = CampusParkingService().get_data()
+        self.assertIsNotNone(data)
+        self.assertGreater(len(data), 0)
+        self.assertIsNotNone(data[0]['openSpots'])
 
     def tearDown(self):
         self.testbed.deactivate()
