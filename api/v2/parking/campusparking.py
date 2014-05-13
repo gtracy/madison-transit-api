@@ -137,10 +137,15 @@ class CampusParkingService():
                     logging.error('Error parsing campus special event date')
                     event_datetime_str = None
 
+                # Rather than exclude props not available via uw lots, going with "None"
+                # This will manifest in the json as "prop":null which should be easily detectable via client JS
                 special_event = {
                     'eventName': event_name,
                     'parkingLocations': lot_num_array,
-                    'eventDatetime': event_datetime_str
+                    'eventDatetime': event_datetime_str,
+                    'parkingStartDatetime': None,
+                    'parkingEndDatetime': None,
+                    'eventVenue': None
                 }
                 special_events['specialEvents'].append(special_event)
 

@@ -10,9 +10,12 @@ class ParkingData:
             'http://www.cityofmadison.com/parkingUtility/garagesLots/availability/'
         self.city_data['special_events_url'] = \
             'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
+
+
         self.city_data['lots'] = [
             {
                 'name': 'State Street Campus Garage',
+                'operatedBy': 'city',
                 'shortName': 'campus',  # minimum reliable unique string
                 'address': {
                     'street': '430 N. Frances St',
@@ -31,6 +34,7 @@ class ParkingData:
             },
             {
                 'name': 'Brayton Lot',
+                'operatedBy': 'city',
                 'shortName': 'brayton',  # minimum reliable unique string
                 'address': {
                     'street': '1 South Butler St',
@@ -48,6 +52,7 @@ class ParkingData:
             },
             {
                 'name': 'Capitol Square North Garage',
+                'operatedBy': 'city',
                 'shortName': 'north',  # minimum reliable unique string
                 'address': {
                     'street': '218 East Mifflin St',
@@ -65,6 +70,7 @@ class ParkingData:
             },
             {
                 'name': 'Government East Garage',
+                'operatedBy': 'city',
                 'shortName': 'east',  # minimum reliable unique string
                 'address': {
                     'street': '215 S. Pinckney St',
@@ -82,6 +88,7 @@ class ParkingData:
             },
             {
                 'name': 'Overture Center Garage',
+                'operatedBy': 'city',
                 'shortName': 'overture',  # minimum reliable unique string
                 'address': {
                     'street': '318 W. Mifflin St',
@@ -99,6 +106,7 @@ class ParkingData:
             },
             {
                 'name': 'State Street Capitol Garage',
+                'operatedBy': 'city',
                 'shortName': 'state street capitol',  # minimum reliable unique string
                 'address': {
                     'street': '214 N. Carroll St',
@@ -125,6 +133,7 @@ class ParkingData:
             {
                'shortName': '20',
                'name': 'University Avenue Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '1390 University Avenue',
                  'city': 'Madison',
@@ -140,6 +149,7 @@ class ParkingData:
             {
                'shortName': '27',
                'name': 'Nancy Nicholas Hall Garage',
+               'operatedBy': 'uw',
                'address': {
                  'street': '1330 Linden Drive',
                  'city': 'Madison',
@@ -155,6 +165,7 @@ class ParkingData:
             {
                'shortName': '36',
                'name': 'Observatory Drive Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '1645 Observatory Drive',
                  'city': 'Madison',
@@ -170,6 +181,7 @@ class ParkingData:
             {
                'shortName': '6U',
                'name': 'Helen C. White Garage Upper Level',
+               'operatedBy': 'uw',
                'address': {
                  'street': '600 N. Park Street',
                  'city': 'Madison',
@@ -185,6 +197,7 @@ class ParkingData:
             {
                'shortName': '6L',
                'name': 'Helen C. White Garage Lower Level',
+               'operatedBy': 'uw',
                'address': {
                  'street': '600 N. Park Street',
                  'city': 'Madison',
@@ -200,6 +213,7 @@ class ParkingData:
             {
                'shortName': '7',
                'name': 'Grainger Hall Garage',
+               'operatedBy': 'uw',
                'address': {
                  'street': '325 N. Brooks Street',
                  'city': 'Madison',
@@ -215,6 +229,7 @@ class ParkingData:
             {
                'shortName': '29',
                'name': 'North Park Street Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '21 N. Park Street',
                  'city': 'Madison',
@@ -230,6 +245,7 @@ class ParkingData:
             {
                'shortName': '46',
                'name': 'Lake & Johnson Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '301 N. Lake Street',
                  'city': 'Madison',
@@ -245,6 +261,7 @@ class ParkingData:
             {
                'shortName': '83',
                'name': 'Fluno Center Garage',
+               'operatedBy': 'uw',
                'address': {
                  'street': '314 N. Frances Street',
                  'city': 'Madison',
@@ -260,6 +277,7 @@ class ParkingData:
             {
                'shortName': '17',
                'name': 'Engineering Drive Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '1525 Engineering Drive',
                  'city': 'Madison',
@@ -275,6 +293,7 @@ class ParkingData:
             {
                'shortName': '80',
                'name': 'Union South Garage',
+               'operatedBy': 'uw',
                'address': {
                  'street': '1308 West Dayton Street',
                  'city': 'Madison',
@@ -290,6 +309,7 @@ class ParkingData:
             {
                'shortName': '76',
                'name': 'University Bay Drive Ramp',
+               'operatedBy': 'uw',
                'address': {
                  'street': '2501 University Bay Drive',
                  'city': 'Madison',
