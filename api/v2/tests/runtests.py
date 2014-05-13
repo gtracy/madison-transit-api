@@ -3,7 +3,8 @@ import optparse
 import sys
 import unittest
 
-# python runtests.py '/Users/chriss/libs/go_appengine/' '/Users/chriss/code/me/madison-transit-api/api/v2/tests/'
+# example command:
+#   python runtests.py '/Users/chriss/libs/go_appengine/' '/Users/chriss/code/me/madison-transit-api/api/v2/tests/'
 
 USAGE = """%prog SDK_PATH TEST_PATH
 Run unit tests for App Engine apps.

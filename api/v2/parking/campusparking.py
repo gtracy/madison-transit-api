@@ -10,11 +10,8 @@ from api.v2.parking.parkingdata import ParkingData
 
 # Handles fetch, parse and combine of cityparking data
 class CampusParkingService():
-    def __init__(self, campusparking=None):  # allow injection of parking data
-        if campusparking:
-            self.lots = campusparking.campus_lots
-        else:
-            self.lots = ParkingData().campus_lots
+    def __init__(self, parking_data=ParkingData().campus_data):  # allow injection of parking data
+        self.parking_data = parking_data
 
     def get_data(self):
         parking_availability_html = self.fetch_availability_html()
@@ -24,10 +21,15 @@ class CampusParkingService():
         special_events = self.parse_special_events_html(special_events_html)
 
         self.fill_campusparking_data_obj(parking_availabilities, special_events)
-        return self.lots
 
-    def fetch_availability_html(self):
-        url = 'http://transportation.wisc.edu/parking/lotinfo_occupancy.aspx'
+        # lot #'s needed for prior "fill" method but don't make sense in payload
+        self.remove_locations_from_special_events()
+
+        return self.parking_data['lots']
+
+    def fetch_availability_html(self, url=None):
+        if not url:
+            url = self.parking_data['availability_url']
         try:
             result = urlfetch.fetch(url)
         except urlfetch.DownloadError:
@@ -72,16 +74,16 @@ class CampusParkingService():
 
         return results
 
-    def fetch_special_events_html(self):
-        special_events_url = 'http://transportation.wisc.edu/newsAndEvents/events.aspx'
-
+    def fetch_special_events_html(self, special_events_url=None):
+        if not special_events_url:
+            special_events_url = self.parking_data['special_events_url']
         try:
-            #grab the city parking html page - what an awesome API!!! :(
+            #grab the city parking html page
             result = urlfetch.fetch(special_events_url).content
 
-        except urlfetch.DownloadError:
-            # problem fetching url
-            logging.error('Error loading page (%s).' % special_events_url)
+        except urlfetch.DownloadError as e:
+            # problem fetching url. Do log and move on as parking availability still valuable
+            logging.error('Error loading page (%s).' % special_events_url + str(e))
             result = None
 
         return result
@@ -105,21 +107,16 @@ class CampusParkingService():
                 event_name = ''
                 for row_index in range(0, 3):
                     if row_index == 0:  # we're on the header row
-                        logging.info('header row')
                         header_content = rows[row_index].find('th').string
                         header_array = header_content.split(':')
                         event_date = header_array[0]
                         event_name = header_array[1].replace('&nbsp;', '')
                     elif row_index == 1:  # time row
-                        logging.info('second row')
                         cells = rows[row_index].findAll('td')
                         cell_content = cells[1].string
                         event_time_arr = cell_content.split(' ', 2)
-                        logging.info(event_time_arr)
                         event_time = event_time_arr[0] + event_time_arr[1].replace('.', '').upper()
-                        logging.info(event_time)
                     elif row_index == 2:  # lots row
-                        logging.info('third row')
                         cells = rows[row_index].findAll('td')
                         cell_content = cells[1].string
                         lot_num_array = cell_content.replace(' ', '').split(',')
@@ -156,7 +153,7 @@ class CampusParkingService():
         return special_events
 
     def fill_campusparking_data_obj(self, parking_availabilities, special_events):
-        for lot in self.lots:
+        for lot in self.parking_data['lots']:
             for park_availability in parking_availabilities:
                 if lot['shortName'] == self.strip_leading_zeros_from_short_name(park_availability['shortName']):
                     lot['openSpots'] = park_availability['openSpots']
@@ -165,6 +162,12 @@ class CampusParkingService():
                 for special_event in special_events['specialEvents']:
                     if lot['shortName'] in special_event['parkingLocations']:
                         lot['specialEvents'].append(special_event)
+
+    def remove_locations_from_special_events(self):
+        for lot in self.parking_data['lots']:
+            if lot['specialEvents'] and len(lot['specialEvents']) > 0:
+                for se in lot['specialEvents']:
+                    se.pop('parkingLocations', None)
 
     def strip_leading_zeros_from_short_name(self, short_name):
         return short_name.lstrip('0')

@@ -23,48 +23,36 @@ class ParkingHandler(webapp.RequestHandler):
         )
 
     def get(self):
-        lots = dict()
+        lot_results = {}
+
         # always include these headers
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.headers['Allow'] = 'GET'
 
         try:
-            lots = CityParkingService().get_data()
-            logging.debug('API: city_lots json response %s' % lots)
-        except urlfetch.DownloadError:
-            logging.error('Failed to retrieve city data')
+            lot_results['cityLots'] = CityParkingService().get_data()
+            logging.debug('API: city_lots json response %s' % lot_results)
+
+        except (ValueError, urlfetch.DownloadError, AttributeError) as e:
+            logging.error('Failed to retrieve city data', str(e))
             self.response.status = 500
             self.response.out.write(
                 json.dumps(
-                    api_utils.buildErrorResponse('-1', 'Failed to retrieve city data')
-                )
-            )
-        except ValueError:
-            logging.error('Failed to parse city html data')
-            self.response.status = 500
-            self.response.out.write(
-                json.dumps(
-                    api_utils.buildErrorResponse('-1', 'Failed to parse city html data')
+                    api_utils.buildErrorResponse('-1',
+                                                 'There was a problem retrieving the city parking data')
                 )
             )
 
         try:
-            lots.append(CampusParkingService().get_data())
-            logging.debug('API: campus lots added, json response %s' % lots)
-        except urlfetch.DownloadError:
-            logging.error('Failed to retrieve uw campus data')
+            lot_results['campusLots'] = CampusParkingService().get_data()
+            logging.debug('API: campus lots added, json response %s' % lot_results)
+        except (ValueError, urlfetch.DownloadError, AttributeError) as e:
+            logging.error('Failed to retrieve campus data', str(e))
             self.response.status = 500
             self.response.out.write(
                 json.dumps(
-                    api_utils.buildErrorResponse('-1', 'Failed to retrieve uw campus data')
-                )
-            )
-        except ValueError:
-            logging.error('Failed to parse city html data')
-            self.response.status = 500
-            self.response.out.write(
-                json.dumps(
-                    api_utils.buildErrorResponse('-1', 'Failed to parse uw campus html data')
+                    api_utils.buildErrorResponse('-1',
+                                                 'There was a problem retrieving the campus parking data')
                 )
             )
 
@@ -74,10 +62,10 @@ class ParkingHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = 'application/javascript'
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Access-Control-Allow-Methods'] = 'GET'
-            response = callback + '(' + json.dumps(lots) + ');'
+            response = callback + '(' + json.dumps(lot_results) + ');'
         else:
             self.response.headers['Content-Type'] = 'application/json'
-            response = json.dumps(lots)
+            response = json.dumps(lot_results)
 
         #stathat.apiStatCount()
         self.response.out.write(response)

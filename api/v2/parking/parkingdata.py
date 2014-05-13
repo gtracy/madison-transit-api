@@ -1,8 +1,16 @@
-# CityParkingData.lots pre-populates static props and later fills dynamic props
+# CityParkingData represents the data model for the parking service
+# and pre-populates fields where possible. The goal is to reduce dependence on the city and
+# campus websites in an attempt to reduce api breakage due to html template
+# changes or field format discrepancies (human data entry variability).
 class ParkingData:
     def __init__(self):
 
-        self.city_lots = [
+        self.city_data = dict()
+        self.city_data['availability_url'] = \
+            'http://www.cityofmadison.com/parkingUtility/garagesLots/availability/'
+        self.city_data['special_events_url'] = \
+            'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
+        self.city_data['lots'] = [
             {
                 'name': 'State Street Campus Garage',
                 'shortName': 'campus',  # minimum reliable unique string
@@ -18,8 +26,7 @@ class ParkingData:
                 ],
                 'totalSpots': 243,
                 'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCampus.cfm',
                 'specialEvents': []
             },
             {
@@ -36,8 +43,7 @@ class ParkingData:
                 ],
                 'totalSpots': 247,
                 'openSpots': None,
-                'operatedBy': 'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/brayton.cfm',
                 'specialEvents': []
             },
             {
@@ -54,8 +60,7 @@ class ParkingData:
                 ],
                 'totalSpots': 613,
                 'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm',
                 'specialEvents': []
             },
             {
@@ -72,8 +77,7 @@ class ParkingData:
                 ],
                 'totalSpots': 516,
                 'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/govtEast.cfm',
                 'specialEvents': []
             },
             {
@@ -90,8 +94,7 @@ class ParkingData:
                 ],
                 'totalSpots': 620,
                 'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/overture.cfm',
                 'specialEvents': []
             },
             {
@@ -108,14 +111,17 @@ class ParkingData:
                 ],
                 'totalSpots': 850,
                 'openSpots': None,
-                'operatedBy':'city',  # city|uw|private
-                'webUrl': None,
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCapitol.cfm',
                 'specialEvents': []
             }
         ]
 
-        # define lots with mostly initial data to minimize potential for breakage.
-        self.campus_lots = [
+        self.campus_data = dict()
+        self.campus_data['availability_url'] = \
+            'http://transportation.wisc.edu/parking/lotinfo_occupancy.aspx'
+        self.campus_data['special_events_url'] = \
+            'http://transportation.wisc.edu/newsAndEvents/events.aspx'
+        self.campus_data['lots'] = [
             {
                'shortName': '20',
                'name': 'University Avenue Ramp',
@@ -128,8 +134,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 220,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': None,
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=20',
                'specialEvents': []
             },
             {
@@ -144,8 +149,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 48,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': None,
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=27',
                'specialEvents': []
             },
             {
@@ -160,8 +164,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 463,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': None,
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=36',
                'specialEvents': []
             },
             {
@@ -176,7 +179,6 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 95,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
                'specialEvents': []
             },
@@ -192,7 +194,6 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 95,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
                'specialEvents': []
             },
@@ -208,7 +209,6 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 412,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=07',
                'specialEvents': []
             },
@@ -224,7 +224,6 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 340,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=029',
                'specialEvents': []
             },
@@ -240,7 +239,6 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 733,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=046',
                'specialEvents': []
             },
@@ -256,8 +254,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 296,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=083',
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=83',
                'specialEvents': []
             },
             {
@@ -272,8 +269,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 822,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=017',
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=17',
                'specialEvents': []
             },
             {
@@ -288,8 +284,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 168,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=080',
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=80',
                'specialEvents': []
             },
             {
@@ -304,8 +299,7 @@ class ParkingData:
                'entrances': [],
                'totalSpots': 1290,
                'openSpots': None,
-               'operatedBy':'uw',  # city|uw|private
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=076',
+               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=76',
                'specialEvents': []
             }
         ]

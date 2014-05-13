@@ -11,31 +11,32 @@ from api.BeautifulSoup import BeautifulSoup
 
 # Handles fetch, parse and combine of cityparking data
 class CityParkingService():
-    def __init__(self, cityparking=None):  # allow injection of parking data
-        if cityparking:
-            self.lots = cityparking.city_lots
-        else:
-            self.lots = ParkingData().city_lots
+    def __init__(self, parking_data=ParkingData().city_data):  # allow injection of parking data
+        self.parking_data = parking_data
 
     #  orchestrate the heavy lifting
     def get_data(self):
-        parking_availability_html = self.fetch_availability_html()
+        city_avail_url = self.parking_data['availability_url']
+        parking_availability_html = self.fetch_availability_html(city_avail_url)
         parking_availabilities = self.parse_availability_html(parking_availability_html)
 
         # a little logic to deal if spec event call failed. we can still return availability
-        special_events_html = self.fetch_special_events_html()
+        special_events_url = self.parking_data['special_events_url']
+        special_events_html = self.fetch_special_events_html(special_events_url)
         special_events = None
         if special_events_html:
             special_events = self.parse_special_events_html(special_events_html)
 
         self.fill_cityparking_data_obj(parking_availabilities, special_events)
 
-        return self.lots
+        # don't make sense in payload
+        self.remove_locations_from_special_events()
+
+        return self.parking_data['lots']
 
     ## end get_data
 
-    def fetch_availability_html(self):
-        url = 'http://www.cityofmadison.com/parkingUtility/garagesLots/availability/'
+    def fetch_availability_html(self, url):
         try:
             result = urlfetch.fetch(url)
         except urlfetch.DownloadError:
@@ -54,6 +55,9 @@ class CityParkingService():
             lot_rows = city_lot_soup.find('div', {'id': 'availability'})\
                 .findAll('div', {'class': re.compile('^dataRow')})
 
+            if not lot_rows: # if we find no rows, we're dead
+                raise ValueError
+
             for row in lot_rows:
                 for detail in row:
                     if detail.string is not None and detail.string.isdigit():
@@ -68,17 +72,25 @@ class CityParkingService():
             logging.debug(json.dumps(results))
 
         except ValueError:
-            # bad error. cannot parse html perhaps due to html change.
-            logging.error('Error parsing scraped content from city parking page.')
+            # Cannot parse html perhaps due to html change.
+            logging.error('ValueError parsing scraped content from city parking page.')
             raise ValueError
+
+        except AttributeError:
+            # HTML doesn't include expected elements
+            logging.error('AttributeError parsing scraped content from city parking page.')
+            raise AttributeError
+
+        except TypeError:
+            # Html is probably None
+            logging.error('TypeError parsing scraped content from city parking page.')
+            raise TypeError
 
         return results
 
     ## end parse_cityparking_availability_html
 
-    def fetch_special_events_html(self):
-        special_events_url = 'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
-
+    def fetch_special_events_html(self, special_events_url):
         try:
             #grab the city parking html page - what an awesome API!!! :(
             result = urlfetch.fetch(special_events_url).content
@@ -123,11 +135,11 @@ class CityParkingService():
     ## end parse_special_event_datetimes
 
     def parse_special_events_html(self, special_events_html):
-        if not special_events_html:
-            return
-
         special_events = dict()
         special_events['specialEvents'] = []
+
+        if not special_events_html:
+            return special_events
 
         try:
             soup = BeautifulSoup(special_events_html)
@@ -157,18 +169,17 @@ class CityParkingService():
                     }
                 )
 
-        except ValueError:
-            # bad error. cannot parse html perhaps due to html change.
-            logging.error('Error parsing scraped content from city special events page.')
+        except (ValueError, AttributeError, TypeError) as e:
+            # unlike availability, we eat this error. availability is still useful w/out events
+            logging.error('Error parsing scraped content from city special events page.' + str(e))
             special_events['specialEvents'] = []
-            raise ValueError
 
         return special_events
 
     ## end parse_cityparking_special_events_html
 
     def fill_cityparking_data_obj(self, parking_availabilities, special_events):
-        for lot in self.lots:
+        for lot in self.parking_data['lots']:
             for availability in parking_availabilities:
                 if availability['name'].lower().find(lot['shortName']) >= 0:
                     lot['openSpots'] = availability['openSpots']
@@ -180,3 +191,9 @@ class CityParkingService():
                         lot['specialEvents'].append(special_event)
 
     ## end merge_availability_with_special_events
+
+    def remove_locations_from_special_events(self):
+        for lot in self.parking_data['lots']:
+            if lot['specialEvents'] and len(lot['specialEvents']) > 0:
+                for se in lot['specialEvents']:
+                    se.pop('parkingLocation', None)
