@@ -79,7 +79,7 @@ class ParkingHandler(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication(
-    [('/v2/parking', ParkingHandler), ], debug=True
+    [('/parking/v2/lots', ParkingHandler), ], debug=True
 )
 
 

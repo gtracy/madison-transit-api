@@ -4,6 +4,7 @@ import json
 import re
 
 from google.appengine.api import urlfetch
+from google.appengine.api import memcache
 
 from api.v2.parking.parkingdata import ParkingData
 from api.BeautifulSoup import BeautifulSoup
@@ -20,16 +21,18 @@ class CityParkingService():
         parking_availability_html = self.fetch_availability_html(city_avail_url)
         parking_availabilities = self.parse_availability_html(parking_availability_html)
 
-        # a little logic to deal if spec event call failed. we can still return availability
-        special_events_url = self.parking_data['special_events_url']
-        special_events_html = self.fetch_special_events_html(special_events_url)
-        special_events = None
-        if special_events_html:
-            special_events = self.parse_special_events_html(special_events_html)
+        special_events = memcache.get('city_special_events')
+        if special_events is None:
+            special_events_url = self.parking_data['special_events_url']
+            special_events_html = self.fetch_special_events_html(special_events_url)
+            special_events = None
+            if special_events_html:
+                special_events = self.parse_special_events_html(special_events_html)
+                memcache.set('city_special_events', special_events, 86400)  # cache for a day
 
         self.fill_cityparking_data_obj(parking_availabilities, special_events)
 
-        # don't make sense in payload
+        # Remove location array as it doesn't make sense in response payload
         self.remove_locations_from_special_events()
 
         return self.parking_data['lots']
@@ -165,7 +168,8 @@ class CityParkingService():
                         'eventDatetime': event_time,
                         'eventName': event,
                         'parkingStartDatetime': parking_start_time,
-                        'parkingEndDatetime': parking_end_time
+                        'parkingEndDatetime': parking_end_time,
+                        'webUrl': self.parking_data['special_events_url']
                     }
                 )
 

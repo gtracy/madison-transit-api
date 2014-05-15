@@ -1,7 +1,7 @@
-# CityParkingData represents the data model for the parking service
-# and pre-populates fields where possible. The goal is to reduce dependence on the city and
-# campus websites in an attempt to reduce api breakage due to html template
-# changes or field format discrepancies (human data entry variability).
+# CityParkingData represents the complete collection of parking lots
+# pre-populated with "static" data where possible. The goal is to
+# reduce api breakage due to html template changes or field format
+# discrepancies by limiting the # of fields pulled dynamically.
 class ParkingData:
     def __init__(self):
 
@@ -11,21 +11,24 @@ class ParkingData:
         self.city_data['special_events_url'] = \
             'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
 
-
         self.city_data['lots'] = [
             {
                 'name': 'State Street Campus Garage',
                 'operatedBy': 'city',
                 'shortName': 'campus',  # minimum reliable unique string
                 'address': {
-                    'street': '430 N. Frances St',
+                    'street': '430 North Frances Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
+                'coordinates': {
+                    'lat': 43.074067,
+                    'lng': -89.39624099999999
+                },
                 'entrances': [
-                    '400 N. Frances St',
-                    '400 N. Lake St'
+                    '400 North Frances Street',
+                    '400 North Lake Street'
                 ],
                 'totalSpots': 243,
                 'openSpots': None,
@@ -37,13 +40,17 @@ class ParkingData:
                 'operatedBy': 'city',
                 'shortName': 'brayton',  # minimum reliable unique string
                 'address': {
-                    'street': '1 South Butler St',
+                    'street': '1 South Butler Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
+                'coordinates': {
+                    'lat': 43.076728,
+                    'lng': -89.3802089
+                },
                 'entrances': [
-                    {'street': '10 S. Butler St'}
+                    {'street': '10 South Butler Street'}
                 ],
                 'totalSpots': 247,
                 'openSpots': None,
@@ -55,13 +62,17 @@ class ParkingData:
                 'operatedBy': 'city',
                 'shortName': 'north',  # minimum reliable unique string
                 'address': {
-                    'street': '218 East Mifflin St',
+                    'street': '218 East Mifflin Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
+                'coordinates': {
+                    'lat': 43.077627,
+                    'lng': -89.38321499999999
+                },
                 'entrances': [
-                    '100 N. Butler St', '200 E. Mifflin St', '100 N. Webster St'
+                    '100 North Butler Street', '200 East Mifflin Street', '100 North Webster Street'
                 ],
                 'totalSpots': 613,
                 'openSpots': None,
@@ -73,13 +84,17 @@ class ParkingData:
                 'operatedBy': 'city',
                 'shortName': 'east',  # minimum reliable unique string
                 'address': {
-                    'street': '215 S. Pinckney St',
+                    'street': '215 South Pinckney Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
+                'coordinates': {
+                    'lat': 43.073934,
+                    'lng': -89.380245
+                },
                 'entrances': [
-                    '200 S. Pinckney St', '100 E. Wilson St'
+                    '200 South Pinckney Street', '100 East Wilson Street'
                 ],
                 'totalSpots': 516,
                 'openSpots': None,
@@ -91,14 +106,18 @@ class ParkingData:
                 'operatedBy': 'city',
                 'shortName': 'overture',  # minimum reliable unique string
                 'address': {
-                    'street': '318 W. Mifflin St',
+                    'street': '318 West Mifflin Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
                 'entrances': [
-                    '300 W. Dayton St', '300 W. Mifflin St'
+                    '300 West Dayton Street', '300 West Mifflin Street'
                 ],
+                'coordinates': {
+                    'lat': 43.073353,
+                    'lng': -89.38928299999999
+                },
                 'totalSpots': 620,
                 'openSpots': None,
                 'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/overture.cfm',
@@ -109,13 +128,17 @@ class ParkingData:
                 'operatedBy': 'city',
                 'shortName': 'state street capitol',  # minimum reliable unique string
                 'address': {
-                    'street': '214 N. Carroll St',
+                    'street': '214 North Carroll Street',
                     'city': 'Madison',
                     'state': 'WI',
                     'postalCode': '53703'
                 },
+                'coordinates': {
+                    'lat': 43.0753667,
+                    'lng': -89.388021
+                },
                 'entrances': [
-                    '200 N. Carroll St', '100 W. Dayton St', '100 W. Johnson St '
+                    '200 North Carroll Street', '100 West Dayton Street', '100 West Johnson Street '
                 ],
                 'totalSpots': 850,
                 'openSpots': None,
@@ -131,195 +154,244 @@ class ParkingData:
             'http://transportation.wisc.edu/newsAndEvents/events.aspx'
         self.campus_data['lots'] = [
             {
-               'shortName': '20',
-               'name': 'University Avenue Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '1390 University Avenue',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 220,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=20',
-               'specialEvents': []
+                'shortName': '20',
+                'name': 'University Avenue Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '1390 University Avenue',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.073397,
+                    'lng': -89.4088843
+                },
+                'entrances': [],
+                'totalSpots': 220,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=20',
+                'specialEvents': []
             },
             {
-               'shortName': '27',
-               'name': 'Nancy Nicholas Hall Garage',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '1330 Linden Drive',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 48,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=27',
-               'specialEvents': []
+                'shortName': '27',
+                'name': 'Nancy Nicholas Hall Garage',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '1330 Linden Drive',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.0751477,
+                    'lng': -89.4097714
+                },
+                'entrances': [],
+                'totalSpots': 48,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=27',
+                'specialEvents': []
             },
             {
-               'shortName': '36',
-               'name': 'Observatory Drive Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '1645 Observatory Drive',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 463,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=36',
-               'specialEvents': []
+                'shortName': '36',
+                'name': 'Observatory Drive Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '1645 Observatory Drive',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.0764412,
+                    'lng': -89.4138189
+                },
+                'entrances': [],
+                'totalSpots': 463,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=36',
+                'specialEvents': []
             },
             {
-               'shortName': '6U',
-               'name': 'Helen C. White Garage Upper Level',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '600 N. Park Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 95,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
-               'specialEvents': []
+                'shortName': '6U',
+                'name': 'Helen C. White Garage Upper Level',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '600 North Park Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.0763396,
+                    'lng': -89.4007865
+                },
+                'entrances': [],
+                'totalSpots': 95,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
+                'specialEvents': []
+            },
+
+            {
+                'shortName': '6L',
+                'name': 'Helen C. White Garage Lower Level',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '600 North Park Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.0767906197085,
+                    'lng': -89.4007865
+                },
+                'entrances': [],
+                'totalSpots': 95,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
+                'specialEvents': []
             },
             {
-               'shortName': '6L',
-               'name': 'Helen C. White Garage Lower Level',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '600 N. Park Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 95,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
-               'specialEvents': []
+                'shortName': '7',
+                'name': 'Grainger Hall Garage',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '325 North Brooks Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53715'
+                },
+                'coordinates': {
+                    'lat': 43.07277759999999,
+                    'lng': -89.40241119999999
+                },
+                'entrances': [],
+                'totalSpots': 412,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=07',
+                'specialEvents': []
             },
             {
-               'shortName': '7',
-               'name': 'Grainger Hall Garage',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '325 N. Brooks Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53715'
-               },
-               'entrances': [],
-               'totalSpots': 412,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=07',
-               'specialEvents': []
+                'shortName': '29',
+                'name': 'North Park Street Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '21 North Park Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53715'
+                },
+                'coordinates': {
+                    'lat': 43.0682501,
+                    'lng': -89.4000363
+                },
+                'entrances': [],
+                'totalSpots': 340,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=029',
+                'specialEvents': []
             },
             {
-               'shortName': '29',
-               'name': 'North Park Street Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '21 N. Park Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53715'
-               },
-               'entrances': [],
-               'totalSpots': 340,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=029',
-               'specialEvents': []
+                'shortName': '46',
+                'name': 'Lake & Johnson Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '301 North Lake Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53715'
+                },
+                'coordinates': {
+                    'lat': 43.0723259,
+                    'lng': -89.396855
+                },
+                'entrances': [],
+                'totalSpots': 733,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=046',
+                'specialEvents': []
             },
             {
-               'shortName': '46',
-               'name': 'Lake & Johnson Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '301 N. Lake Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53715'
-               },
-               'entrances': [],
-               'totalSpots': 733,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=046',
-               'specialEvents': []
+                'shortName': '83',
+                'name': 'Fluno Center Garage',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '314 North Frances Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53703'
+                },
+                'coordinates': {
+                    'lat': 43.0725931,
+                    'lng': -89.3958675
+                },
+                'entrances': [],
+                'totalSpots': 296,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=83',
+                'specialEvents': []
             },
             {
-               'shortName': '83',
-               'name': 'Fluno Center Garage',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '314 N. Frances Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53703'
-               },
-               'entrances': [],
-               'totalSpots': 296,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=83',
-               'specialEvents': []
+                'shortName': '17',
+                'name': 'Engineering Drive Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '1525 Engineering Drive',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53706'
+                },
+                'coordinates': {
+                    'lat': 43.07213400000001,
+                    'lng': -89.4122016
+                },
+                'entrances': [],
+                'totalSpots': 822,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=17',
+                'specialEvents': []
             },
             {
-               'shortName': '17',
-               'name': 'Engineering Drive Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '1525 Engineering Drive',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53706'
-               },
-               'entrances': [],
-               'totalSpots': 822,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=17',
-               'specialEvents': []
+                'shortName': '80',
+                'name': 'Union South Garage',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '1308 West Dayton Street',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53715'
+                },
+                'coordinates': {
+                    'lat': 43.0712481,
+                    'lng': -89.40804949999999
+                },
+                'entrances': [],
+                'totalSpots': 168,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=80',
+                'specialEvents': []
             },
             {
-               'shortName': '80',
-               'name': 'Union South Garage',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '1308 West Dayton Street',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53715'
-               },
-               'entrances': [],
-               'totalSpots': 168,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=80',
-               'specialEvents': []
-            },
-            {
-               'shortName': '76',
-               'name': 'University Bay Drive Ramp',
-               'operatedBy': 'uw',
-               'address': {
-                 'street': '2501 University Bay Drive',
-                 'city': 'Madison',
-                 'state': 'WI',
-                 'postalCode': '53705'
-               },
-               'entrances': [],
-               'totalSpots': 1290,
-               'openSpots': None,
-               'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=76',
-               'specialEvents': []
+                'shortName': '76',
+                'name': 'University Bay Drive Ramp',
+                'operatedBy': 'uw',
+                'address': {
+                    'street': '2501 University Bay Drive',
+                    'city': 'Madison',
+                    'state': 'WI',
+                    'postalCode': '53705'
+                },
+                'coordinates': {
+                    'lat': 43.0813065,
+                    'lng': -89.4282504
+                },
+                'entrances': [],
+                'totalSpots': 1290,
+                'openSpots': None,
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=76',
+                'specialEvents': []
             }
         ]

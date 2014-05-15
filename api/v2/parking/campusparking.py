@@ -3,6 +3,7 @@ import json
 import datetime
 
 from google.appengine.api import urlfetch
+from google.appengine.api import memcache
 
 from api.BeautifulSoup import BeautifulSoup
 from api.v2.parking.parkingdata import ParkingData
@@ -17,8 +18,14 @@ class CampusParkingService():
         parking_availability_html = self.fetch_availability_html()
         parking_availabilities = self.parse_availability_html(parking_availability_html)
 
-        special_events_html = self.fetch_special_events_html()
-        special_events = self.parse_special_events_html(special_events_html)
+        special_events = memcache.get('campus_special_events')
+        if special_events is None:
+            special_events_url = self.parking_data['special_events_url']
+            special_events_html = self.fetch_special_events_html(special_events_url)
+            special_events = None
+            if special_events_html:
+                special_events = self.parse_special_events_html(special_events_html)
+                memcache.set('campus_special_events', special_events, 86400)  # cache for a day
 
         self.fill_campusparking_data_obj(parking_availabilities, special_events)
 
@@ -137,15 +144,16 @@ class CampusParkingService():
                     logging.error('Error parsing campus special event date')
                     event_datetime_str = None
 
-                # Rather than exclude props not available via uw lots, going with "None"
-                # This will manifest in the json as "prop":null which should be easily detectable via client JS
+                # Rather than exclude props not currently available via uw lots, going with "None"
+                # This will manifest in the json as "property":null which should be easily detectable via client JS
                 special_event = {
                     'eventName': event_name,
                     'parkingLocations': lot_num_array,
                     'eventDatetime': event_datetime_str,
                     'parkingStartDatetime': None,
                     'parkingEndDatetime': None,
-                    'eventVenue': None
+                    'eventVenue': None,
+                    'webUrl': self.parking_data['special_events_url']
                 }
                 special_events['specialEvents'].append(special_event)
 

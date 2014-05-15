@@ -3,8 +3,7 @@ import sys
 
 from google.appengine.api import urlfetch
 
-# set up relative paths to system-under-test dependencies.
-# tested only on Mac OS X
+# set up relative paths to app dependencies (tested on Mac OS X)
 sys.path.append(os.path.realpath('../../../'))
 sys.path.append(os.path.realpath('../../'))
 sys.path.append(os.path.realpath('../../v2'))
