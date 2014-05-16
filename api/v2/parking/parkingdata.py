@@ -32,8 +32,7 @@ class ParkingData:
                 ],
                 'totalSpots': 243,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCampus.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCampus.cfm'
             },
             {
                 'name': 'Brayton Lot',
@@ -54,8 +53,7 @@ class ParkingData:
                 ],
                 'totalSpots': 247,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/brayton.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/brayton.cfm'
             },
             {
                 'name': 'Capitol Square North Garage',
@@ -76,8 +74,7 @@ class ParkingData:
                 ],
                 'totalSpots': 613,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm'
             },
             {
                 'name': 'Government East Garage',
@@ -98,8 +95,7 @@ class ParkingData:
                 ],
                 'totalSpots': 516,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/govtEast.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/govtEast.cfm'
             },
             {
                 'name': 'Overture Center Garage',
@@ -120,8 +116,7 @@ class ParkingData:
                 },
                 'totalSpots': 620,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/overture.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/overture.cfm'
             },
             {
                 'name': 'State Street Capitol Garage',
@@ -142,8 +137,7 @@ class ParkingData:
                 ],
                 'totalSpots': 850,
                 'openSpots': None,
-                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCapitol.cfm',
-                'specialEvents': []
+                'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCapitol.cfm'
             }
         ]
 
@@ -170,8 +164,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 220,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=20',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=20'
             },
             {
                 'shortName': '27',
@@ -190,8 +183,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 48,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=27',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=27'
             },
             {
                 'shortName': '36',
@@ -210,8 +202,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 463,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=36',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=36'
             },
             {
                 'shortName': '6U',
@@ -230,8 +221,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 95,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06'
             },
 
             {
@@ -251,8 +241,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 95,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=06'
             },
             {
                 'shortName': '7',
@@ -271,8 +260,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 412,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=07',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=07'
             },
             {
                 'shortName': '29',
@@ -291,8 +279,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 340,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=029',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=029'
             },
             {
                 'shortName': '46',
@@ -311,8 +298,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 733,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=046',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=046'
             },
             {
                 'shortName': '83',
@@ -331,8 +317,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 296,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=83',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=83'
             },
             {
                 'shortName': '17',
@@ -351,8 +336,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 822,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=17',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=17'
             },
             {
                 'shortName': '80',
@@ -371,8 +355,7 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 168,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=80',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=80'
             },
             {
                 'shortName': '76',
@@ -391,7 +374,6 @@ class ParkingData:
                 'entrances': [],
                 'totalSpots': 1290,
                 'openSpots': None,
-                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=76',
-                'specialEvents': []
+                'webUrl': 'https://fpm-www1.fpm.wisc.edu/smomap/lot.aspx?lot=76'
             }
         ]

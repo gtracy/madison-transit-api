@@ -12,28 +12,30 @@ from api.BeautifulSoup import BeautifulSoup
 
 # Handles fetch, parse and combine of cityparking data
 class CityParkingService():
-    def __init__(self, parking_data=ParkingData().city_data):  # allow injection of parking data
-        self.parking_data = parking_data
+    def __init__(self):
+        self.parking_data = ParkingData().city_data
 
     #  orchestrate the heavy lifting
-    def get_data(self):
+    def get_data(self, include_special_events=None):
         city_avail_url = self.parking_data['availability_url']
         parking_availability_html = self.fetch_availability_html(city_avail_url)
         parking_availabilities = self.parse_availability_html(parking_availability_html)
 
-        special_events = memcache.get('city_special_events')
-        if special_events is None:
-            special_events_url = self.parking_data['special_events_url']
-            special_events_html = self.fetch_special_events_html(special_events_url)
-            special_events = None
-            if special_events_html:
-                special_events = self.parse_special_events_html(special_events_html)
-                memcache.set('city_special_events', special_events, 86400)  # cache for a day
+        if include_special_events:
+            special_events = memcache.get('city_special_events')
+            if special_events is None:
+                special_events_url = self.parking_data['special_events_url']
+                special_events_html = self.fetch_special_events_html(special_events_url)
+                special_events = None
+                if special_events_html:
+                    special_events = self.parse_special_events_html(special_events_html)
+                    memcache.set('city_special_events', special_events, 86400)  # cache for a day
 
-        self.fill_cityparking_data_obj(parking_availabilities, special_events)
-
-        # Remove location array as it doesn't make sense in response payload
-        self.remove_locations_from_special_events()
+            self.fill_cityparking_data_obj(parking_availabilities, special_events)
+            # Remove location array as it doesn't make sense in response payload
+            self.remove_locations_from_special_events()
+        else:
+            self.fill_cityparking_data_obj(parking_availabilities)
 
         return self.parking_data['lots']
 
@@ -48,12 +50,12 @@ class CityParkingService():
 
         return result.content
 
-    def parse_availability_html(self, cityparking_avail_html):
+    def parse_availability_html(self, availability_html):
         results = []
         lot_spots = None
 
         try:
-            city_lot_soup = BeautifulSoup(cityparking_avail_html)
+            city_lot_soup = BeautifulSoup(availability_html)
             # get all children of the availability div whose class name starts with dataRow
             lot_rows = city_lot_soup.find('div', {'id': 'availability'})\
                 .findAll('div', {'class': re.compile('^dataRow')})
@@ -182,7 +184,7 @@ class CityParkingService():
 
     ## end parse_cityparking_special_events_html
 
-    def fill_cityparking_data_obj(self, parking_availabilities, special_events):
+    def fill_cityparking_data_obj(self, parking_availabilities, special_events=None):
         for lot in self.parking_data['lots']:
             for availability in parking_availabilities:
                 if availability['name'].lower().find(lot['shortName']) >= 0:
@@ -190,6 +192,7 @@ class CityParkingService():
                     break
 
             if special_events and (special_events['specialEvents']) > 0:
+                lot['specialEvents'] = []
                 for special_event in special_events['specialEvents']:
                     if special_event['parkingLocation'].lower().find(lot['shortName']) >= 0:
                         lot['specialEvents'].append(special_event)

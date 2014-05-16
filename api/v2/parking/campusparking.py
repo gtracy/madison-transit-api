@@ -11,26 +11,29 @@ from api.v2.parking.parkingdata import ParkingData
 
 # Handles fetch, parse and combine of cityparking data
 class CampusParkingService():
-    def __init__(self, parking_data=ParkingData().campus_data):  # allow injection of parking data
-        self.parking_data = parking_data
+    def __init__(self):
+        self.parking_data = ParkingData().campus_data
 
-    def get_data(self):
+    def get_data(self, include_special_events):
         parking_availability_html = self.fetch_availability_html()
         parking_availabilities = self.parse_availability_html(parking_availability_html)
 
-        special_events = memcache.get('campus_special_events')
-        if special_events is None:
-            special_events_url = self.parking_data['special_events_url']
-            special_events_html = self.fetch_special_events_html(special_events_url)
-            special_events = None
-            if special_events_html:
-                special_events = self.parse_special_events_html(special_events_html)
-                memcache.set('campus_special_events', special_events, 86400)  # cache for a day
+        if include_special_events:
+            special_events = memcache.get('campus_special_events')
+            if special_events is None:
+                special_events_url = self.parking_data['special_events_url']
+                special_events_html = self.fetch_special_events_html(special_events_url)
+                special_events = None
+                if special_events_html:
+                    special_events = self.parse_special_events_html(special_events_html)
+                    memcache.set('campus_special_events', special_events, 86400)  # cache for a day
 
-        self.fill_campusparking_data_obj(parking_availabilities, special_events)
+            self.fill_campusparking_data_obj(parking_availabilities, special_events)
 
-        # lot #'s needed for prior "fill" method but don't make sense in payload
-        self.remove_locations_from_special_events()
+            # lot #'s needed for prior "fill" method but don't make sense in payload
+            self.remove_locations_from_special_events()
+        else:
+            self.fill_campusparking_data_obj(parking_availabilities)
 
         return self.parking_data['lots']
 
@@ -165,13 +168,14 @@ class CampusParkingService():
 
         return special_events
 
-    def fill_campusparking_data_obj(self, parking_availabilities, special_events):
+    def fill_campusparking_data_obj(self, parking_availabilities, special_events=None):
         for lot in self.parking_data['lots']:
             for park_availability in parking_availabilities:
                 if lot['shortName'] == self.strip_leading_zeros_from_short_name(park_availability['shortName']):
                     lot['openSpots'] = park_availability['openSpots']
 
             if special_events and (special_events['specialEvents']) > 0:
+                lot['specialEvents'] = []
                 for special_event in special_events['specialEvents']:
                     if lot['shortName'] in special_event['parkingLocations']:
                         lot['specialEvents'].append(special_event)

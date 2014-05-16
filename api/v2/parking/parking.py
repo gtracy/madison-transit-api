@@ -26,13 +26,20 @@ class ParkingHandler(webapp.RequestHandler):
         lot_results = {'lots': []}
         city_lots = []
         campus_lots = []
+        include_special_events = False
 
         # always include these headers
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.headers['Allow'] = 'GET'
 
+        if self.request.get('include') == 'specialevents':
+            include_special_events = True
+
+        logging.info(include_special_events)
+        logging.info(city_lots)
+
         try:
-            city_lots = CityParkingService().get_data()
+            city_lots = CityParkingService().get_data(include_special_events)
             logging.debug('API: city_lots json response %s' % city_lots)
 
         except (ValueError, urlfetch.DownloadError, AttributeError) as e:
@@ -46,7 +53,7 @@ class ParkingHandler(webapp.RequestHandler):
             )
 
         try:
-            campus_lots = CampusParkingService().get_data()
+            campus_lots = CampusParkingService().get_data(include_special_events)
             logging.debug('API: campus lots added, json response %s' % campus_lots)
         except (ValueError, urlfetch.DownloadError, AttributeError) as e:
             logging.error('Failed to retrieve campus data', str(e))
