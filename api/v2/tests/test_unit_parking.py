@@ -22,7 +22,7 @@ if __name__ == '__main__':
     unittest.main()
 
 
-class UnitTestCityParking(unittest.TestCase):
+class ParkingUnitTests(unittest.TestCase):
 
     def setUp(self):
         self.testbed = testbed.Testbed()
@@ -87,76 +87,154 @@ class UnitTestCityParking(unittest.TestCase):
         se_data = CityParkingService().parse_special_events_html(html)
         self.assertEquals(se_data['specialEvents'][0]['eventDatetime'], '2014-05-16T20:00:00')
 
-    # this one could fail without a software bug if there
-    # are no events
-    def test_cityparking_special_event_exists(self):
-        parking_data = ParkingData().city_data
-        url = parking_data['special_events_url']
-        spec_events_html = CityParkingService().fetch_special_events_html(url)
-        special_events = CityParkingService().parse_special_events_html(
-            spec_events_html)
+    def test_fill_city_parking_no_special_events(self):
+        city_parking_service = CityParkingService()
+        parking_avails = [{'name': 'State Street Campus Garage', 'openSpots': '5'}]
+        city_parking_service.fill_cityparking_data_obj(parking_avails)
+        with self.assertRaises(KeyError):
+            spec = city_parking_service.parking_data['lots'][0]['specialEvents']
+        self.assertEquals(city_parking_service.parking_data['lots'][0]['openSpots'], '5')
 
-        self.assertGreater(len(special_events), 0)
+    def test_fill_city_parking_with_special_events(self):
+        city_parking_service = CityParkingService()
+        parking_avails = [{'name': 'State Street Campus Garage', 'openSpots': '5'}]
+        spec_events = {'specialEvents': [{'parkingLocation': 'State Street Campus Garage',
+                        'eventVenue': 'blah',
+                        'eventDatetime': None,
+                        'eventName': None,
+                        'parkingStartDatetime': None,
+                        'parkingEndDatetime': None,
+                        'webUrl': 'http://'}]}
+        city_parking_service.fill_cityparking_data_obj(parking_avails, spec_events)
+        self.assertEquals(city_parking_service.parking_data['lots'][0]['openSpots'], '5')
+        self.assertEquals(city_parking_service.parking_data['lots'][0]['specialEvents'][0]['eventVenue'], 'blah')
 
-    def tearDown(self):
-        self.testbed.deactivate()
+    def test_remove_locations_from_special_events(self):
+        city_parking_service = CityParkingService()
 
+        for lot in city_parking_service.parking_data['lots']:
+            lot['specialEvents'] = []
+        city_parking_service.parking_data['lots'][0]['specialEvents'].append(
+            {
+                'parkingLocation': 'State Street Campus Garage',
+                'eventVenue': 'blah',
+                'eventDatetime': None,
+                'eventName': None,
+                'parkingStartDatetime': None,
+                'parkingEndDatetime': None,
+                'webUrl': 'http://',
+            }
+        )
 
-class UnitTestCampusParking(unittest.TestCase):
-    def setUp(self):
-        self.testbed = testbed.Testbed()
-        self.testbed.activate()
+        city_parking_service.remove_locations_from_special_events()
+        self.assertEquals(city_parking_service.parking_data['lots'][0]['specialEvents'][0]['eventVenue'], 'blah')
+        with self.assertRaises(KeyError):
+            self.assertEquals(city_parking_service.parking_data['lots'][0]['specialEvents'][0]['parkingLocation'], 'State Street Campus Garage')
 
-        # declare the service stubs
-        self.testbed.init_urlfetch_stub()
-        self.testbed.init_memcache_stub()
-
+######## Start Campus Parking Unit Tests #########
     def test_campusparking_bad_campus_avail_url(self):
         with self.assertRaises(urlfetch.DownloadError):
-            CampusParkingService().fetch_availability_html('http://www.campusbaddomainsdfsd.com')
+            CampusParkingService().fetch_availability_html('http://www.campusofmadisonbaddomain.com')
+
+    def test_campusparking_bad_avail_html_none(self):
+        with self.assertRaises(TypeError):
+            CampusParkingService().parse_availability_html(None)
+
+    def test_campusparking_bad_avail_html_empty_html(self):
+        with self.assertRaises(AttributeError):
+            CampusParkingService().parse_availability_html('')
+
+    def test_campusparking_bad_html_bad_avail_parse_html(self):
+        bad_html = '<html><body><table id="ctl00_ctl00_central_block_right_navi_cnt_gvName"><tr></tr><tr><td></td></tr></table></body></html>'
+        with self.assertRaises(IndexError):
+            CampusParkingService().parse_availability_html(bad_html)
+
+    def test_campusparking_html_parse_html_spots(self):
+        html = '<html><body><table id="ctl00_ctl00_central_block_right_navi_cnt_gvName"><tr></tr><tr><td></td><td>020 UNIVERSITY AVE RAMP</td><td>5</td></tr></table></body></html>'
+        lot_details = CampusParkingService().parse_availability_html(html)
+        self.assertEquals(lot_details[0]['openSpots'], '5')
+
+    def test_campusparking_html_parse_html_lotname(self):
+        html = '<html><body><table id="ctl00_ctl00_central_block_right_navi_cnt_gvName"><tr></tr><tr><td></td><td>020 UNIVERSITY AVE RAMP</td><td>5</td></tr></table></body></html>'
+        lot_details = CampusParkingService().parse_availability_html(html)
+        self.assertEquals(lot_details[0]['shortName'], '020')
+
+    def test_campusparking_bad_city_special_events_url(self):
+        html = CampusParkingService().fetch_special_events_html('http://campus---bad.com')
+        self.assertIsNone(html)
+
+    def test_campusparking_bad_special_events_html_none(self):
+        se_data = CampusParkingService().parse_special_events_html(None)
+        self.assertEquals(se_data['specialEvents'], [])
+
+    def test_campusparking_bad_special_events_html_empty_html(self):
+        se_data = CampusParkingService().parse_special_events_html('')
+        self.assertEquals(se_data['specialEvents'], [])
+
+    def test_campusparking_bad_special_events_bad_parse_html(self):
+        bad_html = '<html><body><table class="event-item"></body></html>'
+        se_data = CampusParkingService().parse_special_events_html(bad_html)
+        self.assertEquals(se_data['specialEvents'], [])
+
+    def test_campusparking_special_events_parse_html(self):
+        html = '<table id="event2" class="event-item" border="0" cellspacing="0">' \
+               '<tbody><tr><th class="event-head">06/12/2014:&nbsp;&nbsp;WIAA Softball</th></tr>' \
+               '<tr><td>Times lots will be impacted:</td><td>7:00 a.m. </td></tr>' \
+               '<tr><td>Event Parking Available in Lots:</td><td>60, 76</td></tr>' \
+               '</tbody></table>'
+        se_data = CampusParkingService().parse_special_events_html(html)
+        self.assertEquals(se_data['specialEvents'][0]['eventDatetime'], '2014-06-12T07:00:00')
+
+    def test_fill_campusparking_no_special_events(self):
+        campus_parking_service = CampusParkingService()
+        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': '5', 'shortName': '020'}]
+        campus_parking_service.fill_campusparking_data_obj(parking_avails)
+        with self.assertRaises(KeyError):  # special events should be None
+            spec = campus_parking_service.parking_data['lots'][0]['specialEvents']
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], '5')
 
 
-    def test_campusparking_html_not_none(self):
-        avail_url = ParkingData().campus_data['availability_url']
-        parking_html = CampusParkingService().fetch_availability_html(avail_url)
-        self.assertIsNotNone(parking_html)
+    def test_fill_campusparking_with_special_events(self):
+        campus_parking_service = CampusParkingService()
+        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': '5', 'shortName': '020'}]
+        spec_events = {
+            'specialEvents': [
+                {
+                    'parkingLocations': ['20'],
+                    'eventVenue': 'blah',
+                    'eventDatetime': None,
+                    'eventName': None,
+                    'parkingStartDatetime': None,
+                    'parkingEndDatetime': None,
+                    'webUrl': 'http://'
+                }
+            ]
+        }
+        campus_parking_service.fill_campusparking_data_obj(parking_avails, spec_events)
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], '5')
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['specialEvents'][0]['eventVenue'], 'blah')
 
-    def test_campusparking_not_none(self):
-        parking_results = CampusParkingService().get_data(True)
-        self.assertIsNotNone(parking_results)
+    def test_remove_campus_locations_from_special_events(self):
+        campus_parking_service = CampusParkingService()
 
-    def test_campusparking_spot_availability_val(self):
-        parking_html = CampusParkingService().fetch_availability_html()
-        parking_results = CampusParkingService().parse_availability_html(parking_html)
-        failure = False
-        for result in parking_results:
-            result_num = int(result['openSpots'])
-            if result_num < 0:
-                failure = True
+        for lot in campus_parking_service.parking_data['lots']:
+            lot['specialEvents'] = []
+        campus_parking_service.parking_data['lots'][0]['specialEvents'].append(
+            {
+                'parkingLocations': ['20'],
+                'eventVenue': 'blah',
+                'eventDatetime': None,
+                'eventName': None,
+                'parkingStartDatetime': None,
+                'parkingEndDatetime': None,
+                'webUrl': 'http://'
+            }
+        )
 
-        self.assertEqual(failure, False)
-
-    def test_campusparking_bad_special_events_url(self):
-        campus_special_events_url = 'http://www.campusmadisonbaddomain.com'
-        result = CampusParkingService().fetch_special_events_html(campus_special_events_url)
-        self.assertEquals(result, None)
-
-    def test_campusparking_special_events_html_not_none(self):
-        parking_html = CampusParkingService().fetch_special_events_html()
-        self.assertIsNotNone(parking_html)
-
-    def test_campusparking_special_event_has_parkinglocation(self):
-        spec_events_html = CampusParkingService().fetch_special_events_html()
-        special_events = CampusParkingService().parse_special_events_html(
-            spec_events_html)
-
-        self.assertNotEqual(special_events['specialEvents'][0]['parkingLocations'], '')
-
-    def test_campusparking_special_events_complete_data(self):
-        data = CampusParkingService().get_data(True)
-        self.assertIsNotNone(data)
-        self.assertGreater(len(data), 0)
-        self.assertIsNotNone(data[0]['openSpots'])
+        campus_parking_service.remove_locations_from_special_events()
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['specialEvents'][0]['eventVenue'], 'blah')
+        with self.assertRaises(KeyError):
+            self.assertEquals(campus_parking_service.parking_data['lots'][0]['specialEvents'][0]['parkingLocations'], ['20'])
 
     def tearDown(self):
         self.testbed.deactivate()

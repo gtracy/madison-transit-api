@@ -78,9 +78,24 @@ class CampusParkingService():
             logging.debug(json.dumps(results))
 
         except ValueError:
-            # bad error. cannot parse html perhaps due to html change.
-            logging.error('Error parsing scraped content from campus parking page.')
+            # Cannot parse html perhaps due to html change.
+            logging.error('ValueError parsing scraped content from campus parking page.')
             raise ValueError
+
+        except AttributeError:
+            # HTML doesn't include expected elements
+            logging.error('AttributeError parsing scraped content from campus parking page.')
+            raise AttributeError
+
+        except TypeError:
+            # Html is probably None
+            logging.error('TypeError parsing scraped content from campus parking page.')
+            raise TypeError
+
+        except IndexError:
+            # Html is probably None
+            logging.error('IndexError parsing scraped content from campus parking page.')
+            raise IndexError
 
         return results
 
@@ -99,11 +114,11 @@ class CampusParkingService():
         return result
 
     def parse_special_events_html(self, special_events_html):
-        if not special_events_html:
-            return
-
         special_events = dict()
         special_events['specialEvents'] = []
+
+        if not special_events_html:
+            return special_events
 
         try:
             soup = BeautifulSoup(special_events_html)
@@ -160,11 +175,10 @@ class CampusParkingService():
                 }
                 special_events['specialEvents'].append(special_event)
 
-        except ValueError:
-            # bad error. cannot parse html perhaps due to html change.
-            logging.error('Error parsing scraped content from campus special events page.')
+        except (ValueError, AttributeError, TypeError, IndexError) as e:
+            # unlike availability, we eat this error. availability is still useful w/out events
+            logging.error('Error parsing scraped content from campus special events page.' + str(e))
             special_events['specialEvents'] = []
-            raise ValueError
 
         return special_events
 

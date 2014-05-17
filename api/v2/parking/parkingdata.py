@@ -30,7 +30,7 @@ class ParkingData:
                     '400 North Frances Street',
                     '400 North Lake Street'
                 ],
-                'totalSpots': 243,
+                'totalSpots': 1065,
                 'openSpots': None,
                 'webUrl': 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCampus.cfm'
             },

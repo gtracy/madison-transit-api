@@ -32,7 +32,7 @@ class CityParkingService():
                     memcache.set('city_special_events', special_events, 86400)  # cache for a day
 
             self.fill_cityparking_data_obj(parking_availabilities, special_events)
-            # Remove location array as it doesn't make sense in response payload
+            # Remove location array as it is duplicative in response payload
             self.remove_locations_from_special_events()
         else:
             self.fill_cityparking_data_obj(parking_availabilities)
@@ -175,7 +175,7 @@ class CityParkingService():
                     }
                 )
 
-        except (ValueError, AttributeError, TypeError) as e:
+        except (ValueError, AttributeError, TypeError, IndexError) as e:
             # unlike availability, we eat this error. availability is still useful w/out events
             logging.error('Error parsing scraped content from city special events page.' + str(e))
             special_events['specialEvents'] = []
