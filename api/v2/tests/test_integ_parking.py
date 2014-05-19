@@ -43,10 +43,10 @@ class ParkingIntegrationTests(unittest.TestCase):
         data = response.json['lots']
         # test all openSpots got set
         for lot in data:
-            self.assertGreater(int(lot['openSpots']), 0)
+            self.assertIsNotNone(lot['openSpots'])
 
     def test_parking_include_special_events(self):
-        response = self.testapp.get('/parking/v2/lots?include=specialevents')
+        response = self.testapp.get('/parking/v2/lots?expand=specialevents')
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.content_type, 'application/json')
         data = response.json['lots']
@@ -57,7 +57,7 @@ class ParkingIntegrationTests(unittest.TestCase):
         self.assertTrue(hit)
 
     def test_parking_valid_uw_special_event(self):
-        response = self.testapp.get('/parking/v2/lots?include=specialevents')
+        response = self.testapp.get('/parking/v2/lots?expand=specialevents')
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.content_type, 'application/json')
         data = response.json['lots']
@@ -71,7 +71,7 @@ class ParkingIntegrationTests(unittest.TestCase):
         self.assertIsInstance(thedatetime,datetime.datetime)
 
     def test_parking_valid_city_special_event(self):
-        response = self.testapp.get('/parking/v2/lots?include=specialevents')
+        response = self.testapp.get('/parking/v2/lots?expand=specialevents')
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.content_type, 'application/json')
         data = response.json['lots']

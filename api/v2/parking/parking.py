@@ -32,7 +32,7 @@ class ParkingHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.headers['Allow'] = 'GET'
 
-        if self.request.get('include') == 'specialevents':
+        if self.request.get('expand') == 'specialevents':
             include_special_events = True
 
         logging.info(include_special_events)
@@ -78,7 +78,7 @@ class ParkingHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = 'application/json'
             response_payload = json.dumps(lot_results)
 
-        #stathat.apiStatCount()
+        stathat.apiStatCount()
         self.response.out.write(response_payload)
 
 
