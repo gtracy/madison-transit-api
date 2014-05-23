@@ -9,6 +9,8 @@ from google.appengine.api import memcache
 from api.v2.parking.parkingdata import ParkingData
 from api.BeautifulSoup import BeautifulSoup
 
+from api.v2 import api_utils
+
 
 # Handles fetch, parse and combine of cityparking data
 class CityParkingService():
@@ -112,22 +114,14 @@ class CityParkingService():
     def parse_special_event_datetimes(self, table_cells):
 
         event_timestamp = None
-        try:
-            #  the position of the event time is un predictable so find it, then parse
-            str_event_date = table_cells[0].string
-            event_time_cell_contents = table_cells[5].string
-            colon_index = event_time_cell_contents.find(':')
-            if colon_index > -1:
-                if colon_index == 1:
-                    i_start = colon_index - 1
-                else:
-                    i_start = colon_index - 2
-                i_end = colon_index + 6
-                str_event_time = event_time_cell_contents[i_start:i_end].replace(' ', '')
-                event_timestamp = datetime.datetime.strptime(
-                    str_event_date + str_event_time,'%m/%d/%Y%I:%M%p').strftime('%Y-%m-%dT%H:%M:%S')
-        except:
-            logging.error('error')
+        str_event_date = table_cells[0].string
+
+        # get datetime obj from special event time strings
+        str_event_time = api_utils.get_time_from_text(table_cells[5].string)
+        if str_event_time is not '':
+            event_timestamp = datetime.datetime.strptime(
+                str_event_date + str_event_time,'%m/%d/%Y%I:%M%p').strftime('%Y-%m-%dT%H:%M:%S')
+
 
         # split '00:00 pm - 00:00 pm' into start and end strings
         time_parts = table_cells[2].string.split(' - ')

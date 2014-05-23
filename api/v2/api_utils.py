@@ -205,3 +205,16 @@ def deserialize_entities(data):
     else:
         return [db.model_from_protobuf(entity_pb.EntityProto(x)) for x in data]
 
+def get_time_from_text(text_with_time, findPos=0):
+    # takes unstructured text that contains a time substring and returns '00:00 PM'
+    colon_index = text_with_time.find(':', findPos)
+    if colon_index > -1:
+        if colon_index == 1:
+            i_start = colon_index - 1
+        else:
+            i_start = colon_index - 2
+        i_end = colon_index + 6
+        return text_with_time[i_start:i_end].replace(' ', '')
+    else:
+        return ''
+

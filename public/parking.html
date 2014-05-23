@@ -62,7 +62,7 @@
     </tr>
  </table>
 
- <h3>Example 1: No parameters</h3>
+ <h3>Example 1: GET all parking lots without special events (no parameters)</h3>
   
 
  <span style="font-weight:bold;margin-left:24px;">GET http://api.smsmybus.com/parking/v2/lots</span>
@@ -117,8 +117,8 @@
 }
 
 </code>
-<h3>Example 2: Include current or future special events for given lots. </h3>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus
+<h3>Example 2: Get all parking lots including current and future special events for given lots. </h3>
+ <span style="font-weight:bold;margin-left:24px;"> GET http://api.smsmybus
      .com/parking/v2/lots?expand=specialevents</span>
  <h3>Response</h3>
 <code class="prettyprint lang-javascript">
@@ -200,8 +200,28 @@
 }
 
 </code>
-<h3>Event Information</h3>
-For special event parking, ParkingStartTime and ParkingEndTime designate when pay-on-entry begin and end, respectively. Typically, pay on entry begins two hours before EventTime, and ends 5 minutes after EventTime.
+    <h3>Special Event Information</h3>
+
+     <p>Special event information and pricing policies vary between city and UW operated lots making it difficult to
+     provide a consistent, intuitive return payload across the two operators. UW makes it worse by having a
+         dizzying array of pricing policies depending on the event type. The API had to take the simplest
+         approach possible and push the complexity down to the API consumer (highly unfortunate).</p>
+
+     <p>In addition to pricing complexity, UW does not provide parkingStartDatetime and parkingEndDatetime,
+         which makes explicit determination of special event windows impossible. To mitigate the following steps
+         were taken:</p>
+     <ul>
+         <li>
+             Where particular fields are not available, they will be set to null to make checking (typically via JS)
+             as simple as possible.
+         </li>
+         <li>
+             With end-users in mind, each special event blob contains a "webUrl" link to the appropriate special
+             events page, which could provide consuming applications the ability for users to drill-down into
+             specific special event information. A suggestion might be to detect whether a special event is happening soon (between now and 3 hours),
+             notify the user lot availability and pricing may be affected, and provide the link.
+         </li>
+     </ul>
  </div>
   
  <div id="spacer"></div>
