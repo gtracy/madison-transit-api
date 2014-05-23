@@ -71,7 +71,7 @@ class CampusParkingService():
 
                 lot_details = {
                     'shortName': short_name,
-                    'openSpots': lot_spots
+                    'openSpots': int(lot_spots)
                 }
                 results.append(lot_details)
 

@@ -70,7 +70,7 @@ class CityParkingService():
 
                 lot_details = {
                     'name': row.div.a.string,
-                    'openSpots': lot_spots
+                    'openSpots': int(lot_spots)
                 }
                 results.append(lot_details)
 
@@ -110,11 +110,24 @@ class CityParkingService():
     ## end fetch_parking_special_events_html
 
     def parse_special_event_datetimes(self, table_cells):
-        # transform provided event_time (Central Time)
-        event_time = datetime.datetime.strptime(
-            table_cells[0].string + table_cells[5].string.replace(' ', ''),
-            '%m/%d/%Y%I:%M%p'
-        ).strftime('%Y-%m-%dT%H:%M:%S')
+
+        event_timestamp = None
+        try:
+            #  the position of the event time is un predictable so find it, then parse
+            str_event_date = table_cells[0].string
+            event_time_cell_contents = table_cells[5].string
+            colon_index = event_time_cell_contents.find(':')
+            if colon_index > -1:
+                if colon_index == 1:
+                    i_start = colon_index - 1
+                else:
+                    i_start = colon_index - 2
+                i_end = colon_index + 6
+                str_event_time = event_time_cell_contents[i_start:i_end].replace(' ', '')
+                event_timestamp = datetime.datetime.strptime(
+                    str_event_date + str_event_time,'%m/%d/%Y%I:%M%p').strftime('%Y-%m-%dT%H:%M:%S')
+        except:
+            logging.error('error')
 
         # split '00:00 pm - 00:00 pm' into start and end strings
         time_parts = table_cells[2].string.split(' - ')
@@ -135,7 +148,7 @@ class CityParkingService():
             '%m/%d/%Y%I:%M%p'
         ).strftime('%Y-%m-%dT%H:%M:%S')
 
-        return event_time, parking_end_time, parking_start_time
+        return event_timestamp, parking_end_time, parking_start_time
 
     ## end parse_special_event_datetimes
 

@@ -55,7 +55,7 @@ class ParkingUnitTests(unittest.TestCase):
                '<div class="dataRow rowShade"><div class="carParkName"><a href="../facilities/capSquareNorth.cfm">Capitol Square North Garage</a></div><div class="spotsOpen">345</div></div>' \
                '</div></body></html>'
         lot_details = CityParkingService().parse_availability_html(html)
-        self.assertEquals(lot_details[1]['openSpots'], '345')
+        self.assertEquals(lot_details[1]['openSpots'], 345)
 
     def test_cityparking_html_parse_html_lotname(self):
         html = '<html><body><div id="availability">' \
@@ -83,17 +83,28 @@ class ParkingUnitTests(unittest.TestCase):
         self.assertEquals(se_data['specialEvents'], [])
 
     def test_cityparking_special_events_parse_html(self):
-        html = '<html><body><table id="calendar"><tr></tr><tr></tr><tr class="rowshade"><td>5/16/2014</td><td> Overture Center Garage, State Street Capitol Garage</td><td>6:00 pm - 8:05 pm</td><td>Million Dollar Quartet</td><td>Overture Center - Overture Hall</td><td>8:00 pm</td></tr></table></body></html>'
+        html = '<html><body><table id="calendar"><tr></tr><tr></tr><tr class="rowshade"><td>5/16/2014</td><td> ' \
+               'Overture Center Garage, State Street Capitol Garage</td><td>6:00 pm - 8:05 pm</td><td>Million Dollar ' \
+               'Quartet</td><td>Overture Center - Overture Hall</td><td>blllkjdkjlslkdj ' \
+               '10:00pm</td></tr></table></body></html>'
         se_data = CityParkingService().parse_special_events_html(html)
-        self.assertEquals(se_data['specialEvents'][0]['eventDatetime'], '2014-05-16T20:00:00')
+        self.assertEquals(se_data['specialEvents'][0]['eventDatetime'], '2014-05-16T22:00:00')
+
+    def test_cityparking_special_events_single_digit_hour_parse_html(self):
+        html = '<html><body><table id="calendar"><tr></tr><tr></tr><tr class="rowshade"><td>5/16/2014</td><td> ' \
+               'Overture Center Garage, State Street Capitol Garage</td><td>6:00 pm - 8:05 pm</td><td>Million Dollar ' \
+               'Quartet</td><td>Overture Center - Overture Hall</td><td>blllkjdkjlslkdj ' \
+               '1:00pm</td></tr></table></body></html>'
+        se_data = CityParkingService().parse_special_events_html(html)
+        self.assertEquals(se_data['specialEvents'][0]['eventDatetime'], '2014-05-16T13:00:00')
 
     def test_fill_city_parking_no_special_events(self):
         city_parking_service = CityParkingService()
-        parking_avails = [{'name': 'State Street Campus Garage', 'openSpots': '5'}]
+        parking_avails = [{'name': 'State Street Campus Garage', 'openSpots': 5}]
         city_parking_service.fill_cityparking_data_obj(parking_avails)
         with self.assertRaises(KeyError):
             spec = city_parking_service.parking_data['lots'][0]['specialEvents']
-        self.assertEquals(city_parking_service.parking_data['lots'][0]['openSpots'], '5')
+        self.assertEquals(city_parking_service.parking_data['lots'][0]['openSpots'], 5)
 
     def test_fill_city_parking_with_special_events(self):
         city_parking_service = CityParkingService()
@@ -152,7 +163,7 @@ class ParkingUnitTests(unittest.TestCase):
     def test_campusparking_html_parse_html_spots(self):
         html = '<html><body><table id="ctl00_ctl00_central_block_right_navi_cnt_gvName"><tr></tr><tr><td></td><td>020 UNIVERSITY AVE RAMP</td><td>5</td></tr></table></body></html>'
         lot_details = CampusParkingService().parse_availability_html(html)
-        self.assertEquals(lot_details[0]['openSpots'], '5')
+        self.assertEquals(lot_details[0]['openSpots'], 5)
 
     def test_campusparking_html_parse_html_lotname(self):
         html = '<html><body><table id="ctl00_ctl00_central_block_right_navi_cnt_gvName"><tr></tr><tr><td></td><td>020 UNIVERSITY AVE RAMP</td><td>5</td></tr></table></body></html>'
@@ -187,16 +198,16 @@ class ParkingUnitTests(unittest.TestCase):
 
     def test_fill_campusparking_no_special_events(self):
         campus_parking_service = CampusParkingService()
-        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': '5', 'shortName': '020'}]
+        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': 5, 'shortName': '020'}]
         campus_parking_service.fill_campusparking_data_obj(parking_avails)
         with self.assertRaises(KeyError):  # special events should be None
             spec = campus_parking_service.parking_data['lots'][0]['specialEvents']
-        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], '5')
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], 5)
 
 
     def test_fill_campusparking_with_special_events(self):
         campus_parking_service = CampusParkingService()
-        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': '5', 'shortName': '020'}]
+        parking_avails = [{'name': 'University Avenue Ramp', 'openSpots': 5, 'shortName': '020'}]
         spec_events = {
             'specialEvents': [
                 {
@@ -211,7 +222,7 @@ class ParkingUnitTests(unittest.TestCase):
             ]
         }
         campus_parking_service.fill_campusparking_data_obj(parking_avails, spec_events)
-        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], '5')
+        self.assertEquals(campus_parking_service.parking_data['lots'][0]['openSpots'], 5)
         self.assertEquals(campus_parking_service.parking_data['lots'][0]['specialEvents'][0]['eventVenue'], 'blah')
 
     def test_remove_campus_locations_from_special_events(self):
