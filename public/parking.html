@@ -212,8 +212,9 @@
          were taken:</p>
      <ul>
          <li>
-             Where particular fields are not available, they will be set to null to make checking (typically via JS)
-             as simple as possible.
+             Where particular fields are not available, simple types will be set to null ("eventVenue":null) and
+             array types will be set to empty arrays ("entrances": [ ]). The goal is to make existence checking as
+             simple as possible for consuming apps (typically JavaScript).
          </li>
          <li>
              With end-users in mind, each special event blob contains a "webUrl" link to the appropriate special
