@@ -87,6 +87,11 @@ def getLocalTimestamp():
 
 ## end getLocalTimestamp()
 
+def datetimeNowIsInRange(startDatetime, endDatetime, now):
+    return startDatetime <= now <= endDatetime
+
+## end datetimeNowIsInRange()
+
 def computeCountdownMinutes(arrivalTime):
 
     ltime = getLocalDatetime()

@@ -209,7 +209,8 @@ def getParkingSpecialEvents():
                 event = table_cells[3].string
 
                 # take the event time strings (already central time), create datetime obj, then convert back to correct string
-                eventtimeobj = datetime.datetime.strptime(table_cells[0].string + table_cells[5].string.replace(' ',''), '%m/%d/%Y%I:%M%p')
+                eventtimeobj = datetime.datetime.strptime(table_cells[0].string + api_utils.get_time_from_text(table_cells[5].string)
+                                                          .replace(' ',''), '%m/%d/%Y%I:%M%p')
                 eventtime = datetime.datetime.strftime(eventtimeobj, '%Y-%m-%dT%H:%M:%S')
 
                 # split '00:00 pm - 00:00 pm' into start and end strings
