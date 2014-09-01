@@ -1,13 +1,13 @@
 Madison Transit API
 ========
-This project is a civic hacking project that makes the Madison Metro bus system more accessible, 
+This project is a civic hacking project that makes the Madison Metro bus system more accessible,
 easier to use, and make the entire riding experience more enjoyable.
 
 http://api.smsmybus.com
 
 The app is currently deployed on Google App Engine.
 
-This application provides access to a free, easy to use, JSON-based web service interface for 
+This application provides access to a free, easy to use, JSON-based web service interface for
 Madison Metro service. Once you've received a developer token, you have access to the following
 services:
 
@@ -38,17 +38,18 @@ locally, not using the SMS features, and will not export statistics
 to Google Docs, you may not need to change anything.
 
 Deploy/run the application, and visit
-http://baseurl/debug/create/newkey 
+http://baseurl/debug/create/newkey
 
 You will likely need to log in at that time. If running locally,
 be sure to click on 'Sign in as administrator' to create the key.
 
-That will create your first developer key, 'fixme'. You can go to 
-the Datastore Viewer ( http://localhost:8080/_ah/admin/datastore ) 
+That will create your first developer key, 'fixme'. You can go to
+the Datastore Viewer ( http://localhost:8080/_ah/admin/datastore )
 and edit your new key.
 
 Finally, you need to load route data. SMSMyBus crawls the Madison
-Metro website to load route and stop data. There are detailed instructions on the wiki. 
+Metro website to load route and stop data. There are detailed instructions [on the wiki](https://github.com/gtracy/madison-transit-api/wiki/Bootstrapping-the-database).
 
 You should now be able to use the API as documented to fetch realtime
-bus data, substituting your URL for api.smsmybus.com 
+bus data, substituting your URL for api.smsmybus.com
+
