@@ -168,7 +168,7 @@ class DropTableHandler(webapp.RequestHandler):
 class StartTableDrop(webapp.RequestHandler):
     def get(self,model=""):
         url = '/droptable/%s' % model
-        logging.error('getting ready to start task to drop the %s table' % model)
+        logging.debug('getting ready to start task to drop the %s table' % model)
         task = Task(url=url, params={})
         task.add('crawler')
         self.response.out.write('got it. started the background task to delete all %s entities' % model)

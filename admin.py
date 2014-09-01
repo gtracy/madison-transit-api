@@ -111,7 +111,7 @@ class ResetChannelsHandler(webapp.RequestHandler):
         logging.debug('channels not empty')
     else:
         memcache.delete('channels')
-        logging.error('empty. delete it.')
+        logging.debug('empty. delete it.')
 
 ## end
 

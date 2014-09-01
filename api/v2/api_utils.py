@@ -24,7 +24,7 @@ def validateDevKey(devKey):
 
     storeKey = memcache.get(devKey)
     if storeKey is None:
-        logging.error('Dev key - %s - cache miss')
+        #logging.error('Dev key - %s - cache miss')
         q = db.GqlQuery("SELECT __key__ FROM DeveloperKeys WHERE developerKey = :1", devKey)
         storeKey = q.get()
         if storeKey is None:
