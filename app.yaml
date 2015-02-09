@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: parking-v2
+version: error-500-page
 runtime: python27
 api_version: 1
 threadsafe: true
