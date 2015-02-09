@@ -12,9 +12,9 @@ from api.v1 import api_utils
 from stats import stathat
 
 class MainHandler(webapp.RequestHandler):
-    
+
     def get(self):
-      
+
       # validate the request parameters
       devStoreKey = validateRequest(self.request)
       if devStoreKey is None:
@@ -22,11 +22,11 @@ class MainHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/javascript'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Illegal request parameters')))
           return
-      
+
       # snare the inputs
       routeID = self.request.get('routeID')
       logging.debug('getvehicles request parameters...  routeID %s' % routeID)
-      
+
       if api_utils.afterHours() is True:
           # don't run these jobs during "off" hours
 	      json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
@@ -38,7 +38,7 @@ class MainHandler(webapp.RequestHandler):
           json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters. Did you forget to include a routeID?')
           api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLES,self.request.query_string,self.request.remote_addr,'illegal query string combination');
 
-      #logging.debug('API: json response %s' % json_response);    
+      #logging.debug('API: json response %s' % json_response);
       # encapsulate response in json
       callback = self.request.get('callback')
       if callback is not '':
@@ -49,7 +49,7 @@ class MainHandler(webapp.RequestHandler):
       else:
           self.response.headers['Content-Type'] = 'application/json'
           response = json.dumps(json_response)
-      
+
       self.response.out.write(response)
       stathat.apiStatCount()
 
@@ -78,20 +78,20 @@ def routeRequest(routeID):
             logging.debug("Error content: %s" % result.content)
           time.sleep(6)
           loop = loop+1
-           
+
     if result is None or result.status_code != 200:
         logging.error("Exiting early: error fetching URL: " + result.status_code)
         return api_utils.buildErrorResponse('-1','Error reading live Metro feed')
-    
+
     dataArray = result.content.split('*')
     logging.debug('timestamp is %s' % dataArray[0])
     timestamp = dataArray[0]
-    
+
     vehicles = dataArray[2].split(';')
     results = dict({'status' : 0,
                     'routeID' : routeID,
-                    'count' : len(vehicles)-1, 
-                    'timestamp' : timestamp, 
+                    'count' : len(vehicles)-1,
+                    'timestamp' : timestamp,
                     'vehicles' : list()
                     })
     for v in vehicles:
@@ -106,20 +106,20 @@ def routeRequest(routeID):
                      'nextStop':next[2].split(':')[1].lstrip()
                    })
         results['vehicles'].append(spot)
-    
-    return results   
+
+    return results
 
 ## routeRequest()
 
 
 def validateRequest(request):
-    
+
     # validate the key
     devStoreKey = api_utils.validateDevKey(request.get('key'))
     if devStoreKey is None:
         api_utils.recordDeveloperRequest(None,api_utils.GETSTOPS,request.query_string,request.remote_addr,'illegal developer key specified');
         return None
-    
+
     routeID = request.get('routeID')
     if routeID is None or routeID is '':
         api_utils.recordDeveloperRequest(devStoreKey,type,request.query_string,request.remote_addr,'a routeID must be included');
@@ -132,6 +132,7 @@ def validateRequest(request):
 application = webapp.WSGIApplication([('/v1/getvehicles', MainHandler),
                                       ],
                                      debug=True)
+application.error_handlers[500] = api_utils.handle_500
 
 def main():
   logging.getLogger().setLevel(logging.DEBUG)

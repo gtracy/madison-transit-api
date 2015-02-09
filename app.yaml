@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: parking-v2
+version: load-testing
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -12,7 +12,7 @@ inbound_services:
 
 builtins:
 - appstats: off
-- remote_api: off
+- remote_api: on
 
 libraries:
 - name: webapp2
