@@ -24,10 +24,10 @@ class MainHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','The API does not support POST requests')))
         return
-    
+
     def get(self):
         events = {}
-        
+
         loop = 0
         done = False
         result = None
@@ -43,11 +43,11 @@ class MainHandler(webapp.RequestHandler):
                 logging.debug("Error content: %s" % result.content)
               time.sleep(6)
               loop = loop+1
-           
+
         if result is None or result.status_code != 200:
             logging.error("Exiting early: error fetching URL: " + result.status_code)
-            return 
-     
+            return
+
         #
         # TODO - rework this section to load the realtime data using the
         # async calls in parallel with the scraped event data
@@ -57,7 +57,7 @@ class MainHandler(webapp.RequestHandler):
         if specialEvents is None:
             eventsResult = None
             specialEventsWarning = memcache.get('ParkingEventsServiceStatus')
-            if((specialEventsWarning < 3) or specialEventsWarning is None): 
+            if((specialEventsWarning < 3) or specialEventsWarning is None):
                 eventsResult = getParkingSpecialEvents()
                 if eventsResult is None or eventsResult.status_code != 200:
                     logging.error("Error fetching special events URL: " + eventsResult.status_code)
@@ -78,20 +78,20 @@ class MainHandler(webapp.RequestHandler):
                     else:
                         logging.info("API: Caching Special Events Parking for %d more seconds" % seconds)
                         memcache.set('ParkingEvents', specialEvents, seconds)
-		
+
 
         searchwindow = self.request.get_range('searchwindow', default=3, min_value=0, max_value=24)
         testingtimeparam = self.request.get('testingts')
         if testingtimeparam is '':
             testingtime = None
         else:
-            try: 
+            try:
                 testingtime = datetime.datetime.fromtimestamp(float(testingtimeparam))
             except ValueError:
                 logging.debug("Invalid date passed for testing, ignoring: %s" % testingtimeparam)
-        
+
         events = parseSpecialEvents(specialEvents, searchwindow, testingtime)
-        
+
         soup = BeautifulSoup(result.content)
         json_response = []
         getLots(soup, json_response, "dataRow rowShade");
@@ -133,7 +133,7 @@ class MainHandler(webapp.RequestHandler):
                 if events['State Street Capitol Garage']:
                     lot['SpecialEventNotice'] = events['State Street Capitol Garage']
                 #lot['url'] = 'http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/stateStCapitol.cfm'
-					
+
         # encapsulate response in json or jsonp
         logging.debug('API: json response %s' % json_response)
 
@@ -146,7 +146,7 @@ class MainHandler(webapp.RequestHandler):
         else:
             self.response.headers['Content-Type'] = 'application/json'
             response = json.dumps(json_response)
-      
+
         stathat.apiStatCount()
         self.response.out.write(response)
 
@@ -176,14 +176,14 @@ def getParkingSpecialEvents():
     result = None
     specialeventsurl = 'http://www.cityofmadison.com/parkingUtility/calendar/index.cfm'
     cachehours = 24
-    
+
     #initialize the dict to hold result of scrape.
     specialevents = dict()
     specialevents['CacheUntil'] = datetime.datetime.strftime(api_utils.getLocalDatetime() + datetime.timedelta(hours=+cachehours), '%Y-%m-%dT%H:%M:%S')
     logging.info(specialevents['CacheUntil'])
     specialevents['ParkingSpecialEvents'] = []
     specialevents['LastScraped'] = datetime.datetime.strftime(api_utils.getLocalDatetime(), '%Y-%m-%dT%H:%M:%S')
-    
+
     # Looping in case fetch flaky.
     while not done and loop < 3:
         try:
@@ -244,7 +244,7 @@ def getParkingSpecialEvents():
             time.sleep(6)
             loop = loop+1
 
-        # This is bad. Some data may be in a differnt format due to 
+        # This is bad. Some data may be in a differnt format due to
         # either unexpected data entry or *gulp* site redeisgn.
         # Likely require code change to fix.
         except ValueError:
@@ -260,7 +260,7 @@ def parseSpecialEvents(se, searchwindow, providedtime=None):
     # We're going to hand this array back to the caller
     # It should probably just look and see if there's a key
     # defined for a ramp rather than trusting that
-    # it was explicitly set to none. 
+    # it was explicitly set to none.
     #
     # Someday, make these lists of events
     #
@@ -271,7 +271,7 @@ def parseSpecialEvents(se, searchwindow, providedtime=None):
     ramps['Overture Center Garage'] = None
     ramps['State Street Campus Garage'] = None
     ramps['State Street Capitol Garage'] = None
-    
+
     # bale if the the special events map is empty
     if not se:
         return ramps
@@ -290,7 +290,7 @@ def parseSpecialEvents(se, searchwindow, providedtime=None):
     logging.debug("API: It is %s" % ltime.strftime('%m/%d/%Y %H:%M:%S %Z'))
     for e in se['ParkingSpecialEvents']:
          warntime = datetime.datetime.strptime(e['ParkingStartTime'], "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=-searchwindow)
-         endtime = datetime.datetime.strptime(e['ParkingEndTime'], "%Y-%m-%dT%H:%M:%S") 
+         endtime = datetime.datetime.strptime(e['ParkingEndTime'], "%Y-%m-%dT%H:%M:%S")
          if(ltime > warntime and ltime < endtime):
              logging.debug("API: Considering %s starting at time %s in ramp %s " % (e['Event'], e['ParkingStartTime'], e['ParkingLocation']))
              if(e['ParkingLocation'].lower().find("brayton") >= 0):
@@ -304,10 +304,10 @@ def parseSpecialEvents(se, searchwindow, providedtime=None):
                  ramps['Government East Garage'] = e
              elif(e['ParkingLocation'].lower().find("overture") >= 0):
                  logging.debug("Assigned it to overture")
-                 ramps['Overture Center Garage'] = e 
+                 ramps['Overture Center Garage'] = e
              elif(e['ParkingLocation'].lower().find("campus") >= 0):
                  logging.debug("Assigned it to state st campus")
-                 ramps['State Street Campus Garage'] = e 
+                 ramps['State Street Campus Garage'] = e
              elif(e['ParkingLocation'].lower().find("capitol") >= 0):
                  logging.debug("Assigned it to state st capitol")
                  ramps['State Street Capitol Garage'] = e
@@ -317,6 +317,7 @@ def parseSpecialEvents(se, searchwindow, providedtime=None):
 application = webapp.WSGIApplication([('/v1/getparking', MainHandler),
                                       ],
                                      debug=True)
+application.error_handlers[500] = api_utils.handle_500
 
 def main():
   logging.getLogger().setLevel(logging.DEBUG)

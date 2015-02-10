@@ -1,5 +1,3 @@
-import os
-import wsgiref.handlers
 import logging
 import time
 import webapp2 as webapp
@@ -22,10 +20,11 @@ class MainHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/javascript'
         self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','The API does not support POST requests')))
         return
-    
+
     def get(self):
       start = time.time()
       dev_key = self.request.get('key')
+      self.request.registry['aggregated_results'] = []
 
       try:
           if api_utils.afterHours() is False:
@@ -45,7 +44,7 @@ class MainHandler(webapp.RequestHandler):
               routeID = self.request.get('routeID')
               vehicleID = self.request.get('vehicleID')
               #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
-              
+
               if stopID is not '' and routeID is '':
                   json_response = stopRequest(stopID, dev_key)
                   api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
@@ -77,7 +76,7 @@ class MainHandler(webapp.RequestHandler):
           else:
               self.response.headers['Content-Type'] = 'application/json'
               response = json.dumps(json_response)
-          
+
           self.response.out.write(response)
       except DeadlineExceededError:
           self.response.clear()
@@ -95,7 +94,7 @@ class MainHandler(webapp.RequestHandler):
 ## end RequestHandler
 
 def validateRequest(request):
-    
+
     # validate the key
     devStoreKey = api_utils.validateDevKey(request.get('key'))
     if devStoreKey is None:
@@ -104,34 +103,34 @@ def validateRequest(request):
     stopID = request.get('stopID')
     routeID = request.get('routeID')
     vehicleID = request.get('vehicleID')
-    
+
     # give up if someone asked for stop 0, which seems to be popular for some reason
     #logging.debug('validating stopID %s' % stopID);
     if stopID == '' or stopID is '0' or stopID is '0000':
         return None
-        
+
     # a stopID or routeID is required
     if stopID is None and routeID is None:
         api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'either a stopID or a routeID must be included');
         return None
-    
+
     # the routeID requires either a vehicleID or stopID
     if routeID is not None:
         if vehicleID is None and stopID is None:
             api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'if routeID is specified, either a vehicleID or stopID is required');
             return None
-    
+
     # the vehicleID requires a routeID
     if vehicleID is not None:
         if routeID is None:
             api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,request.query_string,request.remote_addr,'if a vehicleID is specified, you must include a routeID');
             return False
-        
+
     # we've noticed some flagrant abuses of the API where the format
     # of the request parameters are just bogus. check those here
     if len(stopID) > 4:
         return None
-        
+
     #logging.debug("successfully validated command parameters")
     return devStoreKey
 
@@ -141,7 +140,7 @@ def stopRequest(stopID, devKey):
 
     #logging.debug("Stop Request started")
     response_dict = None
-    
+
     # if this is a kiosk request, grab the cached result
     if( devKey.find('kiosk') >= 0 ):
         #logging.debug('kiosk request. check for cache hit')
@@ -154,7 +153,7 @@ def stopRequest(stopID, devKey):
     if( response_dict is None ):
         response_dict = {'status':'0',
                          'timestamp':api_utils.getLocalTimestamp()
-                         }    
+                         }
 
         # unique key to track this request
         t = str(time.time()).split('.')[0]
@@ -170,7 +169,7 @@ def stopRequest(stopID, devKey):
 
         # get the stop details
         stop_dict = {'stopID':stopID,}
-        
+
         # take the first 10 results. we assume the results are sorted by time
         #route_results = sorted(route_results, key=attrgetter('time'))
         route_results = []
@@ -182,14 +181,14 @@ def stopRequest(stopID, devKey):
                               'minutes':str(minutes),
                               'arrivalTime':r.arrivalTime,
                               'destination':r.destination,
-                              }))            
-        
+                              }))
+
         # add the populated stop details to the response
         stop_dict.update({'route':route_results});
         response_dict.update({'stop':stop_dict})
-            
+
         # cleanup the results
-        asynch.clean(sid)
+        #asynch.clean(sid)
 
         # cache results if it is from a kiosk
         if( devKey.find('kiosk') >= 0 ):
@@ -219,11 +218,11 @@ def stopRouteRequest(stopID, routeID, devStoreKey):
                          'info':'No routes found'
                         }
         return response_dict
-    
+
     response_dict = {'status':'0',
                      'timestamp':api_utils.getLocalTimestamp()
-                     }    
-    
+                     }
+
     # there should only be results. we assume the results are sorted by time
     stop_dict = {'stopID':stopID,}
     route_results = []
@@ -235,18 +234,18 @@ def stopRouteRequest(stopID, routeID, devStoreKey):
                           'arrivalTime':r.arrivalTime,
                           'destination':r.destination,
                           }))
-    
+
     # add the populated stop details to the response
     stop_dict.update({'route':route_results});
     response_dict.update({'stop':stop_dict})
-        
+
     return response_dict
 
 ## end stopRouteRequest()
 
 def routeVehicleRequest(routeID, vehicleID, devStoreKey):
     logging.debug("Route/Vehicle Request started for %s, route %s vehicle %s" % (devStoreKey,routeID,vehicleID))
-    
+
     # encapsulate response in json
     return {'status':'-1',
             'timestamp':getLocalTimestamp(),
@@ -259,7 +258,7 @@ def routeVehicleRequest(routeID, vehicleID, devStoreKey):
 application = webapp.WSGIApplication([('/v1/getarrivals', MainHandler),
                                       ],
                                      debug=True)
-
+application.error_handlers[500] = api_utils.handle_500
 
 def main():
   logging.getLogger().setLevel(logging.ERROR)

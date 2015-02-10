@@ -15,7 +15,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api.labs.taskqueue import Task
 
 class GetStopHandler(webapp.RequestHandler):
-    
+
     def get(self):
 
       # validate the request parameters
@@ -26,13 +26,13 @@ class GetStopHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/javascript'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Illegal request parameters')))
           return
-      
+
       # snare the inputs
       stopID = api_utils.conformStopID(self.request.get('stopID'))
       routeID = self.request.get('routeID')
       destination = self.request.get('destination').upper()
       logging.debug('getstops request parameters...  routeID %s destination %s' % (routeID,destination))
-      
+
       if api_utils.afterHours() is True:
           # don't run these jobs during "off" hours
 	      json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
@@ -47,7 +47,7 @@ class GetStopHandler(webapp.RequestHandler):
           json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters. Did you forget to include a routeID?')
           api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETSTOPS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
 
-      #logging.debug('API: json response %s' % json_response);    
+      #logging.debug('API: json response %s' % json_response);
       # encapsulate response in json
       callback = self.request.get('callback')
       if callback is not '':
@@ -58,7 +58,7 @@ class GetStopHandler(webapp.RequestHandler):
       else:
           self.response.headers['Content-Type'] = 'application/json'
           response = json.dumps(json_response)
-      
+
       self.response.out.write(response)
       stathat.apiStatCount()
       # push event out to anyone watching the live board
@@ -73,9 +73,9 @@ class GetStopHandler(webapp.RequestHandler):
 ## end GetStopHandler
 
 class GetStopLocationHandler(webapp.RequestHandler):
-    
+
     def get(self):
-      
+
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETSTOPLOCATION)
       if devStoreKey is None:
@@ -83,11 +83,11 @@ class GetStopLocationHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/javascript'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Illegal request parameters')))
           return
-      
+
       # snare the inputs
       stopID = api_utils.conformStopID(self.request.get('stopID'))
       logging.debug('getstoplocation request parameters...  stopID %s' % stopID)
-      
+
       if api_utils.afterHours() is True:
           # don't run these jobs during "off" hours
 	      json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
@@ -99,7 +99,7 @@ class GetStopLocationHandler(webapp.RequestHandler):
           json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters. Did you forget to include a stpID?')
           api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETSTOPS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
 
-      #logging.debug('API: json response %s' % json_response);    
+      #logging.debug('API: json response %s' % json_response);
       # encapsulate response in json
       callback = self.request.get('callback')
       if callback is not '':
@@ -110,7 +110,7 @@ class GetStopLocationHandler(webapp.RequestHandler):
       else:
           self.response.headers['Content-Type'] = 'application/json'
           response = json.dumps(json_response)
-      
+
       self.response.out.write(response)
       stathat.apiStatCount()
       # push event out to anyone watching the live board
@@ -125,9 +125,9 @@ class GetStopLocationHandler(webapp.RequestHandler):
 ## end GetStopLocationHandler
 
 class GetNearbyStopsHandler(webapp.RequestHandler):
-    
+
     def get(self):
-      
+
       # validate the request parameters
       devStoreKey = validateRequest(self.request,api_utils.GETNEARBYSTOPS)
       if devStoreKey is None:
@@ -135,7 +135,7 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/json'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Illegal request parameters')))
           return
-      
+
       # snare the inputs
       lat = float(self.request.get('lat'))
       lon = float(self.request.get('lon'))
@@ -146,7 +146,7 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
           radius = int(radius)
       routeID = self.request.get('routeID')
       direction = self.request.get('direction')
-      
+
       # stop location requests...
       json_response = nearbyStops(lat,lon,radius,routeID,direction)
 
@@ -164,7 +164,7 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
 
       self.response.out.write(response)
       stathat.apiStatCount()
-    
+
     def post(self):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','The API does not support POST requests')))
@@ -187,9 +187,9 @@ class DebugHandler(webapp.RequestHandler):
 
 
 class NotSupportedHandler(webapp.RequestHandler):
-    
+
     def get(self):
-      
+
       # validate the request parameters
       devStoreKey = validateRequest(self.request)
       if devStoreKey is None:
@@ -245,13 +245,13 @@ def nearbyStops(lat,lon,radius,routeID,direction):
                  StopLocation.all().filter('routeID =', routeID).filter('direction =', direction),
                  geotypes.Point(lat,lon),  # Or db.GeoPt
                  max_results=100,
-                 max_distance=radius)    
+                 max_distance=radius)
         else:
             results = StopLocation.proximity_fetch(
                  StopLocation.all().filter('routeID =', routeID),
                  geotypes.Point(lat,lon),  # Or db.GeoPt
                  max_results=100,
-                 max_distance=radius)    
+                 max_distance=radius)
 
     if results is None:
         response_dict = {'status':'0',
@@ -259,7 +259,7 @@ def nearbyStops(lat,lon,radius,routeID,direction):
                         }
         return response_dict
 
-    
+
     response_dict = {'status':'0',}
     stop_results = []
     stop_tracking = []
@@ -277,12 +277,12 @@ def nearbyStops(lat,lon,radius,routeID,direction):
             stop_tracking.append(stop.stopID)
 
     response_dict.update({'stop':stop_results})
-        
+
     return response_dict
 
 
 def routeRequest(routeID,destination):
-    
+
     # @fixme memcache these results!
     if destination is not None:
 
@@ -301,35 +301,35 @@ def routeRequest(routeID,destination):
                          'info':'No stops found'
                         }
         return response_dict
-        
+
     response_dict = {'status':'0',
                      'timestamp':api_utils.getLocalTimestamp(),
                      'routeID':routeID
-                    }    
-    
+                    }
+
     stop_results = []
     for r in routes:
         stop = r.stopLocation
         if stop is None:
             logging.error('API: ERROR, no location!?')
             continue
-            
+
         stop_results.append(dict({'stopID' : stop.stopID,
                           'intersection' : stop.intersection,
                           'latitude' : stop.location.lat,
                           'longitude' : stop.location.lon,
-                          'destination' : stop.direction,                          
+                          'destination' : stop.direction,
                           }))
-    
+
     # add the populated stop details to the response
     response_dict.update({'stops':stop_results})
-        
+
     return response_dict
 
 ## end routeRequest()
 
 def stopLocationRequest(stopID):
-    
+
     key = 'stopLocation:%s' % stopID
     stop = memcache.get(key)
     if stop is None:
@@ -344,29 +344,29 @@ def stopLocationRequest(stopID):
         else:
             #logging.debug('shoving stop %s entity into memcache' % stopID)
             memcache.set(key,stop)
-        
+
     return {'status':'0',
             'stopID':stopID,
             'intersection':stop.intersection,
             'latitude':stop.location.lat,
             'longitude':stop.location.lon,
-           }    
-    
+           }
+
 ## end stopLocationRequest()
 
 def validateRequest(request,type):
-    
+
     # validate the key
     devStoreKey = api_utils.validateDevKey(request.get('key'))
     if devStoreKey is None:
         logging.debug('... illegal developer key %s' % request.get('key'))
         api_utils.recordDeveloperRequest(None,api_utils.GETSTOPS,request.query_string,request.remote_addr,'illegal developer key specified');
         return None
-    
+
     if type == api_utils.GETSTOPS:
         routeID = request.get('routeID')
         destination = request.get('destination').upper()
-        
+
         # a routeID is required
         if routeID is None or routeID is '':
             api_utils.recordDeveloperRequest(devStoreKey,type,request.query_string,request.remote_addr,'a routeID must be included');
@@ -377,7 +377,7 @@ def validateRequest(request,type):
     elif type == api_utils.GETSTOPLOCATION:
         stopID = api_utils.conformStopID(request.get('stopID'))
         if stopID == '' or stopID == '0' or stopID == '00':
-            return None            
+            return None
     elif type == api_utils.GETNEARBYSTOPS:
         lat = request.get('lat')
         lon = request.get('lon')
@@ -402,6 +402,7 @@ application = webapp.WSGIApplication([('/v1/getstops', GetStopHandler),
                                       ('/v1/getdebug', DebugHandler),
                                       ],
                                      debug=True)
+application.error_handlers[500] = api_utils.handle_500
 
 def main():
   logging.getLogger().setLevel(logging.DEBUG)

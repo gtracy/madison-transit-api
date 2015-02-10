@@ -79,7 +79,6 @@ def getLocalTimestamp():
 
     ltime = getLocalDatetime()
     ltime_stamp = ltime.strftime('%I:%M%p')
-    logging.debug("local pytz time %s" % ltime_stamp)
     return(ltime_stamp)
 
 ## end getLocalTimestamp()
@@ -137,19 +136,6 @@ def buildErrorResponse(error,description):
 
 ## end jsonError()
 
-def handle_500(request, response, exception):
-    logging.error('Server ERROR! %s' % exception)
-    logging.debug(exception)
-    callback = request.get('callback')
-    if callback is not '':
-        response.headers['Content-Type'] = 'application/javascript'
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET'
-    else:
-        response.headers['Content-Type'] = 'application/json'
-
-    response.out.write(json.dumps(buildErrorResponse("-1","Internal server error")))
-
 def getDirectionLabel(directionID):
     directionLabel = memcache.get(directionID)
     if directionLabel is None:
@@ -166,6 +152,20 @@ def getDirectionLabel(directionID):
     return directionLabel
 
 ## end getDirectionLabel()
+
+def handle_500(request, response, exception):
+    logging.error('Server ERROR! %s' % exception)
+    logging.debug(exception)
+    callback = request.get('callback')
+    if callback is not '':
+        response.headers['Content-Type'] = 'application/javascript'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET'
+    else:
+        response.headers['Content-Type'] = 'application/json'
+
+    response.out.write(json.dumps(buildErrorResponse("-1","Internal server error")))
+
 
 GETARRIVALS = "get arrivals"
 GETVEHICLES = "get vehicles"

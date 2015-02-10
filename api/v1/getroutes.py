@@ -1,10 +1,7 @@
-import os
-import wsgiref.handlers
 import logging
 import webapp2 as webapp
 import json
 
-from utils.geo.geomodel import geotypes
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -20,7 +17,7 @@ class StaticAPIs(db.Model):
 #
 
 class MainHandler(webapp.RequestHandler):
-    
+
     def get(self):
 
       # validate the request parameters
@@ -30,13 +27,13 @@ class MainHandler(webapp.RequestHandler):
           self.response.headers['Content-Type'] = 'application/javascript'
           self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Illegal request parameters')))
           return
-      
+
       logging.debug('getroutes request...  ')
       if self.request.get('force') is not '':
           refresh = True
       else:
           refresh = False
-      
+
       if api_utils.afterHours() is True:
           # don't run these jobs during "off" hours
 	      json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
@@ -52,16 +49,16 @@ class MainHandler(webapp.RequestHandler):
               json_response = memcache.get(api_utils.GETROUTES)
               if json_response is None:
                   json_response = getRoutes(refresh)
-        
+
                   # drop it into the memcache again
                   memcache.set(api_utils.GETROUTES, json_response)
                   logging.debug('---> storing in memcache');
-                  
 
-          # record the API call for this devkey              
+
+          # record the API call for this devkey
           api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETROUTES,self.request.query_string,self.request.remote_addr);
 
-      #logging.debug('API: json response %s' % json_response);    
+      #logging.debug('API: json response %s' % json_response);
       callback = self.request.get('callback')
       if callback is not '':
           self.response.headers['Content-Type'] = 'application/javascript'
@@ -71,7 +68,7 @@ class MainHandler(webapp.RequestHandler):
       else:
           self.response.headers['Content-Type'] = 'application/json'
           response = json_response
-      
+
       self.response.out.write(response)
       stathat.apiStatCount()
 
@@ -111,29 +108,29 @@ def getRoutes(refresh):
 
         # get more routes
         routes = q.fetch(1000,offset)
-        
-    routeMap = {}        
+
+    routeMap = {}
     for k,v in hits.iteritems():
         key = k.split(':')
         routeID = key[0]
         direction = key[1]
         directionLabel = api_utils.getDirectionLabel(direction)
-        
+
         logging.debug('adding direction %s to route %s' % (directionLabel,routeID))
         if routeID in routeMap:
             routeMap[routeID].append(directionLabel)
         else:
             routeMap[routeID] = list()
             routeMap[routeID].append(directionLabel)
-        
+
     route_results = []
     for k,v in routeMap.iteritems():
         route_results.append(dict({'routeID':k,'directions':routeMap[k]}))
-    
+
     # add the populated route details to the response
     response_dict.update({'routes':route_results})
     json_results = json.dumps(response_dict)
-    
+
     static = StaticAPIs()
     static.method = api_utils.GETROUTES
     static.json = json_results
@@ -144,13 +141,13 @@ def getRoutes(refresh):
 ## end getRoutes()
 
 def validateRequest(request,type):
-    
+
     # validate the key
     devStoreKey = api_utils.validateDevKey(request.get('key'))
     if devStoreKey is None:
         api_utils.recordDeveloperRequest(None,api_utils.GETSTOPS,request.query_string,request.remote_addr,'illegal developer key specified');
         return None
-    
+
     return devStoreKey
 
 ## end validateRequest()
@@ -158,6 +155,7 @@ def validateRequest(request,type):
 application = webapp.WSGIApplication([('/v1/getroutes', MainHandler),
                                       ],
                                      debug=True)
+application.error_handlers[500] = api_utils.handle_500
 
 def main():
   logging.getLogger().setLevel(logging.DEBUG)
