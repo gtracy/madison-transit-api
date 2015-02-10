@@ -58,7 +58,7 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
 
         # all calls should be complete at this point
         while memcache.get(sid) > 0 :
-            logging.info('API: ERROR : uh-oh. in waiting loop... %s' % memcache.get(sid))
+            #logging.info('API: ERROR : uh-oh. in waiting loop... %s' % memcache.get(sid))
             rpc.wait()
 
         return webapp2.get_request().registry['aggregated_results']
