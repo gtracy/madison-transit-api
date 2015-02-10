@@ -22,7 +22,7 @@ def email_missing_stop(stopID, routeID, sid):
       message.to = config.EMAIL_REPORT_ADDRESS
       message.subject = 'Missing stop ID requested by API client - %s' % stopID
       message.body = 'RouteID: %s \n' % routeID + 'SID: %s \n' % sid
-      message.send()
+      #message.send()
 ## end
 
 def aggregateBusesAsynch(sid, stopID, routeID=None):
@@ -61,30 +61,10 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
             logging.info('API: ERROR : uh-oh. in waiting loop... %s' % memcache.get(sid))
             rpc.wait()
 
-        return aggregateAsynchResults(sid)
+        return webapp2.get_request().registry['aggregated_results']
 
 
 ## end aggregateBusesAsynch()
-
-#
-# once all of the results have been grabbed, piece them together
-#
-def aggregateAsynchResults(sid):
-    #logging.info("API: Time to report back on results for %s..." % sid)
-    aggregated_results = webapp3.get_request().registry['aggregated_results']
-    #logging.debug(aggregated_results)
-
-    try:
-        if len(aggregated_results) == 0:
-            logging.debug("We couldn't find results for transaction %s. Chances are there aren't any matches with the request." % sid)
-            textBody = "Doesn't look good... Your bus isn't running right now!"
-    except KeyError as e:
-        logging.error('aggregation error: %s' % e.message)
-        logging.debug(aggregated_results)
-
-    return aggregated_results
-
-## end aggregatAsynchResults()
 
 #
 # This function handles the callback of a single fetch request.
@@ -172,25 +152,21 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
 # on the time-to-arrival
 #
 def insert_result(sid,stop):
-    #logging.debug('Inserting results.... %s' % stop)
     aggregated_results = webapp2.get_request().registry['aggregated_results']
-    #logging.debug(aggregated_results)
 
-    try:
-        if len(aggregated_results) == 0:
-            aggregated_results = [stop]
-        else:
-            done = False
-            for i, s in enumerate(aggregated_results):
-                if stop.time <= s.time:
-                        aggregated_results.insert(i,stop)
-                        done = True
-                        break
-            if not done:
-                aggregated_results.append(stop)
-    except KeyError as e:
-        logging.error('aggregation error: %s' % e.message)
+    if len(aggregated_results) == 0:
+        aggregated_results = [stop]
+    else:
+        done = False
+        for i, s in enumerate(aggregated_results):
+            if stop.time <= s.time:
+                    aggregated_results.insert(i,stop)
+                    done = True
+                    break
+        if not done:
+            aggregated_results.append(stop)
 
+    # always reset the request registry value
     webapp2.get_request().registry['aggregated_results'] = aggregated_results
 
 ## end
