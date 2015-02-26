@@ -82,13 +82,11 @@ class CampusParkingService():
         except ValueError:
             # Cannot parse html perhaps due to html change.
             logging.error('ValueError parsing scraped content from campus parking page.')
-            logging.info(short_name)
             raise ValueError
 
         except AttributeError:
             # HTML doesn't include expected elements
             logging.error('AttributeError parsing scraped content from campus parking page.')
-            logging.info(AttributeError)
             raise AttributeError
 
         except TypeError:
