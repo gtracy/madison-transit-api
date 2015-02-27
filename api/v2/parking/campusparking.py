@@ -65,9 +65,11 @@ class CampusParkingService():
                 # grab the array of cells in the current row
                 table_cells = lot_rows[row_index].findAll('td')
 
-                short_name = table_cells[1].string.split(' ')[0]
-                if table_cells[2].string is not None and table_cells[2].string.isdigit():
-                    lot_spots = table_cells[2].string
+                short_name = table_cells[1].string.split(' ')[0].strip()
+
+                spots_cell = table_cells[2].string.strip()
+                if spots_cell is not None and spots_cell.isdigit():
+                    lot_spots = spots_cell
 
                 lot_details = {
                     'shortName': short_name,
