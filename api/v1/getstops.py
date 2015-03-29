@@ -30,7 +30,7 @@ class GetStopHandler(webapp.RequestHandler):
       # snare the inputs
       stopID = api_utils.conformStopID(self.request.get('stopID'))
       routeID = self.request.get('routeID')
-      destination = self.request.get('destination').upper()
+      destination = self.request.get('destination')
       logging.debug('getstops request parameters...  routeID %s destination %s' % (routeID,destination))
 
       if api_utils.afterHours() is True:
@@ -145,10 +145,10 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
       else:
           radius = int(radius)
       routeID = self.request.get('routeID')
-      direction = self.request.get('direction')
+      destination = self.request.get('destination')
 
       # stop location requests...
-      json_response = nearbyStops(lat,lon,radius,routeID,direction)
+      json_response = nearbyStops(lat,lon,radius,routeID,destination)
 
       # encapsulate response in json
       #logging.debug('API: json response %s' % response);
@@ -216,64 +216,102 @@ def getDestinationCode(destination):
         destination_listing = db.GqlQuery('select * from DestinationListing where label = :1', destination).get()
         if destination_listing is None:
             logging.error('routeRequest :: unable to locate destination %s in the datastore!?' % destination)
-            response_dict = {'status':'0',
-                             'info':('Destination %s not found' % destination)
-                            }
-            return response_dict
+            destination_code = -1
         else:
             destination_code = destination_listing.id
-            memcache.set(destination_code_key,destination_code)
+
+        # shove the result into memcache
+        memcache.set(destination_code_key,destination_code)
 
     return destination_code
 
-def nearbyStops(lat,lon,radius,routeID,direction):
+def nearbyStops(lat,lon,radius,routeID,destination):
+    route_stops = None
 
+    # limit results to 200
+    max_results = 200
     # limit the radius value to 500
     if radius > 1000:
         radius = 1000
 
+    logging.debug('nearbyStops (%s,%s,%s,%s,%s)' % (lat,lon,radius,routeID,destination))
     if routeID is None or routeID == "":
-        #logging.debug('nearbyStops (%s,%s,%s,%s)' % (lat,lon,radius,routeID))
         results = StopLocation.proximity_fetch(
              StopLocation.all(),
              geotypes.Point(lat,lon),  # Or db.GeoPt
-             max_results=100,
+             max_results=max_results,
              max_distance=radius)
     else:
-        if direction is not None:
-            results = StopLocation.proximity_fetch(
-                 StopLocation.all().filter('routeID =', routeID).filter('direction =', direction),
-                 geotypes.Point(lat,lon),  # Or db.GeoPt
-                 max_results=100,
-                 max_distance=radius)
+        if destination is not None and destination is not "":
+
+            destination_code = getDestinationCode(destination)
+            if destination_code == -1 :
+                response_dict = {'status' : '-1',
+                                 'info' : ('Unknown destination %s' % destination)
+                                }
+                return response_dict
+            else:
+                # first filter stops by route and destination...
+                logging.debug('... filter by destination for route %s and destination %s' % (routeID,destination_code))
+                q = db.GqlQuery('select stopID from RouteListing where route = :1 and direction = :2 order by route', routeID, destination_code)
+                routes = q.fetch(1000)
+                route_stops = []
+                for route in routes:
+                    route_stops.append(route.stopID)
+
+                results = StopLocation.proximity_fetch(
+                     StopLocation.all(),
+                     geotypes.Point(lat,lon),  # Or db.GeoPt
+                     max_results=max_results,
+                     max_distance=radius)
         else:
+            # first filter stops by route and destination...
+            logging.debug('... filter by destination for route %s' % routeID)
+            q = db.GqlQuery('select * from RouteListing where route = :1', routeID)
+            routes = q.fetch(1000)
+            route_stops = []
+            for route in routes:
+                route_stops.append(route.stopID)
+
             results = StopLocation.proximity_fetch(
-                 StopLocation.all().filter('routeID =', routeID),
+                 StopLocation.all(),
                  geotypes.Point(lat,lon),  # Or db.GeoPt
-                 max_results=100,
+                 max_results=max_results,
                  max_distance=radius)
 
     if results is None:
         response_dict = {'status':'0',
+                         'timestamp':api_utils.getLocalTimestamp(),
                          'info':'No stops found',
+                         'stops':[]
                         }
         return response_dict
 
 
-    response_dict = {'status':'0',}
+    response_dict = {'status':'0','timestamp':api_utils.getLocalTimestamp(),}
     stop_results = []
     stop_tracking = []
+    logging.info('loop through %s results' % len(results))
     for stop in results:
+
+        # manually apply the destination filter here because
+        # the GCL query limits our ability to apply it in the
+        # proximity query
+        if route_stops is not None and stop.stopID not in route_stops:
+            #logging.debug('filtered out %s' % stop.stopID)
+            continue
+
         # kind of a hack, but limit the results to one per route.
         # the query will return multiple results for each stop
         if stop.stopID not in stop_tracking:
+
             stop_results.append(dict({
                                 'stopID':stop.stopID,
                                 'intersection':stop.intersection,
                                 'latitude':stop.location.lat,
                                 'longitude':stop.location.lon,
                                 }))
-            #logging.debug('appending %s to route tracking list' % stop.stopID)
+            logging.debug('appending %s to route tracking list' % stop.stopID)
             stop_tracking.append(stop.stopID)
 
     response_dict.update({'stop':stop_results})
@@ -283,12 +321,17 @@ def nearbyStops(lat,lon,radius,routeID,direction):
 
 def routeRequest(routeID,destination):
 
-    # @fixme memcache these results!
     if destination is not None:
 
         destination_code = getDestinationCode(destination)
-        logging.debug('route listing query for route %s and direction %s' % (routeID,destination_code))
-        q = db.GqlQuery('select * from RouteListing where route = :1 and direction = :2 order by route', routeID, destination_code)
+        if destination_code == -1 :
+            response_dict = {'status' : '-1',
+                             'info' : ('Unknown destination %s' % destination)
+                            }
+            return response_dict
+        else:
+            logging.debug('route listing query for route %s and direction %s' % (routeID,destination_code))
+            q = db.GqlQuery('select * from RouteListing where route = :1 and direction = :2 order by route', routeID, destination_code)
 
     else:
 
@@ -318,7 +361,7 @@ def routeRequest(routeID,destination):
                           'intersection' : stop.intersection,
                           'latitude' : stop.location.lat,
                           'longitude' : stop.location.lon,
-                          'destination' : stop.direction,
+                          #'destination' : stop.direction,
                           }))
 
     # add the populated stop details to the response

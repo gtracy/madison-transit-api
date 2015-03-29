@@ -13,7 +13,7 @@
     <script src="/js/prettify.js" type="text/javascript"></script>
   </head>
 
-<body onload="prettyPrint()">  
+<body onload="prettyPrint()">
 
 <div id="page-container">
  <div id="header">
@@ -34,8 +34,8 @@
  </ul>
  </div>
  <div id="sub-menu">
-   <a href="#getstops">getstops</a> | <a href="#getnearbystops">getnearbystops</a> | 
-   <a href="#getstoplocation">getstoplocation</a> | <a href="#getvehicles">getvehicles</a> 
+   <a href="#getstops">getstops</a> | <a href="#getnearbystops">getnearbystops</a> |
+   <a href="#getstoplocation">getstoplocation</a> | <a href="#getvehicles">getvehicles</a>
  </div>
  <h1><a name="getstops">getstops</a></h1>
  <div id="spec">
@@ -53,7 +53,7 @@
  <tr>
   <td class="center">key</td>
   <td class="center">String (required)</td>
-  <td>16-digit API access key</td>
+  <td>API access key</td>
  </tr>
  <tr class="striped">
   <td class="center">routeID</td>
@@ -102,13 +102,13 @@
 }
 </code>
  <h3>Error</h3>
- An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be
  present describing the error in plain English.
  <p> </p>
 <code class="prettyprint lang-javascript">
 {
   "status" : "-1",
-  "description" : "Invalid request parameters",	
+  "description" : "Invalid request parameters",
 }
 </code>
  </div>
@@ -131,7 +131,7 @@
  <tr>
   <td class="center">key</td>
   <td class="center">String (required)</td>
-  <td>16-digit API access key</td>
+  <td>API access key</td>
  </tr>
  <tr class="striped">
   <td class="center">lat</td>
@@ -192,13 +192,13 @@
 }
 </code>
  <h3>Error</h3>
- An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be
  present describing the error in plain English.
  <p> </p>
 <code class="prettyprint lang-javascript">
 {
   "status" : "-1",
-  "description" : "Invalid request parameters",	
+  "description" : "Invalid request parameters",
 }
 </code>
  </div>
@@ -221,7 +221,7 @@
  <tr>
   <td class="center">key</td>
   <td class="center">String (required)</td>
-  <td>16-digit API access key</td>
+  <td>API access key</td>
  </tr>
  <tr class="striped">
   <td class="center">stopID</td>
@@ -247,13 +247,13 @@
 }
 </code>
  <h3>Error</h3>
- An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be
  present describing the error in plain English.
  <p> </p>
 <code class="prettyprint lang-javascript">
 {
   "status" : "-1",
-  "description" : "Invalid request parameters",	
+  "description" : "Invalid request parameters",
 }
 </code>
  </div>
@@ -277,7 +277,7 @@
  <tr>
   <td class="center">key</td>
   <td class="center">String (required)</td>
-  <td>16-digit API access key</td>
+  <td>API access key</td>
  </tr>
  <tr class="striped">
   <td class="center">routeID</td>
@@ -313,41 +313,41 @@
     "timestamp" : "1/15/2012 10:13:44 AM",
     "vehicles" : [
       {
-        "lat": "43.0863712", 
-        "lon": "-89.3601702", 
-        "direction": "WTP", 
-        "nextStop": "Jenifer & Ingersoll", 
+        "lat": "43.0863712",
+        "lon": "-89.3601702",
+        "direction": "WTP",
+        "nextStop": "Jenifer & Ingersoll",
         "vehicleID": "943"
-      }, 
+      },
       {
-        "lat": "43.0535659", 
-        "lon": "-89.4430852", 
-        "direction": "WTP", 
-        "nextStop": "West Transfer Point", 
+        "lat": "43.0535659",
+        "lon": "-89.4430852",
+        "direction": "WTP",
+        "nextStop": "West Transfer Point",
         "vehicleID": "937"
-      }, 
+      },
       {
-        "lat": "43.0742107", 
-        "lon": "-89.3826771", 
-        "direction": "ETP", 
-        "nextStop": "Jenifer & Ingersoll", 
+        "lat": "43.0742107",
+        "lon": "-89.3826771",
+        "direction": "ETP",
+        "nextStop": "Jenifer & Ingersoll",
         "vehicleID": "015"
       }
     ]
 }
 </code>
  <h3>Error</h3>
- An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be
  present describing the error in plain English.
  <p> </p>
 <code class="prettyprint lang-javascript">
 {
   "status" : "-1",
-  "description" : "Invalid request parameters",	
+  "description" : "Invalid request parameters",
 }
 </code>
  </div>
- 
+
  <div id="spacer"></div>
  <hr>
  <div id="footer">

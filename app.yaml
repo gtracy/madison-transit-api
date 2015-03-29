@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: threadsafe
+version: getbydestination-fix
 runtime: python27
 api_version: 1
 threadsafe: true

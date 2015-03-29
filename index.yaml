@@ -11,6 +11,12 @@ indexes:
   - name: stopID
   - name: route
 
+- kind: RouteListing
+  properties:
+  - name: direction
+  - name: route
+  - name: stopID
+
 - kind: DirectionListing
   properties:
   - name: key

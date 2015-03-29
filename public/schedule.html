@@ -13,7 +13,7 @@
     <script src="/js/prettify.js" type="text/javascript"></script>
   </head>
 
-<body onload="prettyPrint()">  
+<body onload="prettyPrint()">
 
 <div id="page-container">
  <div id="header">
@@ -33,11 +33,11 @@
   <li><a href="/blog.html" class="blog-title">Blog</a></li>
  </ul>
  </div>
- <p>This portion of the web service describes scheduling information. Under <strong>all</strong> circumstances, this is 
+ <p>This portion of the web service describes scheduling information. Under <strong>all</strong> circumstances, this is
  predictive data. It is based on the real-time information described by the Metro system for each route - not fixed
  schedule information.</p>
  <p>It's important to understand that the API is dependent on the Metro's scheduling service. If the Metro's service is
- down, so are we. I'm going to do my best to differentiate the difference between "no buses running" and "service unavailable" 
+ down, so are we. I'm going to do my best to differentiate the difference between "no buses running" and "service unavailable"
  but there are no guarantees.</p>
  <hr>
  <h1><a name="getarrivals">getarrivals</a></h1>
@@ -57,7 +57,7 @@
  <tr>
   <td class="center">key</td>
   <td class="center">String (required)</td>
-  <td>16-digit API access key</td>
+  <td>API access key</td>
  </tr>
  <tr class="striped">
   <td class="center">stopID</td>
@@ -67,13 +67,13 @@
  <tr>
   <td class="center">routeID</td>
   <td class="center">String</td>
-  <td>A two-digit value describing a valid route in the Metro system. 
+  <td>A two-digit value describing a valid route in the Metro system.
   If routeID is specified, either stopID or vehicleID <strong><i>must also</i></strong> be specified in the request.</td>
  </tr>
  <tr class="striped">
   <td class="center">vehicleID</td>
   <td class="center">String</td>
-  <td>A three-digit value describing a valid bus vehicle in the Metro system. If vehicleID is specified, 
+  <td>A three-digit value describing a valid bus vehicle in the Metro system. If vehicleID is specified,
   routeID <strong><i>must also</i></strong> be specified in the request.</td>
  </tr>
  </table>
@@ -119,13 +119,13 @@
 </code>
   <p>If a vehicleID is specified, multiple stops will be returned.</p>
  <h3>Error</h3>
- An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be 
+ An error is indicated by a non-zero status value. If the status value is non-zero, the description field will be
  present describing the error in plain English.
  <p> </p>
 <code class="prettyprint lang-javascript">
 {
   "status" : "-1",
-  "description" : "Invalid request parameters",	
+  "description" : "Invalid request parameters",
 }
 </code>
  </div>
