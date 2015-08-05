@@ -1,13 +1,13 @@
 from google.appengine.ext import db
 from utils.geo.geomodel import GeoModel
 
-# note that a stop extends GeoModel   
+# note that a stop extends GeoModel
 class StopLocation(GeoModel):
     stopID       = db.StringProperty()
     intersection = db.StringProperty()
     direction    = db.StringProperty()
     description  = db.StringProperty(multiline=True)
-## end StopLocation    
+## end StopLocation
 
 # temporary storage model for the bulk uploader
 class StopLocationLoader(db.Model):
@@ -72,3 +72,9 @@ class BusStopAggregation(db.Model):
     text        = db.StringProperty(multiline=True,indexed=False)
     sid         = db.StringProperty()
 ## end BusStopAggregation
+
+class StopStat(db.Model):
+    dateAdded   = db.DateTimeProperty(auto_now_add=True)
+    stopID      = db.StringProperty()
+    apiKey      = db.StringProperty()
+## end StopStat
