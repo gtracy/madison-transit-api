@@ -65,8 +65,6 @@ class MainHandler(webapp.RequestHandler):
               json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
 
           # encapsulate response in json or jsonp
-          #logging.debug('API: json response %s' % json_response);
-
           callback = self.request.get('callback')
           if callback is not '':
               self.response.headers['Content-Type'] = 'application/javascript'
@@ -83,8 +81,15 @@ class MainHandler(webapp.RequestHandler):
           self.response.set_status(500)
           self.response.out.write("This operation could not be completed in time...")
 
+      # persist some statistics
+      # stathat:
       stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
       stathat.apiStatCount()
+      # stop statistics
+      if( "kiosk" not in dev_key ):
+          task = Task(url='/stats/stop', params={'apikey':dev_key,'stop':stopID})
+          task.add('stats')
+
       # push event out to anyone watching the live board
       channels = memcache.get('channels')
       if channels is not None:

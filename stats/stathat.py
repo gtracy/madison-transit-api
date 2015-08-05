@@ -8,6 +8,9 @@ from google.appengine.api import memcache
 
 import config
 
+from data_model import StopStat
+
+
 STATHAT_MEMCACHE_ERROR_COUNT = 'stathat_error_count'
 STATHAT_MEMCACHE_REQ_COUNT = 'stathat_req_count'
 
@@ -20,7 +23,7 @@ class StatHat:
 
             rpc = urlfetch.create_rpc()
             urlfetch.make_fetch_call(
-                rpc, 
+                rpc,
                 url=self.URL_BASE+path,
                 payload=pdata,
                 method='POST'
@@ -36,13 +39,13 @@ class StatHat:
         def post_value(self, user_key, stat_key, value, callback=None):
             if( callback is None ):
                 return self.http_post_async('/v', {'key': stat_key, 'ukey': user_key, 'value': value})
-            else: 
+            else:
                 return self.http_post('/v', {'key': stat_key, 'ukey': user_key, 'value': value})
 
         def post_count(self, user_key, stat_key, count, callback=None):
             if( callback is None ):
                 return self.http_post('/c', {'key': stat_key, 'ukey': user_key, 'count': count})
-            else: 
+            else:
                 return self.http_post_async('/c', {'key': stat_key, 'ukey': user_key, 'count': count})
 
         def ez_post_value(self, ezkey, stat_name, value):
@@ -100,9 +103,20 @@ class StatFlushHandler(webapp.RequestHandler):
 
 ## end StatFlushHandler
 
+class StatStopsCollectHandler(webapp.RequestHandler):
+
+    def post(self):
+        stat = StopStat()
+        stat.stopID = self.request.get('stop')
+        stat.apiKey = self.request.get('apikey')
+        stat.put()
+
+## end StatStopsCollectHandler
+
 
 application = webapp.WSGIApplication([('/stats/new/value', StatValueTaskHandler),
-                                      ('/stats/flush', StatFlushHandler)
+                                      ('/stats/flush', StatFlushHandler),
+                                      ('/stats/stop', StatStopsCollectHandler)
                                       ],
                                      debug=True)
 

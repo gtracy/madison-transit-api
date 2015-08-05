@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: getbydestination-fix
+version: stops-analytics
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -114,6 +114,9 @@ handlers:
   login: admin
 
 # stats task
+- url: /stats/stop
+  script: stats.stathat.application
+
 - url: /stats/new/.*
   script: stats.stathat.application
 
