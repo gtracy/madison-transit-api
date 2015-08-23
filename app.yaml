@@ -1,5 +1,5 @@
 application: msn-transit-api
-version: stops-analytics
+version: random-code-cleanup
 runtime: python27
 api_version: 1
 threadsafe: true

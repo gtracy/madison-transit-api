@@ -38,7 +38,7 @@ def validateDevKey(devKey):
 
     # we've validated the dev key at this point... start counting requests
     total = memcache.incr(devKey + ':counter', initial_value=0)
-    logging.debug(storeKey)
+    logging.debug('key validated for %s at %d' % (storeKey,total))
     return storeKey
 
 ## end validateDevKey()

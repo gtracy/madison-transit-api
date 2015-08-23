@@ -36,7 +36,7 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
     routes = getRouteListing(stopID,routeID)
     if len(routes) == 0:
         # this can happen if the user passes in a bogus stopID
-        logging.error("API: User error. There are no matching stops for this ID?!? %s" % stopID)
+        logging.error("API: User error. There are no matching route listings for this ID?!? %s" % stopID)
         if stopID not in config.INVALID_STOP_IDS:
             email_missing_stop(stopID,routeID,sid)
         return None

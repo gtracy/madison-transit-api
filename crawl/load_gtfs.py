@@ -1,14 +1,10 @@
-import wsgiref.handlers
 import logging
-import os
 
 from google.appengine.api.taskqueue import Task
 from google.appengine.ext import webapp
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
 from google.appengine.ext.db import GeoPt
 
-from data_model import RouteListing
 from data_model import StopLocation
 from data_model import StopLocationLoader
 
@@ -44,7 +40,6 @@ class PortStopsHandler(webapp.RequestHandler):
 class PortStopTask(webapp.RequestHandler):
     def post(self):
         stop_list = []
-        route_list = []
 
         stopID      = self.request.get('stopID')
         if len(stopID) == 1:
@@ -62,7 +57,6 @@ class PortStopTask(webapp.RequestHandler):
 
         # if it doesn't, create a new one
         s = StopLocation()
-        stop_template = s
 
         s.stopID = stopID
         s.intersection = name.split('(')[0].rstrip()
