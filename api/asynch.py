@@ -44,11 +44,11 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
         logging.debug('Stop aggregation start %s '%sid)
         # create a bunch of asynchronous url fetches to get all of the route data
         rpcs = []
-        memcache.set(sid,0)
+        memcache.set(sid,len(routes))
         for r in routes:
             rpc = urlfetch.create_rpc()
             rpc.callback = create_callback(rpc,stopID,r.route,sid,r.direction)
-            counter = memcache.incr(sid)
+            #counter = memcache.incr(sid)
             urlfetch.make_fetch_call(rpc, r.scheduleURL)
             rpcs.append(rpc)
 
@@ -61,6 +61,7 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
             #logging.info('API: ERROR : uh-oh. in waiting loop... %s' % memcache.get(sid))
             rpc.wait()
 
+        memcache.delete(sid)
         return webapp2.get_request().registry['aggregated_results']
 
 
@@ -71,7 +72,6 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
 # If all requests for this sid are services, aggregate the results
 #
 def handle_result(rpc,stopID,routeID,sid,directionID):
-    routes = None
     result = None
     try:
         # go fetch the webpage for this route/stop!
@@ -137,11 +137,7 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
 
     # create the task that glues all the messages together when
     # we've finished the fetch tasks
-    counter = memcache.decr(sid)
-    if counter == 0:
-        # put them all together
-        memcache.delete(sid)
-        #routes = aggregateAsynchResults(sid)
+    memcache.decr(sid)
 
     return
 
