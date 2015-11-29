@@ -23,7 +23,13 @@ class MainHandler(webapp.RequestHandler):
 
     def get(self):
       start = time.time()
+      # snare the inputs
       dev_key = self.request.get('key')
+      stopID = api_utils.conformStopID(self.request.get('stopID'))
+      routeID = self.request.get('routeID')
+      vehicleID = self.request.get('vehicleID')
+      #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
+
       self.request.registry['aggregated_results'] = []
 
       try:
@@ -39,12 +45,6 @@ class MainHandler(webapp.RequestHandler):
                   self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
                   return
 
-              # snare the inputs
-              stopID = api_utils.conformStopID(self.request.get('stopID'))
-              routeID = self.request.get('routeID')
-              vehicleID = self.request.get('vehicleID')
-              #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
-
               if stopID is not '' and routeID is '':
                   json_response = stopRequest(stopID, dev_key)
                   api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
@@ -58,6 +58,17 @@ class MainHandler(webapp.RequestHandler):
                   logging.debug("API: invalid request")
                   api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
                   json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
+
+              # push event out to anyone watching the live board
+              channels = memcache.get('channels')
+              if channels is not None:
+                  task = Task(url='/map/task', params={'stopID':stopID})
+                  task.add('eventlogger')
+
+              # stop statistics - DISABLED
+              # if( "kiosk" not in dev_key ):
+              #     task = Task(url='/stats/stop', params={'apikey':dev_key,'stop':stopID})
+              #     task.add('stats')
 
           else:
               # don't run these jobs during "off" hours
@@ -85,16 +96,6 @@ class MainHandler(webapp.RequestHandler):
       # stathat:
       stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
       stathat.apiStatCount()
-      # stop statistics
-      if( "kiosk" not in dev_key ):
-          task = Task(url='/stats/stop', params={'apikey':dev_key,'stop':stopID})
-          task.add('stats')
-
-      # push event out to anyone watching the live board
-      channels = memcache.get('channels')
-      if channels is not None:
-          task = Task(url='/map/task', params={'stopID':stopID})
-          task.add('eventlogger')
 
 ## end RequestHandler
 
