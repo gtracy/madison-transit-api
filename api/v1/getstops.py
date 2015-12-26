@@ -7,7 +7,7 @@ import json
 from data_model import StopLocation
 from utils.geo import geotypes
 from api.v1 import api_utils
-from stats import stathat
+from stats_and_maps.stats import stathat
 
 from google.appengine.api import memcache
 from google.appengine.ext import db

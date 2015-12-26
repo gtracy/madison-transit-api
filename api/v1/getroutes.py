@@ -7,7 +7,7 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from api.v1 import api_utils
-from stats import stathat
+from stats_and_maps.stats import stathat
 from data_model import RouteListing
 
 class StaticAPIs(db.Model):

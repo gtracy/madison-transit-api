@@ -1,0 +1,6 @@
+dispatch:
+  - url: "*/map*"
+    module: stats-and-maps
+
+  - url: "*/stats/*"
+    module: stats-and-maps

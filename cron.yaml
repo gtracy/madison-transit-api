@@ -4,11 +4,6 @@ cron:
   schedule: every 2 hours from 6:00 to 00:00
   timezone: America/Chicago
 
-- description: email the daily report
-  url: /admin/dailyreport
-  schedule: every day 23:27
-  timezone: America/Chicago
-
 - description: reset live map channels
   url: /admin/resetchannels
   schedule: every 2 hours
@@ -16,5 +11,5 @@ cron:
 
 - description: flush stathat counters
   url: /stats/flush
-  schedule: every 1 minutes
+  schedule: every 5 minutes
   timezone: America/Chicago

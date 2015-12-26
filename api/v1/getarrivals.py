@@ -10,7 +10,7 @@ from google.appengine.runtime import DeadlineExceededError
 
 from api.v1 import api_utils
 from api import asynch
-from stats import stathat
+from stats_and_maps.stats import stathat
 import config
 
 

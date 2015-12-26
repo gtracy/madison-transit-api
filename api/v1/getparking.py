@@ -1,9 +1,6 @@
-import os
-import wsgiref.handlers
 import logging
 import time
 import datetime
-from datetime import timedelta
 import webapp2 as webapp
 import json
 
@@ -11,11 +8,8 @@ from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from api.BeautifulSoup import BeautifulSoup, Tag
-
-
 from api.v1 import api_utils
-from stats import stathat
+from stats_and_maps.stats import stathat
 
 
 class MainHandler(webapp.RequestHandler):

@@ -1,6 +1,4 @@
-import os
 import logging
-import time
 import re
 import datetime
 from pytz.gae import pytz
@@ -9,8 +7,6 @@ from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.datastore import entity_pb
 
-from stats.stathat import StatHat
-import config
 from data_model import DeveloperRequest
 
 

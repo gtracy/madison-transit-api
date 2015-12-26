@@ -6,6 +6,7 @@ queue:
 - name: eventlogger
   rate: 50/s
   bucket_size: 1
+  target: stats-and-maps
 
 - name: smssender
   rate: 1/s
@@ -22,3 +23,4 @@ queue:
 - name: stats
   rate: 50/s
   bucket_size: 1
+  target: stats-and-maps

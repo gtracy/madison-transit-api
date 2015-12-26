@@ -1,11 +1,14 @@
 application: msn-transit-api
-version: optimize-memcache
+module: default
+version: micro-services-max-requests
 runtime: python27
 api_version: 1
 threadsafe: true
 instance_class: F2
 automatic_scaling:
-  min_idle_instances: 4
+  min_idle_instances: 2
+  max_idle_instances: 2
+  max_concurrent_requests: 10
 
 derived_file_type:
 - python_precompiled
@@ -28,10 +31,6 @@ handlers:
 - url: /
   static_files: public/index.html
   upload: public/index.html
-
-# map apps
-- url: /map(.*)
-  script: maps.map.app
 
 - url: /(.*\.html)
   static_files: public/\1
@@ -115,17 +114,6 @@ handlers:
 - url: /debug/drop/DeveloperRequest
   script: crawl.crawler.application
   login: admin
-
-# stats task
-- url: /stats/stop
-  script: stats.stathat.application
-
-- url: /stats/new/.*
-  script: stats.stathat.application
-
-# stathat flusher
-- url: /stats/flush
-  script: stats.stathat.application
 
 #admin_console:
 # pages:

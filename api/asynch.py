@@ -11,7 +11,7 @@ from BeautifulSoup import BeautifulSoup
 from data_model import BusStopAggregation
 
 from api.v1 import api_utils
-from stats import stathat
+from stats_and_maps.stats import stathat
 import config
 
 

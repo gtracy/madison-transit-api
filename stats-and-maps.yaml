@@ -1,0 +1,46 @@
+application: msn-transit-api
+module: stats-and-maps
+version: micro-services
+runtime: python27
+api_version: 1
+threadsafe: true
+instance_class: B1
+basic_scaling:
+  max_instances: 1
+
+derived_file_type:
+- python_precompiled
+
+inbound_services:
+- channel_presence
+
+builtins:
+- appstats: off
+- remote_api: on
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+
+handlers:
+
+# map apps
+- url: /map(.*)
+  script: stats_and_maps.maps.map.app
+
+# stats task
+- url: /stats/stop
+  script: stats_and_maps.stats.stathat.application
+  login: admin
+
+- url: /stats/new/.*
+  script: stats_and_maps.stats.stathat.application
+  login: admin
+
+# stathat flusher
+- url: /stats/flush
+  script: stats_and_maps.stats.stathat.application
+  login: admin
+
