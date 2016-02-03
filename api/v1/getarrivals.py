@@ -33,7 +33,7 @@ class MainHandler(webapp.RequestHandler):
       self.request.registry['aggregated_results'] = []
 
       try:
-          if api_utils.afterHours() is False:
+          if api_utils.afterHours() is False:  # and dev_key != 'uwkiosk9':
 
               # validate the request parameters
               devStoreKey = validateRequest(self.request)
@@ -73,6 +73,9 @@ class MainHandler(webapp.RequestHandler):
           else:
               # don't run these jobs during "off" hours
               #logging.debug('shunted... off hour request')
+              #if dev_key.find('kiosk') >= 0:
+              #  json_response = api_utils.buildErrorResponse('-1','Kiosk requests no longer supported')
+              #else:
               json_response = api_utils.buildErrorResponse('-1','The Metro service is not currently running')
 
           # encapsulate response in json or jsonp
@@ -94,8 +97,9 @@ class MainHandler(webapp.RequestHandler):
 
       # persist some statistics
       # stathat:
-      stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
-      stathat.apiStatCount()
+      if api_utils.afterHours() is False and dev_key != 'uwkiosk9':
+        stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+        stathat.apiStatCount()
 
 ## end RequestHandler
 
@@ -144,19 +148,14 @@ def validateRequest(request):
 
 def stopRequest(stopID, devKey):
 
-    #logging.debug("Stop Request started")
     response_dict = None
 
-    # if this is a kiosk request, grab the cached result
-    if( devKey.find('kiosk') >= 0 ):
-        #logging.debug('kiosk request. check for cache hit')
-        # look for memcahced results
-        results_cache_key = 'kiosk::%s' % stopID
-        response_dict = memcache.get(results_cache_key)
-        if( response_dict is None ):
-            logging.debug('gettarrivals : kiosk cache miss')
+    # look for memcahced results
+    results_cache_key = 'stopRequest::%s' % stopID
+    response_dict = memcache.get(results_cache_key)
 
     if( response_dict is None ):
+        logging.debug("getarrivals : cache miss")
         response_dict = {'status':'0',
                          'timestamp':api_utils.getLocalTimestamp()
                          }
@@ -196,15 +195,11 @@ def stopRequest(stopID, devKey):
         # cleanup the results
         #asynch.clean(sid)
 
-        # cache results if it is from a kiosk
-        if( devKey.find('kiosk') >= 0 ):
-            # look for memcahced results
-            results_cache_key = 'kiosk::%s' % stopID
-            memcache.set(results_cache_key,response_dict,75)
-            #logging.debug('gettarrivals : kiosk cache set')
+        # stash results in the cache
+        memcache.set(results_cache_key,response_dict,60)
 
     else:
-        logging.debug('getarrivals : kiosk cash hit')
+        logging.debug('getarrivals : cash hit')
         response_dict['cached'] = True
 
     return response_dict
