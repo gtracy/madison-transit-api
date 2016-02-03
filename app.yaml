@@ -1,14 +1,12 @@
 application: msn-transit-api
 module: default
-version: micro-services-max-requests
+version: cache-all
 runtime: python27
 api_version: 1
 threadsafe: true
-instance_class: F2
-automatic_scaling:
-  min_idle_instances: 2
-  max_idle_instances: 2
-  max_concurrent_requests: 10
+instance_class: B2
+basic_scaling:
+  max_instances: 4
 
 derived_file_type:
 - python_precompiled
