@@ -11,5 +11,5 @@ cron:
 
 - description: flush stathat counters
   url: /stats/flush
-  schedule: every 5 minutes
+  schedule: every 10 minutes
   timezone: America/Chicago
