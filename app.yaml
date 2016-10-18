@@ -1,6 +1,6 @@
 application: msn-transit-api
 module: default
-version: cache-all
+version: scraper-v2
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -83,6 +83,9 @@ handlers:
   script: api.v2.parking.parking.application
 
 - url: /v1/getarrivals
+  script: api.v1.getarrivals.application
+
+- url: /v1/getarrivalstest
   script: api.v1.getarrivals.application
 
 - url: /v1/getroutes

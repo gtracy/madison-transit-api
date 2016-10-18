@@ -87,53 +87,72 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
     arrival = '0'
     textBody = 'unknown'
     if result is None or result.status_code != 200:
-           logging.error("API: Exiting early: error fetching URL")
-           if( result is not None ):
-                logging.error("fetch error: %s" % result.status_code)
-           textBody = "error " + routeID + " (missing data)"
+        logging.error("API: Exiting early: error fetching URL")
+        textBody = "error " + routeID + " (missing data)"
+        if( result is not None ):
+            logging.error("fetch error: %s" % result.status_code)
     else:
-           soup = BeautifulSoup(result.content)
-           for slot in soup.html.body.findAll("a","ada"):
-              # only take the first time entry
-              if slot['title'].split(':')[0].isdigit():
-                arrival = slot['title']
-                textBody = arrival.replace('P.M.','pm').replace('A.M.','am')
+        # Sample HTML of the results page
+        # <tbody><tr>
+        #     <td colspan="2">&nbsp;<a class="ada" title=" <snip>
+        #   </tr><tr>
+        #     <td><a class="adatitle" title="UNIV AVE &gt; N MIDVALE [2191]">UNIV AVE &gt; N MIDVALE [2191]</a></td>
+        #   </tr><tr>
+        #     <td><a class="adatime" title="11:12 am">11:12 am</a></td>
+        #     <td><a class="adatext" title="NTP">NTP</a></td>
+        #   </tr><tr>
+        #     <td><p class="stopLabel">Scheduled time shown</p></td>
+        #   </tr><tr>
+        #     <td><a class="adatime" title="11:42 am">11:42 am</a></td>
+        #     <td><a class="adatext" title="NTP">NTP</a></td>
+        #   </tr><tr>
+        #     <td><p class="stopLabel">Scheduled time shown</p></td>
+        #   </tr><tr>
+        #     <td><a class="adatime" title="12:12 pm">12:12 pm</a></td>
+        #     <td><a class="adatext" title="NTP">NTP</a></td>
+        #   </tr><tr>
+        #     <td><p class="stopLabel">Scheduled time shown</p></td>
+        #   </tr><tr>
+        #     <td><a class="ada" title="Times last updated 10:54:01 AM 10/16/2016">Times last updated 10:54:01 AM 10/16/2016</a></td>
+        #   </tr>
+        # </tbody>
+        soup = BeautifulSoup(result.content)
+        for slot in soup.html.body.findAll("a","adatime"):
+            logging.error('adatime slot : %s' % slot);
+            arrival = slot.string
+            logging.error('arrival : %s' % arrival)
+            direction = slot.parent.nextSibling.a.string
+            logging.error('direction : %s' % direction)
 
-                # the next column includes very specific details about
-                # where the route is going. some buses take multiple
-                # routes to a destination point. that detail is here
-                direction = slot.parent.nextSibling.string.strip().lower().title()
-                # contort this string to minimize it
-                # ... strip off the "To" on the front end
-                direction = direction.replace('To ','',1).strip()
-                # ... correct the transfer point acronym we broke in the title() call above
-                direction = direction.replace('Tp','TP')
+            # ... correct the transfer point acronym we broke in the title() call above
+            direction = direction.replace('Tp','TP')
 
-                # the original implementaiton leveraged the datastore to store and
-                # ultimately sort the results when we got all of the routes back.
-                # we'll continute to use the model definition, but never actually store
-                # the results in the datastore.
-                stop = BusStopAggregation()
-                stop.stopID = stopID
-                stop.routeID = routeID
-                stop.sid = sid
-                stop.arrivalTime = textBody
-                stop.destination = direction
+            # the original implementaiton leveraged the datastore to store and
+            # ultimately sort the results when we got all of the routes back.
+            # we'll continute to use the model definition, but never actually store
+            # # the results in the datastore.
+            stop = BusStopAggregation()
+            stop.stopID = stopID
+            stop.routeID = routeID
+            stop.sid = sid
+            stop.arrivalTime = arrival
+            stop.destination = direction
 
-                # turn the arrival time into absolute minutes
-                hours = int(arrival.split(':')[0])
-                if arrival.find('P.M.') > 0 and int(hours) < 12:
-                    hours += 12
-                minutes = int(arrival.split(':')[1].split()[0])
-                arrivalMinutes = (hours * 60) + minutes
-                stop.time = arrivalMinutes
+            # turn the arrival time into absolute minutes
+            hours = int(arrival.split(':')[0])
+            if arrival.find('pm') > 0 and int(hours) < 12:
+                hours += 12
+            minutes = int(arrival.split(':')[1].split()[0])
+            arrivalMinutes = (hours * 60) + minutes
+            stop.time = arrivalMinutes
+            stop.text = "%s %s" % (arrival,direction)
+            logging.error(arrivalMinutes)
+            logging.error("%s %s" % (arrival,direction))
 
-                stop.text = "%s %s" % (textBody,direction)
-
-                # instead of shoving this in the datastore, we're going to shove
-                # it in a local variable and retrieve it with the sid later
-                # old implementation --> stop.put()
-                insert_result(sid,stop)
+            # instead of shoving this in the datastore, we're going to shove
+            # it in a local variable and retrieve it with the sid later
+            # old implementation --> stop.put()
+            insert_result(sid,stop)
 
     # create the task that glues all the messages together when
     # we've finished the fetch tasks
