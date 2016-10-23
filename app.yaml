@@ -66,10 +66,6 @@ handlers:
 #
 # data CRAWLER access
 #
-- url: /crawl/routelist/.*
-  script: crawl.crawler.application
-  login: admin
-
 - url: /gtfs/port/.*
   script: crawl.load_gtfs.application
   login: admin
