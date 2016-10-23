@@ -27,6 +27,16 @@ class RouteListing(db.Model):
     stopLocation = db.ReferenceProperty(StopLocation,collection_name="stops")
 ## end RouteListing
 
+class RouteListingLoader(db.Model):
+    routeID       = db.StringProperty()
+    routeCode     = db.StringProperty()
+    direction     = db.StringProperty()
+    directionCode = db.StringProperty()
+    stopID        = db.StringProperty()
+    stopCode      = db.StringProperty()
+## end RouteListingLoader
+
+
 class DestinationListing(db.Model):
     id    = db.StringProperty()
     label = db.StringProperty()
