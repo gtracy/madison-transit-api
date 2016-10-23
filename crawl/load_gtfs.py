@@ -7,6 +7,72 @@ from google.appengine.ext.db import GeoPt
 
 from data_model import StopLocation
 from data_model import StopLocationLoader
+from data_model import RouteListing
+from data_model import RouteListingLoader
+from data_model import DestinationListing
+
+CRAWL_URLBASE = "http://webwatchtest.cityofmadison.com/tmwebwatch/LiveADAArrivalTimes"
+
+#
+# a collection of handlers that will transform RouteListingLoader entities
+# into routes and destinations
+#
+# note that order matters. the Stop transformation has to happen first.
+#
+class RouteTransformationStart(webapp.RequestHandler):
+    def get(self) :
+        # shove a task in the queue because we need more time then
+        # we may be able to get in the browser
+        task = Task(url="/gtfs/port/routes/task",params={})
+        task.add('crawler')
+        self.response.out.write('done. spawned a task to go do the route transformations')
+
+## end RouteTransformationStart
+
+class RouteTransformationTask(webapp.RequestHandler):
+    def post(self):
+        route_loader_query = RouteListingLoader.all()
+        for r in route_loader_query.run(keys_only=True):
+            logging.debug('launch key query %s' % r)
+            task = Task(url="/gtfs/port/routes/transform/task",params={'rll_key':r})
+            task.add('crawler')
+
+        return
+
+## end RouteTransformationParent
+
+class RouteTransformationChildTask(webapp.RequestHandler):
+    def post(self):
+        route_loader_key = self.request.get('rll_key')
+        logging.debug('work on %s' % self.request.get('rll_key'))
+        route_loader = RouteListingLoader.get(route_loader_key)
+#        route_loader = db.GqlQuery("SELECT * FROM RouteListingLoader WHERE __key__ = route_loader_key")
+        if route_loader is None:
+            logging.error('total fail. unable to find %s' % route_loader_key)
+        else:
+            logging.debug(route_loader.routeID)
+            # find the corresponding stop details
+            stop = db.GqlQuery("SELECT * FROM StopLocation WHERE stopID = :1", route_loader.stopID).get()
+            if stop is None:
+              logging.error("Missing stop %s which should be impossible" % route_loader.stopID);
+
+
+            url = CRAWL_URLBASE + '?r=' + route_loader.routeCode + '&d=' + route_loader.directionCode + '&s=' + route_loader.stopCode
+            logging.debug(url)
+            route = RouteListing()
+            route.route = route_loader.routeID
+            route.direction = route_loader.directionCode
+            route.stopID = route_loader.stopID
+            route.scheduleURL = url
+            route.stopLocation = stop
+            route.put()
+            logging.info("added new route listing entry to the database!")
+
+            DestinationListing.get_or_insert(route_loader.direction, id=route_loader.directionCode, label=route_loader.direction)
+
+        return
+
+## end RouteTransformationChild
 
 #
 # This handler is designed to port the GTFS Stops loaded via the bulk loader
@@ -76,7 +142,10 @@ class PortStopTask(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication([('/gtfs/port/stops', PortStopsHandler),
-                                        ('/gtfs/port/stop/task/', PortStopTask),
+                                      ('/gtfs/port/stop/task/', PortStopTask),
+                                      ('/gtfs/port/routes', RouteTransformationStart),
+                                      ('/gtfs/port/routes/task', RouteTransformationTask),
+                                      ('/gtfs/port/routes/transform/task', RouteTransformationChildTask)
                                      ],
                                      debug=True)
 

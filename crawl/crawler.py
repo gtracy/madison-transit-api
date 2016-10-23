@@ -26,33 +26,65 @@ from data_model import DestinationListing
 from data_model import DeveloperKeys
 
 
-URLBASE = "http://webwatch.cityofmadison.com/webwatch/ada.aspx?"
-CRAWL_URLBASE = "http://webwatch.cityofmadison.com/webwatch/Ada.aspx"
+CRAWL_URLBASE = "http://webwatchtest.cityofmadison.com/tmwebwatch/LiveADAArrivalTimes"
 
-class CrawlerHandler(webapp.RequestHandler):
-    def get(self,routeID=""):
-        # create a new task with this link
-        #crawlURL = "http://webwatch.cityofmadison.com/webwatch/Ada.aspx"
-        crawlURL = URLBASE + 'r=' + routeID
-        task = Task(url='/crawl/routelist/crawlingtask', params={'crawl':crawlURL,'routeID':'00'})
-        task.add('crawler')
-        logging.info("Added new task for %s" % crawlURL)
+# just kick off the crawler by sticking a task in the queue
+# for the top-level arrival time page
+#
+class CrawlerStartHandler(webapp.RequestHandler):
+    def get(self):
+        loop = 0
+        done = False
+        while not done and loop < 3:
+            try:
+                # fetch the page
+                result = urlfetch.fetch(CRAWL_URLBASE)
+                done = True;
+            except urlfetch.DownloadError:
+                logging.info("Error loading page (%s)... sleeping" % loop)
+                if result:
+                    logging.debug("Error status: %s" % result.status_code)
+                    logging.debug("Error header: %s" % result.headers)
+                    logging.debug("Error content: %s" % result.content)
+                    time.sleep(4)
+                    loop = loop+1
+
+        self.response.write(result.content)
+        # roll through all of the links and create crawl tasks for them
+        soup = BeautifulSoup(result.content)
+        for slot in soup.html.body.findAll("a","adalink"):
+
+            # sample HTML for each link
+            #  <a class="adalink" title="01 - Route 1" href="?r=61">01 - Route 1</a>
+            #
+            # skip the supplemental listings
+            #
+            if slot['title'].find('Supplemental') == -1:
+                href = slot['href']
+                routeID = slot['title'].split(' ',1)[0]
+                crawlURL = CRAWL_URLBASE + href
+                logging.error("route %s, %s" % (routeID,crawlURL))
+                task = Task(url='/crawl/routelist/crawlingtask', params={'crawl':crawlURL,'routeID':routeID})
+                task.add('crawler')
+
         return
 
-## end CrawlerHandler()
+## end CrawlerStartHandler()
 
+# task handler for all crawling jobs. this task handles two types of pages
+#  1) intermediate page which has different direction for a single route
+#  2) bottom page which lists all stops for a route direction
+#
 class CrawlingTaskHandler(webapp.RequestHandler):
     def post(self):
         try:
             scrapeURL = self.request.get('crawl')
             direction = self.request.get('direction')
             routeID = self.request.get('routeID')
-            logging.debug("task scraping for %s, direction %s, route %s" % (scrapeURL,direction,routeID))
 
             loop = 0
             done = False
             result = None
-            #start = quota.get_request_cpu_usage()
             while not done and loop < 3:
                 try:
                     # fetch the page
@@ -66,19 +98,21 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                         logging.debug("Error content: %s" % result.content)
                         time.sleep(4)
                         loop = loop+1
-            #end = quota.get_request_cpu_usage()
-            #logging.info("scraping took %s cycles" % (end-start))
 
             # start to interrogate the results
             soup = BeautifulSoup(result.content)
-            for slot in soup.html.body.findAll("a","ada"):
-                logging.info("pulling out data from page... %s" % slot)
+            for slot in soup.html.body.findAll("a","adalink"):
 
                 if slot.has_key('href'):
                     href = slot['href']
                     title = slot['title']
                     logging.info("FOUND A TITLE ----> %s" % title)
+
                     # route crawler looks for titles with an ID# string
+                    #
+                    # stop links have the following format
+                    #    <a class="adalink" title="CAMPUS &amp; BABCOCK RR [EB#0809]" href="?r=61&amp;d=102&amp;s=3457">CAMPUS &amp; BABCOCK RR [EB#0809]</a>
+                    #
                     if title.find("#") > 0:
                         # we finally got down to the page we're looking for
 
@@ -99,7 +133,7 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                         routeData = scrapeURL.split('?')[1]
                         logging.info("FOUND THE PAGE ---> arguments: %s stopID: %s" % (routeData,stopID))
                         routeArgs = routeData.split('&')
-                        routeID = routeArgs[0].split('=')[1]
+                        fakeRouteID = routeArgs[0].split('=')[1]
                         directionID = routeArgs[1].split('=')[1]
                         timeEstimatesURL = CRAWL_URLBASE + href
 
@@ -118,25 +152,24 @@ class CrawlingTaskHandler(webapp.RequestHandler):
                           logging.info("added new route listing entry to the database!")
                         else:
                           logging.error("we found a duplicate entry!?! %s", r.scheduleURL)
-                    #else: # title.split(",")[0].isdigit():
                     else:
+                        # direction links look like the following,
+                        #    <a class="adalink" title="CapSq" href="?r=61&amp;d=102">CapSq</a>
+                        #
+                        # fetch the next page depth to get to the stop details
+                        #
+
                         if href.find("?r=") > -1:
                             # create a new task with this link
                             crawlURL = CRAWL_URLBASE + href
-                            if routeID == '00':
-                                routeID = href.split('r=')[1]
-                            elif href.find("&") > -1:
-                                routeID = href.split('&')[0].split('r=')[1]
                             task = Task(url='/crawl/routelist/crawlingtask', params={'crawl':crawlURL,'direction':title,'routeID':routeID})
                             task.add('crawler')
                             logging.info("Added new task for %s, direction %s, route %s" % (title.split(",")[0],title,routeID))
+
                         # label crawler looks for titles with letters for extraction/persistence
                         if title.replace('-','').replace(' ','').isalpha():
+                            directionID = href.split('d=')[0]
                             logging.info("found the route LABEL page! href: %s" % href)
-                            routeData = href.split('?')[1]
-                            routeArgs = routeData.split('&')
-                            directionID = routeArgs[1].split('=')[1]
-
                             l = DestinationListing.get_or_insert(title, id=directionID, label=title)
 
         except apiproxy_errors.DeadlineExceededError:
@@ -211,7 +244,7 @@ class RouteListHandler(webapp.RequestHandler):
 
 ## end
 
-application = webapp.WSGIApplication([('/crawl/routelist/configure/(.*)', CrawlerHandler),
+application = webapp.WSGIApplication([('/crawl/routelist/configure', CrawlerStartHandler),
                                         ('/crawl/routelist/crawlingtask', CrawlingTaskHandler),
                                         ('/routelist/(.*)', RouteListHandler),
                                         ('/droptable/(.*)', DropTableHandler),
@@ -220,7 +253,7 @@ application = webapp.WSGIApplication([('/crawl/routelist/configure/(.*)', Crawle
                                        debug=True)
 
 def main():
-  logging.getLogger().setLevel(logging.DEBUG)
+  logging.getLogger().setLevel(logging.INFO)
   run_wsgi_app(application)
 
 

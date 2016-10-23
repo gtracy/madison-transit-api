@@ -44,3 +44,29 @@ transformers:
 
     - property: direction
       external_name: direction
+
+- kind: RouteListingLoader
+  connector: csv
+  connector_options:
+  property_map:
+    - property: __key__
+      external_name: key
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: routeID
+      external_name: routeID
+
+    - property: routeCode
+      external_name: routeCode
+
+    - property: direction
+      external_name: direction
+
+    - property: directionCode
+      external_name: directionCode
+
+    - property: stopID
+      external_name: stopID
+
+    - property: stopCode
+      external_name: stopCode
