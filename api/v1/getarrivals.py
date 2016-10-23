@@ -255,8 +255,7 @@ def routeVehicleRequest(routeID, vehicleID, devStoreKey):
 
 ## end stopRouteRequest()
 
-
-application = webapp.WSGIApplication([('/v1/getarrivals', MainHandler),
+application = webapp.WSGIApplication([('/v1/getarrivals', MainHandler)
                                       ],
                                      debug=True)
 application.error_handlers[500] = api_utils.handle_500
@@ -264,7 +263,6 @@ application.error_handlers[500] = api_utils.handle_500
 def main():
   logging.getLogger().setLevel(logging.ERROR)
   run_wsgi_app(application)
-  #wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
   main()

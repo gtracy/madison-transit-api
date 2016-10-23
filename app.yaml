@@ -4,7 +4,7 @@ version: scraper-v2
 runtime: python27
 api_version: 1
 threadsafe: true
-instance_class: B2
+instance_class: B4
 basic_scaling:
   max_instances: 4
 
@@ -83,9 +83,6 @@ handlers:
   script: api.v2.parking.parking.application
 
 - url: /v1/getarrivals
-  script: api.v1.getarrivals.application
-
-- url: /v1/getarrivalstest
   script: api.v1.getarrivals.application
 
 - url: /v1/getroutes
