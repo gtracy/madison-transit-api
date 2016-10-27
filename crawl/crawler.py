@@ -17,7 +17,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.db import GeoPt
 
 from google.appengine.runtime import apiproxy_errors
-
+from google.appengine.runtime import DeadlineExceededError
 from api.BeautifulSoup import BeautifulSoup, Tag
 
 from data_model import RouteListing

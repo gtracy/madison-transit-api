@@ -118,11 +118,8 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
         # </tbody>
         soup = BeautifulSoup(result.content)
         for slot in soup.html.body.findAll("a","adatime"):
-            logging.error('adatime slot : %s' % slot);
             arrival = slot.string
-            logging.error('arrival : %s' % arrival)
             direction = slot.parent.nextSibling.a.string
-            logging.error('direction : %s' % direction)
 
             # ... correct the transfer point acronym we broke in the title() call above
             direction = direction.replace('Tp','TP')
@@ -146,8 +143,6 @@ def handle_result(rpc,stopID,routeID,sid,directionID):
             arrivalMinutes = (hours * 60) + minutes
             stop.time = arrivalMinutes
             stop.text = "%s %s" % (arrival,direction)
-            logging.error(arrivalMinutes)
-            logging.error("%s %s" % (arrival,direction))
 
             # instead of shoving this in the datastore, we're going to shove
             # it in a local variable and retrieve it with the sid later

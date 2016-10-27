@@ -1,10 +1,10 @@
 application: msn-transit-api
 module: default
-version: scraper-v2
+version: scraper-v2-routefix
 runtime: python27
 api_version: 1
 threadsafe: true
-instance_class: B4
+instance_class: B2
 basic_scaling:
   max_instances: 4
 
