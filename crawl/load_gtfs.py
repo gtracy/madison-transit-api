@@ -50,8 +50,8 @@ class RouteTransformationTask(webapp.RequestHandler):
 
         except Timeout:
             logging.error('FAIL : timeout getting the route loader tasks spawned')
-          self.response.set_status(200)
-          self.response.out.write("timeout")
+            self.response.set_status(200)
+            self.response.out.write("timeout")
 
         return
 
@@ -76,8 +76,10 @@ class RouteTransformationChildTask(webapp.RequestHandler):
                 logging.debug(url)
                 route = RouteListing()
                 route.route = route_loader.routeID
+                route.routeCode = route_loader.routeCode
                 route.direction = route_loader.directionCode
                 route.stopID = route_loader.stopID
+                route.stopCode = route_loader.stopCode
                 route.scheduleURL = url
                 route.stopLocation = stop
                 route.put()

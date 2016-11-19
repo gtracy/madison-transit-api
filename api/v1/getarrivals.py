@@ -237,7 +237,7 @@ def stopRouteRequest(stopID, routeID, devStoreKey):
                           }))
 
     # add the populated stop details to the response
-    stop_dict.update({'route':route_results});
+    stop_dict.update({'route':route_results})
     response_dict.update({'stop':stop_dict})
 
     return response_dict

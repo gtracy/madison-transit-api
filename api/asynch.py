@@ -16,13 +16,13 @@ import config
 
 
 def email_missing_stop(stopID, routeID, sid):
-      # setup the response email
-      message = mail.EmailMessage()
-      message.sender = config.EMAIL_SENDER_ADDRESS
-      message.to = config.EMAIL_REPORT_ADDRESS
-      message.subject = 'Missing stop ID requested by API client - %s' % stopID
-      message.body = 'RouteID: %s \n' % routeID + 'SID: %s \n' % sid
-      #message.send()
+    # setup the response email
+    message = mail.EmailMessage()
+    message.sender = config.EMAIL_SENDER_ADDRESS
+    message.to = config.EMAIL_REPORT_ADDRESS
+    message.subject = 'Missing stop ID requested by API client - %s' % stopID
+    message.body = 'RouteID: %s \n' % routeID + 'SID: %s \n' % sid
+    message.send()
 ## end
 
 def aggregateBusesAsynch(sid, stopID, routeID=None):
@@ -48,7 +48,6 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
         for r in routes:
             rpc = urlfetch.create_rpc()
             rpc.callback = create_callback(rpc,stopID,r.route,sid,r.direction)
-            #counter = memcache.incr(sid)
             urlfetch.make_fetch_call(rpc, r.scheduleURL)
             rpcs.append(rpc)
 
@@ -186,15 +185,16 @@ def create_callback(rpc,stopID,routeID,sid,directionID):
     return lambda: handle_result(rpc,stopID,routeID,sid,directionID)
 
 # Convenience method to extract RouteListing
-def getRouteListing(stopID,routeID=None):
+def getRouteListing(stopID=None,routeID=None):
 
     # ignore the invalid stop IDs that keep coming in
     if stopID in config.INVALID_STOP_IDS:
         return []
 
-
     if routeID is None:
         key = 'routelisting:%s' % stopID
+    elif stopID is None:
+        key = 'singleRouteListing:%s' % routeID
     else:
         key = 'routelisting:%s:%s' % (stopID,routeID)
 
@@ -202,6 +202,8 @@ def getRouteListing(stopID,routeID=None):
     if not entities:
         if routeID is None:
             entities = db.GqlQuery("SELECT * FROM RouteListing WHERE stopID = :1",stopID).fetch(50)
+        elif stopID is None:
+            entities = db.GqlQuery("SELECT * FROM RouteListing WHERE route = :1", routeID).fetch(1)
         else:
             entities = db.GqlQuery("SELECT * FROM RouteListing WHERE stopID = :1 AND route = :2",stopID,routeID).fetch(50)
         if entities:

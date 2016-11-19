@@ -1,0 +1,59 @@
+
+class TestHandler(webapp.RequestHandler):
+
+    def get(self):
+      url = 'http://webwatchtest.cityofmadison.com/tmwebwatch/LiveADADepartureTimes?r=92&d=115&s=1285'
+      logging.error(url)
+      try:
+          result = urlfetch.fetch(url)
+          if result.status_code == 200:
+              logging.debug(result.content)
+              self.response.write(result.content)
+
+              from api.BeautifulSoup import BeautifulSoup
+
+              soup = BeautifulSoup(result.content)
+              for slot in soup.html.body.findAll("a","adatime"):
+                  logging.error('adatime slot : %s' % slot);
+                  arrival = slot.string
+                  logging.error('arrival : %s' % arrival)
+                  direction = slot.parent.nextSibling.a.string
+                  logging.error('direction : %s' % direction)
+
+                  # ... correct the transfer point acronym we broke in the title() call above
+                  direction = direction.replace('Tp','TP')
+
+                  # the original implementaiton leveraged the datastore to store and
+                  # ultimately sort the results when we got all of the routes back.
+                  # we'll continute to use the model definition, but never actually store
+                  # # the results in the datastore.
+                  # stop = BusStopAggregation()
+                  # stop.stopID = stopID
+                  # stop.routeID = routeID
+                  # stop.sid = sid
+                  # stop.arrivalTime = arrival
+                  # stop.destination = direction
+
+                  # turn the arrival time into absolute minutes
+                  hours = int(arrival.split(':')[0])
+                  if arrival.find('pm') > 0 and int(hours) < 12:
+                      hours += 12
+                  minutes = int(arrival.split(':')[1].split()[0])
+                  arrivalMinutes = (hours * 60) + minutes
+                  #stop.time = arrivalMinutes
+                  #stop.text = "%s %s" % (arrival,direction)
+                  logging.error(arrivalMinutes)
+                  logging.error("%s %s" % (arrival,direction))
+
+                  # instead of shoving this in the datastore, we're going to shove
+                  # it in a local variable and retrieve it with the sid later
+                  # old implementation --> stop.put()
+                  #insert_result(sid,stop)
+
+          else:
+              self.response.status_code = result.status_code
+      except urlfetch.Error:
+          logging.exception('Caught exception fetching url')
+
+## end TestHandler
+

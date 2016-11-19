@@ -21,8 +21,10 @@ class StopLocationLoader(db.Model):
 
 class RouteListing(db.Model):
     route        = db.StringProperty()
+    routeCode    = db.StringProperty()
     direction    = db.StringProperty()
     stopID       = db.StringProperty()
+    stopCode     = db.StringProperty()
     scheduleURL  = db.StringProperty(indexed=False)
     stopLocation = db.ReferenceProperty(StopLocation,collection_name="stops")
 ## end RouteListing
