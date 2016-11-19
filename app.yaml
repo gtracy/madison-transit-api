@@ -1,6 +1,6 @@
 application: msn-transit-api
 module: default
-version: scraper-v2-routefix
+version: scraper-v2-getvehicles
 runtime: python27
 api_version: 1
 threadsafe: true
