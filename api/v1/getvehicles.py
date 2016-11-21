@@ -25,6 +25,8 @@ class MainHandler(webapp.RequestHandler):
 
         # snare the inputs
         routeID = self.request.get('routeID')
+        if len(routeID) == 1:
+            routeID = "0" + routeID
         logging.debug('getvehicles request parameters...  routeID %s' % routeID)
 
         if api_utils.afterHours() is True:
@@ -97,44 +99,43 @@ def routeRequest(routeID):
             time.sleep(6)
             loop = loop+1
 
-    logging.error(result.status_code)
-    logging.error(result.content)
     if result is None or result.status_code != 200:
         logging.error("Exiting early: error fetching URL: " + result.status_code)
         return api_utils.buildErrorResponse('-1', 'Error reading live Metro feed')
 
     # vehicle results are in a JSON array
     # { "d" : [ {}, {} ] }
-    logging.debug('now parse the JSON')
     json_result = json.loads(result.content)
-    logging.error(json_result)
     vehicles = json_result['d']
-    logging.debug(vehicles)
+    if vehicles:
+        vehicle_count = len(vehicles)
+    else:
+        vehicle_count = 0
 
     # setup the core response object
     results = dict({'status' : 0,
                     'routeID' : routeID,
-                    'count' : len(vehicles)-1,
+                    'count' : vehicle_count,
                     'timestamp' : api_utils.getLocalTimestamp(),
                     'vehicles' : list()})
+    
+    if vehicles:
+        # loop through all vehicles on the route and parse
+        # out details for the response
+        for v in vehicles:
+            if v == vehicles[-1]:
+                break
+            spot = dict({'lat':v['lat'],
+                        'lon':v['lon'],
+                        'direction':v['directionName'],
+                        'vehicleID':v['propertyTag'],
+                        'nextStop':v['nextStop'],
 
-    # loop through all vehicles on the route and parse
-    # out details for the response
-    for v in vehicles:
-        if v == vehicles[-1]:
-            break
-        logging.error(v)
-        spot = dict({'lat':v['lat'],
-                     'lon':v['lon'],
-                     'direction':v['directionName'],
-                     'vehicleID':v['propertyTag'],
-                     'nextStop':v['nextStop'],
-
-                     'bikeRack':v['bikeRack'],
-                     'wifiAccess':v['wiFiAccess'],
-                     'wheelChairAccessible':v['wheelChairAccessible'],
-                     'wheelChairLift':v['wheelChairLift']})
-        results['vehicles'].append(spot)
+                        'bikeRack':v['bikeRack'],
+                        'wifiAccess':v['wiFiAccess'],
+                        'wheelChairAccessible':v['wheelChairAccessible'],
+                        'wheelChairLift':v['wheelChairLift']})
+            results['vehicles'].append(spot)
 
     return results
 
