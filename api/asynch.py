@@ -22,7 +22,7 @@ def email_missing_stop(stopID, routeID, sid):
     message.to = config.EMAIL_REPORT_ADDRESS
     message.subject = 'Missing stop ID requested by API client - %s' % stopID
     message.body = 'RouteID: %s \n' % routeID + 'SID: %s \n' % sid
-    message.send()
+    # message.send()
 ## end
 
 def aggregateBusesAsynch(sid, stopID, routeID=None):
