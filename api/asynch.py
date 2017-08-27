@@ -41,7 +41,7 @@ def aggregateBusesAsynch(sid, stopID, routeID=None):
             email_missing_stop(stopID,routeID,sid)
         return None
     else:
-        logging.debug('Stop aggregation start %s '%sid)
+        logging.debug('Stop aggregation start for stop %s/%s, %s '%(stopID,routeID,sid))
         # create a bunch of asynchronous url fetches to get all of the route data
         rpcs = []
         memcache.set(sid,len(routes))

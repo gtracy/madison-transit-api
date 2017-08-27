@@ -14,7 +14,7 @@ from data_model import RouteListing
 from data_model import RouteListingLoader
 from data_model import DestinationListing
 
-CRAWL_URLBASE = "http://webwatch.cityofmadison.com/tmwebwatch/LiveADAArrivalTimes"
+CRAWL_URLBASE = "http://webwatch.cityofmadison.com/tmwebwatch/LiveADADepartureTimes"
 
 #
 # a collection of handlers that will transform RouteListingLoader entities

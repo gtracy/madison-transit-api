@@ -26,7 +26,7 @@ from data_model import DestinationListing
 from data_model import DeveloperKeys
 
 
-CRAWL_URLBASE = "http://webwatchtest.cityofmadison.com/webwatch/LiveADAArrivalTimes"
+CRAWL_URLBASE = "http://webwatch.cityofmadison.com/tmwebwatch/LiveADADepartureTimes"
 
 # just kick off the crawler by sticking a task in the queue
 # for the top-level arrival time page
