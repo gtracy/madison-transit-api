@@ -1,6 +1,6 @@
 application: msn-transit-api
 module: default
-version: departure-crawl-fix
+version: enable-stats
 runtime: python27
 api_version: 1
 threadsafe: true
