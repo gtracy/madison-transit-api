@@ -43,7 +43,7 @@ class RouteTransformationTask(webapp.RequestHandler):
             q = RouteListingLoader.all()
             q.filter("routeID = ", routeID)
             for r in q.run(keys_only=True):
-                logging.debug('launch key query %s' % r)
+                logging.debug('launch key query %s', r)
                 task = Task(url="/gtfs/port/routes/transform/task",params={'rll_key':r})
                 task.add('crawler')
             self.response.set_status(200)
@@ -69,7 +69,7 @@ class RouteTransformationChildTask(webapp.RequestHandler):
             # find the corresponding stop details
             stop = db.GqlQuery("SELECT * FROM StopLocation WHERE stopID = :1", route_loader.stopID).get()
             if stop is None:
-              logging.error("Missing stop %s which should be impossible" % route_loader.stopID);
+              logging.error("Missing stop %s which should be impossible",route_loader.stopID);
 
             try:
                 url = CRAWL_URLBASE + '?r=' + route_loader.routeCode + '&d=' + route_loader.directionCode + '&s=' + route_loader.stopCode
@@ -128,7 +128,7 @@ class PortStopTask(webapp.RequestHandler):
     def post(self):
         stop_list = []
 
-        stopID      = self.request.get('stopID')
+        stopID = self.request.get('stopID')
         if len(stopID) == 1:
             stopID = "000" + stopID
         if len(stopID) == 2:
@@ -142,9 +142,7 @@ class PortStopTask(webapp.RequestHandler):
         lon         = self.request.get('lon')
         direction   = self.request.get('direction')
 
-        # if it doesn't, create a new one
         s = StopLocation()
-
         s.stopID = stopID
         s.intersection = name.split('(')[0].rstrip()
         s.direction = direction
