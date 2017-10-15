@@ -16,7 +16,7 @@ STATHAT_MEMCACHE_REQ_COUNT = 'stathat_req_count'
 
 class StatHat:
 
-        URL_BASE = 'http://api.stathat.com'
+        URL_BASE = 'https://api.stathat.com'
 
         def http_post_async(self, path, data):
             pdata = urllib.urlencode(data)

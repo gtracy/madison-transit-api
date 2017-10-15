@@ -1,6 +1,6 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html>
   <head>
@@ -46,7 +46,7 @@
  The getarrivals method will return real-time arrival estimates for the next <i>N</i> buses at a specified stop.
  Several filters can be applied to narrow the results.
  <h3>URL</h3>
- http://api.smsmybus.com/v1/getarrivals
+ https://api.smsmybus.com/v1/getarrivals
  <h3>Fields</h3>
  <table>
  <tr>
@@ -79,11 +79,11 @@
  </table>
  <h3>Examples</h3>
  Retrieve the arrival estimates for all buses traveling through stop 1101:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101</span><p> </p>
  Retrieve the arrival estimates for route 19 buses traveling through stop 1101:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101&routeID=19</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getarrivals?key=xxx&stopID=1101&routeID=19</span><p> </p>
  Retrieve the arrival estimates for future stops of the route 19 bus identifies as #915:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getarrivals?key=xxx&routeID=19&vehicleID=915</span>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getarrivals?key=xxx&routeID=19&vehicleID=915</span>
  <h3>Response</h3>
  The response length is dependent on the particular request parameters. If the status field is 0, the response
  will be grouped by stop and each stop will be grouped by routes traveling through the respective stop.
@@ -133,8 +133,8 @@
  <hr>
  <div id="footer">
   <div id="me">
-   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
-   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=https://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=https://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
   </div>
   <div id="contact-container">
    <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>

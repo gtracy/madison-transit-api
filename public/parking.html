@@ -1,6 +1,6 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html>
   <head>
@@ -42,7 +42,7 @@
  </p>
 
  <h3>URL</h3>
- http://api.smsmybus.com/parking/v2/lots
+ https://api.smsmybus.com/parking/v2/lots
  <h3>Parameters</h3>
  <table>
     <tr>
@@ -65,7 +65,7 @@
  <h3>Example 1: GET all parking lots without special events (no parameters)</h3>
   
 
- <span style="font-weight:bold;margin-left:24px;">GET http://api.smsmybus.com/parking/v2/lots</span>
+ <span style="font-weight:bold;margin-left:24px;">GET https://api.smsmybus.com/parking/v2/lots</span>
  <h3>Response</h3>
 <code class="prettyprint lang-javascript">
 {
@@ -76,7 +76,7 @@
             "totalSpots": 613,
             "openSpots": 301,
             "operatedBy": "city",
-            "webUrl": "http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm",
+            "webUrl": "https://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm",
             "address": {
                 "postalCode": "53703",
                 "city": "Madison",
@@ -118,8 +118,7 @@
 
 </code>
 <h3>Example 2: Get all parking lots including current and future special events for given lots. </h3>
- <span style="font-weight:bold;margin-left:24px;"> GET http://api.smsmybus
-     .com/parking/v2/lots?expand=specialevents</span>
+ <span style="font-weight:bold;margin-left:24px;"> GET https://api.smsmybus.com/parking/v2/lots?expand=specialevents</span>
  <h3>Response</h3>
 <code class="prettyprint lang-javascript">
 {
@@ -130,7 +129,7 @@
             "totalSpots": 613,
             "openSpots": 301,
             "operatedBy": "city",
-            "webUrl": "http://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm",
+            "webUrl": "https://www.cityofmadison.com/parkingUtility/garagesLots/facilities/capSquareNorth.cfm",
             "address": {
                 "postalCode": "53703",
                 "city": "Madison",
@@ -151,7 +150,7 @@
                 {
                     "eventName": "Graduation - Madison East &amp; Madsion LaFollette",
                     "eventVenue": "Kohl Center",
-                    "webUrl": "http://www.cityofmadison.com/parkingUtility/calendar/index.cfm",
+                    "webUrl": "https://www.cityofmadison.com/parkingUtility/calendar/index.cfm",
                     "eventDatetime": "2014-06-13T17:00:00",
                     "parkingStartDatetime": "2014-06-13T15:00:00",
                     "parkingEndDatetime": "2014-06-13T19:35:00"
@@ -180,7 +179,7 @@
                 {
                     "eventName": "WIAA Boys Individual Tennis",
                     "eventVenue": null,
-                    "webUrl": "http://transportation.wisc.edu/newsAndEvents/events.aspx",
+                    "webUrl": "https://transportation.wisc.edu/newsAndEvents/events.aspx",
                     "eventDatetime": "2014-06-05T12:00:00",
                     "parkingStartDatetime": null,
                     "parkingEndDatetime": null
@@ -188,7 +187,7 @@
                 {
                     "eventName": "WIAA Softball",
                     "eventVenue": null,
-                    "webUrl": "http://transportation.wisc.edu/newsAndEvents/events.aspx",
+                    "webUrl": "https://transportation.wisc.edu/newsAndEvents/events.aspx",
                     "eventDatetime": "2014-06-12T07:00:00",
                     "parkingStartDatetime": null,
                     "parkingEndDatetime": null
@@ -229,8 +228,8 @@
  <hr>
  <div id="footer">
   <div id="me">
-   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
-   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=https://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=https://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
   </div>
   <div id="contact-container">
    <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>

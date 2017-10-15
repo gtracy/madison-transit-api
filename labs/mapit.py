@@ -124,7 +124,7 @@ class FixStop(webapp.RequestHandler):
                 r.stopLocation = stop
                 r.put()
 
-        self.redirect('http://smsmybus.com/labs/displaystops')
+        self.redirect('https://smsmybus.com/labs/displaystops')
         
 ## end FixStop
 

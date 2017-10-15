@@ -1,6 +1,6 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html>
   <head>
@@ -17,7 +17,7 @@
 <body>
 
 <div id="page-container">
- <div id="banner"  style="color: #b00000;font-weight: bold;">looking for the text messaging app? <a href="http://www.smsmybus.com">go here</a></div>
+ <div id="banner"  style="color: #b00000;font-weight: bold;">looking for the text messaging app? <a href="https://www.smsmybus.com">go here</a></div>
  <div id="header">
  SMSMyBus API
  </div>
@@ -46,40 +46,40 @@
  <hr>
  <p>API Resources : In addition to this documention, you may find the following resources helpful:
 	<ul>
-	  <li>Google Group - <a href="http://groups.google.com/group/smsmybus-dev">http://groups.google.com/group/smsmybus-dev</a></li>
+	  <li>Google Group - <a href="https://groups.google.com/group/smsmybus-dev">https://groups.google.com/group/smsmybus-dev</a></li>
 	  <li>Github Examples - <a href="https://github.com/HackingMadison/smsmybus-dev">https://github.com/gtracy/smsmybus-dev</a></li>
 	</ul>
  </p>
  <h3>API Traffic</h3>
   <center>
     <script>StatHatEmbed.render({s1: 'LSBZ', w: 760, h: 235, style: 'fill', tf: 'year_compare', title: 'API Call Volume'});</script>
-    <a href="http://www.stathat.com/stats/LSBZ">Analyze on StatHat</a>
+    <a href="https://www.stathat.com/stats/LSBZ">Analyze on StatHat</a>
   </center>
  <hr>
  <h3>Why have this API?</h3>
  Currently, the Metro doesn't make their transit data available in an easy to use form for developers. But I
- started to mirror the real-time schedule to build the original <a href=http://www.smsmybus.com>SMS interface</a>.
+ started to mirror the real-time schedule to build the original <a href=https://www.smsmybus.com>SMS interface</a>.
  Making this data available to other developers is the logical next step.<p>
- <center><object width="400" height="225"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" />
-  <embed src="http://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="400" height="225"></embed>
+ <center><object width="400" height="225"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="https://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" />
+  <embed src="https://vimeo.com/moogaloop.swf?clip_id=13764646&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=9086c0&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="400" height="225"></embed>
   </object>
-  <p><a href="http://vimeo.com/13764646">A Case for Open Data in Transit</a> from <a href="http://vimeo.com/user2352061">Streetfilms</a> on <a href="http://vimeo.com">Vimeo</a>.
+  <p><a href="https://vimeo.com/13764646">A Case for Open Data in Transit</a> from <a href="https://vimeo.com/user2352061">Streetfilms</a> on <a href="https://vimeo.com">Vimeo</a>.
   </p>
  </center>
  <hr/>
  <h3>Web Service Basics:</h3>
  The Bus Tracker API is a web service that uses HTTP/1.1 as its application protocol. Each type of call/request
  to the API is an HTTP GET call to a unique URL. Parameters are encoded in the HTTP GET request by following the
- URL with a “?” and “argument=value” pairs separated by “&”.
- <p>The response is a JSON document with a Content-Type of “text/javascript”.
+ URL with a ï¿½?ï¿½ and ï¿½argument=valueï¿½ pairs separated by ï¿½&ï¿½.
+ <p>The response is a JSON document with a Content-Type of ï¿½text/javascriptï¿½.
  <p>For example, to request the current system time through the developer API, a program or script will make a
  HTTP/1.1 GET request to the following URL with parameters:
- <p>http://api.smsmybus.com/v1/getarrivals?key=89dj2he89d8j3j3ksjhdue93j&stopID=1101
+ <p>https://api.smsmybus.com/v1/getarrivals?key=89dj2he89d8j3j3ksjhdue93j&stopID=1101
  <p>The api.smsmybus.com is the host on which the Developer API is servicing HTTP requests. The service is running
  on port 80.
- <p>The version of the API that is being accessed is built into the URL. In the above example, “v1” represents
+ <p>The version of the API that is being accessed is built into the URL. In the above example, ï¿½v1ï¿½ represents
  version 1.0 of the API.
- <p>The “key” parameter represents the API key assigned to the developer making the request. All requests to the
+ <p>The ï¿½keyï¿½ parameter represents the API key assigned to the developer making the request. All requests to the
  API must be accompanied by a valid API key.
  <h3>What kind of information is available via the API?</h3>
  In general terms, the API provides access to schedule data, location information (for buses and stops), and
@@ -91,7 +91,7 @@
  <h3>How do I get started?</h3>
  The first step is to register for a developer key. You'll need to use this key when you make calls to the API.
  Just send me an email describing your application at <a href=mailto:api@smsmybus.com>api@smsmybus.com</a>. Also,
- follow us on Twitter at <a href=http://twitter.com/smsmybus>smsmybus</a> to stay on top of news and updates on the
+ follow us on Twitter at <a href=https://twitter.com/smsmybus>smsmybus</a> to stay on top of news and updates on the
  service.
 
 
@@ -99,8 +99,8 @@
  <hr>
  <div id="footer">
   <div id="me">
-   <a href="http://www.gregtracy.com">Greg Tracy</a> - <a href="http://twitter.com/gregtracy">@gregtracy</a>
-   <br><a href="http://code.google.com/appengine/"><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+   <a href="http://www.gregtracy.com">Greg Tracy</a> - <a href="https://twitter.com/gregtracy">@gregtracy</a>
+   <br><a href="https://code.google.com/appengine/"><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
   </div>
   <div id="contact-container">
    <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>

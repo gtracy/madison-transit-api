@@ -1,6 +1,6 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html>
   <head>
@@ -42,7 +42,7 @@
  <h3>Overview</h3>
  The getstops method will return the geo locations for all stops of a specified route.
  <h3>URL</h3>
- http://api.smsmybus.com/v1/getstops
+ https://api.smsmybus.com/v1/getstops
  <h3>Fields</h3>
  <table>
  <tr>
@@ -68,9 +68,9 @@
  </table>
  <h3>Examples</h3>
  Retrieve all stops for route 3:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstops?key=xxx&routeID=03</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getstops?key=xxx&routeID=03</span><p> </p>
  Retrieve all stops for route 3 headed toward ETP:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstops?key=xxx&routeID=03&destination=ETP</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getstops?key=xxx&routeID=03&destination=ETP</span><p> </p>
  <h3>Response</h3>
  The response length is dependent on the particular request parameters. If the status field is 0, the response
  will be grouped by route, listing the details of each stop on that route.
@@ -120,7 +120,7 @@
  <h3>Overview</h3>
  The getnearbystops method will return the geo locations for all stops near a specified location.
  <h3>URL</h3>
- http://api.smsmybus.com/v1/getnearbystops
+ https://api.smsmybus.com/v1/getnearbystops
  <h3>Fields</h3>
  <table>
  <tr>
@@ -161,7 +161,7 @@
  </table>
  <h3>Examples</h3>
  Retrieve all stops for route 3 around a point on Atwood (43.0733673,-89.4014633):<p> </p>
- <span style="font-size:14px;font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getnearbystops?key=xxx&lat=43.0733673&lon=-89.4014633&routeID=03</span><p> </p>
+ <span style="font-size:14px;font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getnearbystops?key=xxx&lat=43.0733673&lon=-89.4014633&routeID=03</span><p> </p>
  <h3>Response</h3>
  The response length is dependent on the particular request parameters. If the status field is 0, the response
  will be grouped by route, listing the details of each stop on that route within the specified radius.
@@ -210,7 +210,7 @@
  <h3>Overview</h3>
  The getstoplocation method will return the geo location for a specific stop.
  <h3>URL</h3>
- http://api.smsmybus.com/v1/getstoplocation
+ https://api.smsmybus.com/v1/getstoplocation
  <h3>Fields</h3>
  <table>
  <tr>
@@ -231,7 +231,7 @@
  </table>
  <h3>Examples</h3>
  Retrieve the location of stop ID 1391:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getstoplocation?key=xxx&stopID=1391</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getstoplocation?key=xxx&stopID=1391</span><p> </p>
  <h3>Response</h3>
  The response length is going to fixed since this method only supports retreiving a ingle resource. If the status field is 0, the response
  will list the details of the requested stop.
@@ -266,7 +266,7 @@
  The getvehicles method will return the geo locatios for all buses currently driving a specified route.
  <br/>
  <h3>URL</h3>
- http://api.smsmybus.com/v1/getvehicles
+ https://api.smsmybus.com/v1/getvehicles
  <h3>Fields</h3>
  <table>
  <tr>
@@ -297,9 +297,9 @@
  </table>
  <h3>Examples</h3>
  Retrieve all vehicles for route 3:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03</span><p> </p>
  Retrieve all details for vehicle 991 of route 3:<p> </p>
- <span style="font-weight:bold;margin-left:24px;">http://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03&vehicleID=991</span><p> </p>
+ <span style="font-weight:bold;margin-left:24px;">https://api.smsmybus.com/v1/getvehicles?key=xxx&routeID=03&vehicleID=991</span><p> </p>
  <h3>Response</h3>
  The response length is dependent on the particular request parameters. If the status field is 0, the response
  will be grouped by route, listing the details of each stop on that route within the specified radius.
@@ -364,8 +364,8 @@
  <hr>
  <div id="footer">
   <div id="me">
-   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=http://twitter.com/gregtracy>@gregtracy</a>
-   <br><a href=http://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
+   <a href=http://www.gregtracy.com>Greg Tracy</a> - <a href=https://twitter.com/gregtracy>@gregtracy</a>
+   <br><a href=https://code.google.com/appengine/><img src="/img/gae-logo.png" alt="google app engine" height="30" width="30"></a>
   </div>
   <div id="contact-container">
    <a href="/api/terms.html">terms</a> | <a href="mailto:api@smsmybus.com?subject=SMSMyBus%20feedback">feedback</a>
