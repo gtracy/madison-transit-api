@@ -29,7 +29,7 @@ class GetStopHandler(webapp.RequestHandler):
 
       # snare the inputs
       stopID = api_utils.conformStopID(self.request.get('stopID'))
-      routeID = self.request.get('routeID')
+      routeID = api_utils.conformRouteID(self.request.get('routeID'))
       destination = self.request.get('destination')
       logging.debug('getstops request parameters...  routeID %s destination %s' % (routeID,destination))
 
@@ -62,8 +62,8 @@ class GetStopHandler(webapp.RequestHandler):
       self.response.out.write(response)
       stathat.apiStatCount()
       # push event out to anyone watching the live board
-      task = Task(url='/map/task', params={'stopID':stopID})
-      task.add('eventlogger')
+      # task = Task(url='/map/task', params={'stopID':stopID})
+      # task.add('eventlogger')
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'
@@ -114,8 +114,8 @@ class GetStopLocationHandler(webapp.RequestHandler):
       self.response.out.write(response)
       stathat.apiStatCount()
       # push event out to anyone watching the live board
-      task = Task(url='/map/task', params={'stopID':stopID})
-      task.add('eventlogger')
+      # task = Task(url='/map/task', params={'stopID':stopID})
+      # task.add('eventlogger')
 
     def post(self):
         self.response.headers['Content-Type'] = 'application/javascript'
@@ -144,7 +144,7 @@ class GetNearbyStopsHandler(webapp.RequestHandler):
           radius = 100
       else:
           radius = int(radius)
-      routeID = self.request.get('routeID')
+      routeID = api_utils.conformRouteID(self.request.get('routeID'))
       destination = self.request.get('destination')
 
       # stop location requests...
@@ -407,7 +407,7 @@ def validateRequest(request,type):
         return None
 
     if type == api_utils.GETSTOPS:
-        routeID = request.get('routeID')
+        routeID = api_utils.conformRouteID(request.get('routeID'))
         destination = request.get('destination').upper()
 
         # a routeID is required

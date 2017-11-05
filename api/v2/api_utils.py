@@ -55,6 +55,16 @@ def conformStopID(stopID):
 
 ## end conformStopID()
 
+def conformRouteID(routeID):
+
+    # routeID should be two digits
+    if len(routeID) < 2:
+        routeID = "0" + routeID
+
+    return routeID
+
+## end conformRouteID
+
 def inthepast(time):
 
     if computeCountdownMinutes(time) < 0:

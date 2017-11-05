@@ -26,9 +26,9 @@ class MainHandler(webapp.RequestHandler):
       # snare the inputs
       dev_key = self.request.get('key')
       stopID = api_utils.conformStopID(self.request.get('stopID'))
-      routeID = self.request.get('routeID')
+      routeID = api_utils.conformRouteID(self.request.get('routeID'))
       vehicleID = self.request.get('vehicleID')
-      #logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
+      logging.debug('getarrivals request parameters...  stopID %s routeID %s vehicleID %s' % (stopID,routeID,vehicleID))
 
       self.request.registry['aggregated_results'] = []
 
@@ -60,10 +60,10 @@ class MainHandler(webapp.RequestHandler):
                   json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
 
               # push event out to anyone watching the live board
-              channels = memcache.get('channels')
-              if channels is not None:
-                  task = Task(url='/map/task', params={'stopID':stopID})
-                  task.add('eventlogger')
+              # channels = memcache.get('channels')
+              # if channels is not None:
+              #     task = Task(url='/map/task', params={'stopID':stopID})
+              #     task.add('eventlogger')
 
           else:
               # don't run these jobs during "off" hours
@@ -110,12 +110,12 @@ def validateRequest(request):
     if devStoreKey is None:
         api_utils.recordDeveloperRequest(None,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'illegal developer key specified');
         return None
-    stopID = request.get('stopID')
-    routeID = request.get('routeID')
+    stopID = api_utils.conformStopID(request.get('stopID'))
+    routeID = api_utils.conformRouteID(request.get('routeID'))
     vehicleID = request.get('vehicleID')
+    logging.debug('validating stopID %s routeID %s' % (stopID,routeID));
 
     # give up if someone asked for stop 0, which seems to be popular for some reason
-    #logging.debug('validating stopID %s' % stopID);
     if stopID == '' or stopID is '0' or stopID is '0000':
         return None
 
@@ -134,7 +134,7 @@ def validateRequest(request):
     if vehicleID is not None:
         if routeID is None:
             api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,request.query_string,request.remote_addr,'if a vehicleID is specified, you must include a routeID');
-            return False
+            return None
 
     # we've noticed some flagrant abuses of the API where the format
     # of the request parameters are just bogus. check those here
@@ -261,7 +261,7 @@ application = webapp.WSGIApplication([('/v1/getarrivals', MainHandler)
 application.error_handlers[500] = api_utils.handle_500
 
 def main():
-  logging.getLogger().setLevel(logging.ERROR)
+  logging.getLogger().setLevel(logging.DEBUG)
   run_wsgi_app(application)
 
 if __name__ == '__main__':

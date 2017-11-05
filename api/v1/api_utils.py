@@ -35,7 +35,6 @@ def validateDevKey(devKey):
 
     # we've validated the dev key at this point... start counting requests
     total = memcache.incr(devKey + ':counter', initial_value=0)
-    logging.debug(storeKey)
     return storeKey
 
 ## end validateDevKey()
@@ -55,6 +54,16 @@ def conformStopID(stopID):
     return stopID
 
 ## end conformStopID()
+
+def conformRouteID(routeID):
+
+    # routeID should be two digits
+    if len(routeID) == 1:
+        routeID = "0" + routeID
+
+    return routeID
+
+## end conformRouteID
 
 def inthepast(time):
 
@@ -154,8 +163,7 @@ def getDirectionLabel(directionID):
 ## end getDirectionLabel()
 
 def handle_500(request, response, exception):
-    logging.error('Server ERROR! %s' % exception)
-    logging.debug(exception)
+    logging.error('Server ERROR :: %s' % exception)
     callback = request.get('callback')
     if callback is not '':
         response.headers['Content-Type'] = 'application/javascript'

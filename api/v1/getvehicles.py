@@ -24,7 +24,7 @@ class MainHandler(webapp.RequestHandler):
             return
 
         # snare the inputs
-        routeID = self.request.get('routeID')
+        routeID = api_utils.conformRouteID(self.request.get('routeID'))
         if len(routeID) == 1:
             routeID = "0" + routeID
         logging.debug('getvehicles request parameters...  routeID %s' % routeID)
@@ -150,7 +150,7 @@ def validateRequest(request):
         api_utils.recordDeveloperRequest(None, api_utils.GETSTOPS, request.query_string, request.remote_addr, 'illegal developer key specified');
         return None
 
-    routeID = request.get('routeID')
+    routeID = api_utils.conformRouteID(request.get('routeID'))
     if routeID is None or routeID is '':
         api_utils.recordDeveloperRequest(devStoreKey,type,request.query_string,request.remote_addr,'a routeID must be included');
         return None

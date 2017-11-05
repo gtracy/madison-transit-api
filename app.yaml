@@ -1,6 +1,6 @@
 application: msn-transit-api
 module: default
-version: port-https
+version: disable-livemap
 runtime: python27
 api_version: 1
 threadsafe: true

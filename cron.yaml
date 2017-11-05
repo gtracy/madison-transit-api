@@ -4,11 +4,6 @@ cron:
   schedule: every 2 hours from 6:00 to 00:00
   timezone: America/Chicago
 
-- description: reset live map channels
-  url: /admin/resetchannels
-  schedule: every 2 hours
-  timezone: America/Chicago
-
 - description: flush stathat counters
   url: /stats/flush
   schedule: every 10 minutes
