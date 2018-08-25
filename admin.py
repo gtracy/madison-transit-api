@@ -27,6 +27,7 @@ import gdata.spreadsheet.text_db
 import config
 
 from data_model import DeveloperKeys
+from data_model import StopStat
 
 
 
@@ -170,6 +171,35 @@ class APIUserDumpHandler(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'views/devlist.html')
         self.response.out.write(template.render(path,template_values))
 
+class DumpUsageHandler(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        
+        logging.debug('Read and dump the usage history')
+        read_chunks = 1000
+        count = 0
+        cursor = None
+        q = StopStat.all()
+        q.order('-dateAdded')
+        while q is not None:
+          # If the app stored a cursor during a previous request, use it.
+          if cursor:
+              q.with_cursor(cursor)
+
+          # Perform the query to get results.
+          query = q.run(batch_size=read_chunks,limit=read_chunks)
+          cursor = q.cursor()
+          logging.debug('... another chunk of stop statistics...')
+          loop_count = 0
+          for usage in query:
+              loop_count += 1
+              count += 1
+              logging.info('stop %s from %s' % (usage.stopID,usage.apiKey))
+
+          if loop_count is 0:
+              logging.error('done reading usage history, %s' % count)
+
+        self.ressponse.out.write('done, %s' % count)
 
 
 
@@ -178,7 +208,8 @@ application = webapp.WSGIApplication([('/admin/persistcounters', PersistCounterH
                                       ('/admin/gdoctest', GDocHandler),
                                       ('/admin/resetchannels', ResetChannelsHandler),
                                       ('/admin/apidump', APIUserDumpHandler),
-                                      ('/admin/api/create', CreateDeveloperKeysHandler)
+                                      ('/admin/api/create', CreateDeveloperKeysHandler),
+                                      ('/admin/dump/usages', DumpUsageHandler)
                                       ],
                                      debug=True)
 
