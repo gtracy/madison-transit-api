@@ -1,6 +1,6 @@
 application: msn-transit-api
 module: default
-version: disable-livemap
+version: disable-stats
 runtime: python27
 api_version: 1
 threadsafe: true

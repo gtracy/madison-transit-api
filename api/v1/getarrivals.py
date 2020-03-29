@@ -92,13 +92,14 @@ class MainHandler(webapp.RequestHandler):
 
       # persist some statistics
       # stathat:
-      if api_utils.afterHours() is False and dev_key != 'uwkiosk9':
-        stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
-        stathat.apiStatCount()
+      #if api_utils.afterHours() is False and dev_key != 'uwkiosk9':
+        #stathat.apiTimeStat(config.STATHAT_API_GETARRIVALS_TIME_KEY,((time.time()-start)*1000))
+        #stathat.apiStatCount()
 
-        if( "kiosk" not in dev_key and "willycoop" not in dev_key ):
-            task = Task(url='/stats/stop', params={'apikey':dev_key,'stop':stopID})
-            task.add('stats')
+        # disabling stats
+        # if( "kiosk" not in dev_key and "willycoop" not in dev_key ):
+        #     task = Task(url='/stats/stop', params={'apikey':dev_key,'stop':stopID})
+        #     task.add('stats')
 
 
 ## end RequestHandler

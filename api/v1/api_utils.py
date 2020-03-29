@@ -14,7 +14,7 @@ from data_model import DeveloperRequest
 
 def validateDevKey(devKey):
 
-    if devKey is None:
+    if devKey is None or devKey is "kiosk":
         return None
     else:
         devKey = devKey.lower()
@@ -124,12 +124,12 @@ def afterHours():
 
     # late night service on Friday/Saturday
     if( weekday >= 5 ):
-        if hour > 2 and hour < 6:
+        if hour > 2 and hour < 5:
           return True
         else:
           return False
     else:
-        if hour > 1 and hour < 6:
+        if hour > 1 and hour < 5:
           return True
         else:
           return False
