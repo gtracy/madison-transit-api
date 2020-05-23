@@ -53,3 +53,12 @@ Metro website to load route and stop data. There are detailed instructions [on t
 You should now be able to use the API as documented to fetch realtime
 bus data, substituting your URL for api.smsmybus.com
 
+GCP Deployment
+---
+The App Engine SDK is deprecated so you must use the command line tools. Here's a note for myself to remember the command. :)
+
+`gcloud app deploy --project=msn-transit-api --version=FIXME --no-promote`
+
+CRON only
+
+`gcloud app deploy --project=msn-transit-api ./cron.yaml`
