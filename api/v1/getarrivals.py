@@ -82,6 +82,8 @@ class MainHandler(webapp.RequestHandler):
               response = callback + '(' + json.dumps(json_response) + ');'
           else:
               self.response.headers['Content-Type'] = 'application/json'
+              self.response.headers['Access-Control-Allow-Origin'] = '*'
+              self.response.headers['Access-Control-Allow-Methods'] = 'GET'
               response = json.dumps(json_response)
 
           self.response.out.write(response)
