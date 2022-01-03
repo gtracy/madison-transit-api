@@ -69,6 +69,9 @@ handlers:
 
 #
 # API access
+- url: /shadow/task
+  script: api.v1.shadow.application
+
 - url: /v1/getparking
   script: api.v1.getparking.application
 

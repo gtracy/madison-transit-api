@@ -11,7 +11,6 @@ from google.appengine.runtime import DeadlineExceededError
 from api.v1 import api_utils
 from api import asynch
 from stats_and_maps.stats import stathat
-import config
 
 
 class MainHandler(webapp.RequestHandler):
@@ -39,7 +38,7 @@ class MainHandler(webapp.RequestHandler):
               devStoreKey = validateRequest(self.request)
               if devStoreKey is None:
                   # filter out the kiosk errors from the log
-                  if( not (dev_key == 'kiosk' and self.request.get('stopID') == '') ):
+                  if dev_key != 'kiosk' :
                       logging.error("failed to validate the request parameters")
                   self.response.headers['Content-Type'] = 'application/javascript'
                   self.response.out.write(json.dumps(api_utils.buildErrorResponse('-1','Unable to validate the request. There may be an illegal developer key.')))
@@ -47,16 +46,16 @@ class MainHandler(webapp.RequestHandler):
 
               if stopID is not '' and routeID is '':
                   json_response = stopRequest(stopID, dev_key)
-                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+                  #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
               elif stopID is not '' and routeID is not '':
                   json_response = stopRouteRequest(stopID, routeID, devStoreKey)
-                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
+                  #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr);
               elif routeID is not '' and vehicleID is not '':
                   json_response = routeVehicleRequest(routeID, vehicleID, devStoreKey)
-                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
+                  #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,self.request.query_string,self.request.remote_addr);
               else:
                   logging.debug("API: invalid request")
-                  api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
+                  #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,self.request.query_string,self.request.remote_addr,'illegal query string combination');
                   json_response = api_utils.buildErrorResponse('-1','Invalid Request parameters')
 
               # push event out to anyone watching the live board
@@ -64,6 +63,15 @@ class MainHandler(webapp.RequestHandler):
               # if channels is not None:
               #     task = Task(url='/map/task', params={'stopID':stopID})
               #     task.add('eventlogger')
+
+              # push an event into a task queue to make a shadow API
+              # call against the new gtfs/node implementation
+              task = Task(url="/shadow/task",
+                          params={'devKey':self.request.get('key'),
+                                  'stopID':self.request.get('stopID'),
+                                  'routeID':self.request.get('routeID')})
+              task.add('shadow-api')
+
 
           else:
               # don't run these jobs during "off" hours
@@ -111,7 +119,7 @@ def validateRequest(request):
     # validate the key
     devStoreKey = api_utils.validateDevKey(request.get('key'))
     if devStoreKey is None:
-        api_utils.recordDeveloperRequest(None,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'illegal developer key specified');
+        #api_utils.recordDeveloperRequest(None,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'illegal developer key specified');
         return None
     stopID = api_utils.conformStopID(request.get('stopID'))
     routeID = api_utils.conformRouteID(request.get('routeID'))
@@ -124,19 +132,19 @@ def validateRequest(request):
 
     # a stopID or routeID is required
     if stopID is None and routeID is None:
-        api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'either a stopID or a routeID must be included');
+        #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'either a stopID or a routeID must be included');
         return None
 
     # the routeID requires either a vehicleID or stopID
     if routeID is not None:
         if vehicleID is None and stopID is None:
-            api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'if routeID is specified, either a vehicleID or stopID is required');
+            #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETARRIVALS,request.query_string,request.remote_addr,'if routeID is specified, either a vehicleID or stopID is required');
             return None
 
     # the vehicleID requires a routeID
     if vehicleID is not None:
         if routeID is None:
-            api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,request.query_string,request.remote_addr,'if a vehicleID is specified, you must include a routeID');
+            #api_utils.recordDeveloperRequest(devStoreKey,api_utils.GETVEHICLE,request.query_string,request.remote_addr,'if a vehicleID is specified, you must include a routeID');
             return None
 
     # we've noticed some flagrant abuses of the API where the format

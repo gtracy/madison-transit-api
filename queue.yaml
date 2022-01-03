@@ -24,3 +24,7 @@ queue:
   rate: 50/s
   bucket_size: 1
   target: stats-and-maps
+
+- name: shadow-api
+  rate: 50/s
+  bucket_size: 1

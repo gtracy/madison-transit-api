@@ -14,7 +14,7 @@ from data_model import DeveloperRequest
 
 def validateDevKey(devKey):
 
-    if devKey is None or devKey is "kiosk":
+    if devKey is None or devKey == "kiosk":
         return None
     else:
         devKey = devKey.lower()
