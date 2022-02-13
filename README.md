@@ -1,3 +1,7 @@
+:warning: :warning: this repo is no longer maintained. a new Madison transit API has been built and is managed at, :warning: :warning:
+
+[https://github.com/gtracy/madison-transit-api-gtfs](https://github.com/gtracy/madison-transit-api-gtfs)
+
 Madison Transit API
 ========
 This project is a civic hacking project that makes the Madison Metro bus system more accessible,
