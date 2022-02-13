@@ -64,13 +64,6 @@ class MainHandler(webapp.RequestHandler):
               #     task = Task(url='/map/task', params={'stopID':stopID})
               #     task.add('eventlogger')
 
-              # push an event into a task queue to make a shadow API
-              # call against the new gtfs/node implementation
-              task = Task(url="/shadow/task",
-                          params={'devKey':self.request.get('key'),
-                                  'stopID':self.request.get('stopID'),
-                                  'routeID':self.request.get('routeID')})
-              task.add('shadow-api')
 
 
           else:

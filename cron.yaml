@@ -1,5 +1,1 @@
 cron:
-- description: persist the API counters
-  url: /admin/persistcounters
-  schedule: every 2 hours from 6:00 to 00:00
-  timezone: America/Chicago
